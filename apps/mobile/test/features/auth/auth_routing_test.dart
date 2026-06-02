@@ -60,7 +60,8 @@ void main() {
       await tester.tap(find.text('Sem cadastro, sem complicações'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Bem-vindo ao Conecta Geração'), findsOneWidget);
+      expect(find.text('Antes de fazer algo importante...'), findsOneWidget);
+      expect(find.text('Quero ajuda agora'), findsOneWidget);
     });
 
     testWidgets('start button opens login page', (tester) async {

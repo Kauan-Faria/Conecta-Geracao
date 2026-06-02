@@ -3,16 +3,22 @@ id: 005-ai-assistant-api
 unit: 003-ai-assistant-api
 intent: 001-digital-guidance
 type: ddd-construction-bolt
-status: planned
+status: complete
 stories:
   - 002-rag-orchestration
   - 003-checkpoint-dialog-flow
   - 004-guardrails-security
-created: 2026-05-28T01:00:00Z
-started: null
-completed: null
+created: 2026-05-28T01:00:00.000Z
+started: 2026-06-01T21:00:00.000Z
+completed: "2026-06-02T00:49:22Z"
 current_stage: null
-stages_completed: []
+stages_completed:
+  - name: domain-model
+    completed: 2026-06-01T21:00:00.000Z
+    artifact: ddd-01-domain-model.md
+  - name: technical-design
+    completed: 2026-06-01T21:15:00.000Z
+    artifact: ddd-02-technical-design.md
 requires_bolts:
   - 003-knowledge-base
   - 004-ai-assistant-api
@@ -55,6 +61,6 @@ Respostas da IA baseadas na base de conhecimento, com checkpoints e segurança.
 
 ## Success Criteria
 
-- [ ] IA responde sobre 6 tópicos usando RAG
-- [ ] Checkpoints funcionam (sim/não adapta fluxo)
-- [ ] Guardrails bloqueiam pedidos de credenciais
+- [x] IA responde sobre 6 tópicos usando RAG
+- [x] Checkpoints funcionam (sim/não adapta fluxo)
+- [x] Guardrails bloqueiam pedidos de credenciais

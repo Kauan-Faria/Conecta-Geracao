@@ -3,15 +3,24 @@ id: 007-digital-guidance-ui
 unit: 004-digital-guidance-ui
 intent: 001-digital-guidance
 type: simple-construction-bolt
-status: planned
+status: complete
 stories:
   - 003-conversation-history-list
   - 004-offline-conversation-cache
-created: 2026-05-28T01:00:00Z
-started: null
-completed: null
+created: 2026-05-28T01:00:00.000Z
+started: 2026-06-02T22:08:28.000Z
+completed: "2026-06-02T22:15:41Z"
 current_stage: null
-stages_completed: []
+stages_completed:
+  - name: plan
+    completed: 2026-06-02T22:15:00.000Z
+    artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-06-02T22:30:00.000Z
+    artifact: implementation-walkthrough.md
+  - name: test
+    completed: 2026-06-02T22:35:00.000Z
+    artifact: test-walkthrough.md
 requires_bolts:
   - 006-digital-guidance-ui
 enables_bolts:
@@ -50,5 +59,5 @@ Usuário retoma conversas e lê histórico offline.
 
 ## Success Criteria
 
-- [ ] Lista paginada de conversas
-- [ ] Leitura offline de conversas cacheadas
+- [x] Lista paginada de conversas
+- [x] Leitura offline de conversas cacheadas

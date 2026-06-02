@@ -8,53 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class HomePage extends ConsumerWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
-    return AppScaffold(
-      title: 'Início',
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bem-vindo ao Conecta Geração',
-            style: theme.textTheme.headlineMedium,
-          ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            'Use o menu abaixo para falar com o assistente ou ajustar suas preferências.',
-            style: theme.textTheme.bodyLarge,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ChatPlaceholderPage extends StatelessWidget {
-  const ChatPlaceholderPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppScaffold(
-      title: 'Chat',
-      body: Center(
-        child: Text(
-          'Assistente em breve',
-          style: theme.textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 

@@ -2,9 +2,9 @@
 
 ## Overview
 
-- **Total stories**: 16
-- **Generated**: 16
-- **Last updated**: 2026-05-28T01:00:00Z
+- **Total stories**: 17
+- **Generated**: 17
+- **Last updated**: 2026-06-02T12:00:00Z
 
 ---
 
@@ -68,6 +68,9 @@
 ### 005-checkpoint-user-responses.md ✅ GENERATED
 **Title**: UI de checkpoints | **Priority**: Must | **Bolt**: 006-digital-guidance-ui
 
+### 006-home-screen.md ✅ GENERATED
+**Title**: Tela inicial (Home) | **Priority**: Must | **Bolt**: 009-digital-guidance-ui
+
 ---
 
 ## Stories by Status
@@ -91,3 +94,4 @@
 | 006-digital-guidance-ui | 004-digital-guidance-ui | 2 |
 | 007-digital-guidance-ui | 004-digital-guidance-ui | 2 |
 | 008-digital-guidance-ui | 004-digital-guidance-ui | 1 |
+| 009-digital-guidance-ui | 004-digital-guidance-ui | 1 |

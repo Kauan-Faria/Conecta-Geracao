@@ -3,14 +3,23 @@ id: 008-digital-guidance-ui
 unit: 004-digital-guidance-ui
 intent: 001-digital-guidance
 type: simple-construction-bolt
-status: planned
+status: complete
 stories:
   - 002-topic-shortcuts
-created: 2026-05-28T01:00:00Z
-started: null
-completed: null
+created: 2026-05-28T01:00:00.000Z
+started: 2026-06-02T23:30:00.000Z
+completed: "2026-06-02T22:29:32Z"
 current_stage: null
-stages_completed: []
+stages_completed:
+  - name: plan
+    completed: 2026-06-02T23:35:00.000Z
+    artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-06-02T23:50:00.000Z
+    artifact: implementation-walkthrough.md
+  - name: test
+    completed: 2026-06-02T23:55:00.000Z
+    artifact: test-walkthrough.md
 requires_bolts:
   - 006-digital-guidance-ui
 enables_bolts: []
@@ -44,4 +53,4 @@ Reduzir barreira de entrada — usuário toca no assunto e inicia conversa.
 
 ## Success Criteria
 
-- [ ] 6 cards funcionais iniciando conversa com topicSlug
+- [x] 6 cards funcionais iniciando conversa com topicSlug

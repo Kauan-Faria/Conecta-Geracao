@@ -3,15 +3,17 @@ id: 006-digital-guidance-ui
 unit: 004-digital-guidance-ui
 intent: 001-digital-guidance
 type: simple-construction-bolt
-status: planned
+status: complete
 stories:
   - 001-chat-screen
   - 005-checkpoint-user-responses
-created: 2026-05-28T01:00:00Z
-started: null
-completed: null
+created: 2026-05-28T01:00:00.000Z
+started: 2026-06-01T20:00:00.000Z
+completed: "2026-06-02T00:58:39Z"
 current_stage: null
-stages_completed: []
+stages_completed:
+  - plan
+  - implement
 requires_bolts:
   - 001-mobile-auth-shell
   - 005-ai-assistant-api
@@ -56,5 +58,5 @@ Usuário conversa com IA e responde checkpoints de forma simples.
 
 ## Success Criteria
 
-- [ ] Chat end-to-end com IA nos 6 tópicos
-- [ ] Botões Sim/Não acessíveis
+- [x] Chat end-to-end com IA nos 6 tópicos (UI + API integrados; validação manual com backend)
+- [x] Botões Sim/Não acessíveis

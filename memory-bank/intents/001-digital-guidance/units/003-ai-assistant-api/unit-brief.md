@@ -4,9 +4,9 @@ intent: 001-digital-guidance
 unit_type: backend
 default_bolt_type: ddd-construction-bolt
 phase: inception
-status: ready
-created: 2026-05-28T01:00:00Z
-updated: 2026-05-28T01:00:00Z
+status: complete
+created: 2026-05-28T01:00:00.000Z
+updated: 2026-05-28T01:00:00.000Z
 ---
 
 # Unit Brief: AI Assistant API

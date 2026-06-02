@@ -1,7 +1,10 @@
 import 'package:conecta_geracao/core/routing/routing_providers.dart';
 import 'package:conecta_geracao/features/auth/presentation/login_page.dart';
 import 'package:conecta_geracao/features/auth/presentation/welcome_page.dart';
+import 'package:conecta_geracao/features/home/presentation/home_page.dart';
 import 'package:conecta_geracao/features/shell/presentation/app_shell.dart';
+import 'package:conecta_geracao/features/chat/presentation/chat_page.dart';
+import 'package:conecta_geracao/features/chat/presentation/conversation_list_page.dart';
 import 'package:conecta_geracao/features/shell/presentation/shell_pages.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +57,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/chat',
-                builder: (context, state) => const ChatPlaceholderPage(),
+                builder: (context, state) {
+                  final conversationId =
+                      state.uri.queryParameters['conversationId'];
+                  final topicSlug = state.uri.queryParameters['topic'];
+                  final startNewChat =
+                      state.uri.queryParameters['new'] == 'true';
+                  return ChatPage(
+                    initialConversationId: conversationId,
+                    initialTopicSlug: topicSlug,
+                    startNewChat: startNewChat,
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/conversations',
+                builder: (context, state) => const ConversationListPage(),
               ),
             ],
           ),

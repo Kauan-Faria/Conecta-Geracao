@@ -4,9 +4,9 @@ intent: 001-digital-guidance
 unit_type: frontend
 default_bolt_type: simple-construction-bolt
 phase: inception
-status: ready
-created: 2026-05-28T01:00:00Z
-updated: 2026-05-28T01:00:00Z
+status: complete
+created: 2026-05-28T01:00:00.000Z
+updated: 2026-06-02T12:00:00.000Z
 ---
 
 # Unit Brief: Digital Guidance UI
@@ -22,7 +22,8 @@ Interface mobile acessível do assistente: chat conversacional, respostas de che
 - UI de checkpoint (sim/não/descrever onde parou)
 - Lista de conversas anteriores
 - Cache local de conversas para offline
-- Cards de atalho dos 6 tópicos MVP
+- Cards de atalho dos 6 tópicos MVP (chat vazio)
+- **Tela inicial (Home)**: hero CTA, ações rápidas com mensagem contextual, verificações recentes
 
 ### Out of Scope
 - Lógica RAG/LLM (API)
@@ -37,7 +38,8 @@ Interface mobile acessível do assistente: chat conversacional, respostas de che
 |----|-------------|----------|
 | FR-1 | Chat com assistente IA | Must |
 | FR-7 | Acesso offline parcial | Should |
-| FR-10 | Entrada assistida por sugestões | Could |
+| FR-10 | Entrada assistida por sugestões (chat vazio) | Should |
+| FR-11 | Tela inicial como hub do assistente | Must |
 
 ---
 
@@ -45,10 +47,10 @@ Interface mobile acessível do assistente: chat conversacional, respostas de che
 
 | Metric | Count |
 |--------|-------|
-| Total Stories | 5 |
-| Must Have | 2 |
-| Should Have | 2 |
-| Could Have | 1 |
+| Total Stories | 6 |
+| Must Have | 3 |
+| Should Have | 3 |
+| Could Have | 0 |
 
 ### Stories
 
@@ -59,6 +61,7 @@ Interface mobile acessível do assistente: chat conversacional, respostas de che
 | 003-conversation-history-list | Lista de conversas | Should | Planned |
 | 004-offline-conversation-cache | Cache offline | Should | Planned |
 | 005-checkpoint-user-responses | UI de checkpoints | Must | Planned |
+| 006-home-screen | Tela inicial (Home) | Must | Draft |
 
 ---
 
@@ -79,3 +82,4 @@ Interface mobile acessível do assistente: chat conversacional, respostas de che
 | 006-digital-guidance-ui | simple | 001, 005 | Chat + checkpoints |
 | 007-digital-guidance-ui | simple | 003, 004 | Histórico + offline |
 | 008-digital-guidance-ui | simple | 002 | Atalhos de tópicos |
+| 009-digital-guidance-ui | simple | 006 | Tela inicial (Home) |

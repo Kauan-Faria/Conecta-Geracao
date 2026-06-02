@@ -2,11 +2,11 @@
 id: 001-chat-screen
 unit: 004-digital-guidance-ui
 intent: 001-digital-guidance
-status: draft
+status: complete
 priority: must
-created: 2026-05-28T01:00:00Z
+created: 2026-05-28T01:00:00.000Z
 assigned_bolt: 006-digital-guidance-ui
-implemented: false
+implemented: true
 ---
 
 # Story: 001-chat-screen

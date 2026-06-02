@@ -2,7 +2,7 @@
 intent: 001-digital-guidance
 phase: inception
 status: requirements-approved
-updated: 2026-05-28T01:00:00Z
+updated: 2026-06-02T12:00:00Z
 ---
 
 # Requirements: Orientação digital guiada
@@ -109,12 +109,23 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
   - Alvos de toque ≥ 48dp nos controles do chat
 - **Priority**: Must
 
-### FR-10: Entrada assistida por sugestões (opcional MVP)
-- **Description**: Atalhos visuais para os 6 tópicos principais, reduzindo barreira de "o que perguntar".
+### FR-10: Entrada assistida por sugestões
+- **Description**: Atalhos visuais reduzem a barreira de "o que perguntar". No chat vazio, exibe os 6 tópicos MVP; na tela inicial, exibe ações rápidas orientadas à intenção do usuário (ver FR-11).
 - **Acceptance Criteria**:
-  - Tela inicial ou chat exibe botões/cards com os tópicos do MVP
-  - Toque em tópico inicia conversa com contexto pré-definido
-- **Priority**: Could
+  - Chat vazio exibe grid com os 6 tópicos MVP (PIX, Gov.br, WhatsApp, Wi-Fi, Boleto, Golpe)
+  - Toque em tópico MVP inicia conversa com mensagem starter e `topicSlug` quando aplicável
+- **Priority**: Should
+
+### FR-11: Tela inicial (Home) como hub do assistente
+- **Description**: A aba Início apresenta o valor do app e caminhos claros para iniciar uma conversa com a IA, conforme mockup aprovado.
+- **Acceptance Criteria**:
+  - **Cabeçalho**: logo + "ConectaGeração" + atalho para Configurações
+  - **Hero**: título "Antes de fazer algo importante...", subtítulo "Confira rapidamente e evite erros.", botão "Quero ajuda agora >" que abre a aba Chat sem enviar mensagem
+  - **Ações rápidas** ("O que você quer fazer?"): grid 2 colunas com os **6 atalhos MVP** (PIX, Gov.br, WhatsApp, Wi-Fi, Boleto, Golpe)
+  - **Toque em atalho MVP**: navega para Chat, cria nova conversa com `topicSlug` e envia mensagem starter **relacionada à ação** (ex.: PIX → "Desejo fazer um PIX"; Gov.br → "Desejo ajuda com o código Gov.br")
+  - **Verificações recentes**: exibe até 4 conversas recentes com data relativa; link "Ver todas" abre lista completa; toque em item reabre conversa no Chat
+  - UI acessível: alvos ≥ 48dp, rótulos textuais, tokens de `ux-guide.md`
+- **Priority**: Must
 
 ---
 
@@ -189,7 +200,7 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 |------------|-----------------|------------|
 | RAG com base curada produz respostas confiáveis | Alucinações ou passos errados | Revisão humana do conteúdo; testes com usuários reais |
 | 6 tópicos cobrem dúvidas iniciais do MVP | Baixa adoção | Expandir base após feedback dos testes |
-| Usuários conseguem digitar ou usar sugestões | Barreira de entrada | FR-10 atalhos por tópico |
+| Usuários conseguem digitar ou usar sugestões | Barreira de entrada | FR-10 + FR-11 atalhos na home e no chat |
 | Latência < 8s é aceitável para o público | Frustração | Indicador "pensando..."; otimizar prompts/RAG |
 
 ---
@@ -202,6 +213,8 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 | Admin de conteúdo: JSON estático vs. painel mínimo? | Tech/Produto | Units | Pendente |
 | Retenção de conversas (dias/meses) sob LGPD? | Produto/Legal | Antes dos testes | Pendente |
 | Entrada por voz no MVP? | Produto | Pendente | Provável Won't no MVP |
+| Manter atalhos MVP no chat vazio além da home? | Produto | 2026-06-02 | Sim — home para intenções genéricas; chat vazio mantém 6 tópicos curados |
+| Ações rápidas fixas (4) ou configuráveis? | Produto | 2026-06-02 | Fixas no MVP conforme mockup |
 
 ---
 

@@ -21,14 +21,6 @@
   },
   "homepage": "https://github.com/Kauan-Faria/Conecta-Gera-o#readme",
   "description": "",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@prisma/client",
-      "@prisma/engines",
-      "prisma"
-    ]
-  },
   "dependencies": {
     "fs-extra": "^11.3.5",
     "js-yaml": "^4.2.0",

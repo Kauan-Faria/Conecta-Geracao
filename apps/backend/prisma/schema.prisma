@@ -35,3 +35,43 @@ model KnowledgeStep {
   @@unique([topicId, order])
   @@map("knowledge_steps")
 }
+
+enum ConversationStatus {
+  in_progress
+  completed
+
+  @@map("conversation_status")
+}
+
+enum MessageRole {
+  user
+  assistant
+
+  @@map("message_role")
+}
+
+model Conversation {
+  id          String             @id @default(cuid())
+  firebaseUid String             @map("firebase_uid") @db.VarChar(128)
+  topicSlug   String?            @map("topic_slug") @db.VarChar(64)
+  status      ConversationStatus @default(in_progress)
+  currentStep Int                @default(0) @map("current_step")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  messages    Message[]
+
+  @@index([firebaseUid, createdAt(sort: Desc)])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  role           MessageRole
+  content        String       @db.VarChar(4000)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt(sort: Asc)])
+  @@map("messages")
+}

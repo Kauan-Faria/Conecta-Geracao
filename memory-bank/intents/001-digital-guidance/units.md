@@ -21,6 +21,7 @@ updated: 2026-05-28T01:00:00Z
 | FR-8 | Autenticação de usuário | `001-mobile-auth-shell` |
 | FR-9 | Preferências de acessibilidade | `001-mobile-auth-shell` |
 | FR-10 | Entrada assistida por sugestões | `004-digital-guidance-ui` |
+| FR-11 | Tela inicial (Home) | `004-digital-guidance-ui` |
 
 ## Units Overview
 
