@@ -1,0 +1,30 @@
+# ==============================================================================
+# .cursorignore — Otimizacao de tokens no fluxo AIDLC/specsmd
+# ==============================================================================
+#
+# Este arquivo NAO impede que os agentes (construction, master, inception)
+# leiam arquivos sob demanda via a ferramenta Read. Ele apenas evita que o
+# Cursor injete automaticamente estes arquivos no contexto (por exemplo,
+# quando aparecem em "arquivos abertos" ou "recentemente vistos").
+#
+# Regra geral: bloquear artefatos grandes de bolts ja COMPLETOS e logs
+# historicos que nao agregam informacao nova ao trabalho atual.
+# ==============================================================================
+
+# Artefatos pesados gerados pelos bolts (walkthroughs e design docs de DDD)
+# Os agentes leem sob demanda quando necessario - basta o path no bolt.md.
+
+memory-bank/bolts/*/spike-exploration.md
+memory-bank/bolts/*/spike-report.md
+memory-bank/bolts/*/adr-*.md
+
+# Logs historicos do memory-bank (agentes leem explicitamente quando precisam)
+memory-bank/maintenance-log.md
+memory-bank/intents/*/inception-log.md
+memory-bank/intents/*/units/*/construction-log.md
+
+# Documentacao de validacao com stakeholders (gerada a partir das stories de UI)
+docs/stakeholders-validations/
+
+# Dumps volumosos de referencia que nao devem entrar no contexto automatico
+.specsmd/resource/

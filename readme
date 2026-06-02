@@ -1,0 +1,19 @@
+# Connect to Postgres via the shared transaction-mode pooler (IPv4-only)
+DATABASE_URL="postgresql://postgres.mybkharhyyaxkkfhelpk:postgres123.@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# Connect to Postgres via the shared session-mode pooler (used for migrations)
+DIRECT_URL="postgresql://postgres.mybkharhyyaxkkfhelpk:postgres123.@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
+
+postgres123.
+
+pnpm api:dev              # sobe a API (porta 3000)
+pnpm api:prisma:seed      # reexecuta seed (idempotente)
+pnpm api:test   
+
+Flutter run key commands.
+r Hot reload.
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).

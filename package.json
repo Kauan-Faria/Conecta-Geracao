@@ -1,0 +1,37 @@
+{
+  "name": "conecta-geracao",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "api:dev": "pnpm --filter @conecta-geracao/api dev",
+    "api:build": "pnpm --filter @conecta-geracao/api build",
+    "api:test": "pnpm --filter @conecta-geracao/api test",
+    "api:prisma:generate": "pnpm --filter @conecta-geracao/api prisma:generate",
+    "api:prisma:migrate": "pnpm --filter @conecta-geracao/api prisma:migrate",
+    "api:prisma:seed": "pnpm --filter @conecta-geracao/api prisma:seed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kauan-Faria/Conecta-Gera-o.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kauan-Faria/Conecta-Gera-o/issues"
+  },
+  "homepage": "https://github.com/Kauan-Faria/Conecta-Gera-o#readme",
+  "description": "",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma"
+    ]
+  },
+  "dependencies": {
+    "fs-extra": "^11.3.5",
+    "js-yaml": "^4.2.0",
+    "specsmd": "^0.1.66"
+  }
+}
