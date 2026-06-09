@@ -1,5 +1,6 @@
 import 'package:conecta_geracao/core/network/api_exception.dart';
 import 'package:conecta_geracao/core/network/connectivity_service.dart';
+import 'package:conecta_geracao/core/routing/routing_providers.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/accessibility_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/chat/data/chat_repository.dart';
@@ -9,8 +10,7 @@ import 'package:conecta_geracao/features/chat/domain/chat_message.dart';
 import 'package:conecta_geracao/features/chat/domain/topic_shortcuts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const offlineSendMessage =
-    'Precisa de internet para falar com o assistente';
+const offlineSendMessage = 'Precisa de internet para falar com o assistente';
 
 final conversationsApiProvider = Provider<ConversationsApi>((ref) {
   return ConversationsApi(ref.watch(apiClientProvider));
@@ -18,10 +18,10 @@ final conversationsApiProvider = Provider<ConversationsApi>((ref) {
 
 final conversationCacheRepositoryProvider =
     Provider<ConversationCacheRepository>((ref) {
-  return SharedPreferencesConversationCacheRepository(
-    ref.watch(sharedPreferencesProvider),
-  );
-});
+      return SharedPreferencesConversationCacheRepository(
+        ref.watch(sharedPreferencesProvider),
+      );
+    });
 
 final cachedChatRepositoryProvider = Provider<CachedChatRepository>((ref) {
   return CachedChatRepository(
@@ -106,7 +106,21 @@ class ChatController extends Notifier<ChatState> {
   ConnectivityService get _connectivity =>
       ref.read(connectivityServiceProvider);
 
+  bool get _isGuestChatMode {
+    if (ref.read(authGateProvider).isAuthenticated) {
+      return false;
+    }
+    return ref.read(guestSessionGateProvider).isGuestActive;
+  }
+
   Future<bool> _ensureAuthenticated() async {
+    if (_isGuestChatMode) {
+      if (state.requiresAuth) {
+        state = state.copyWith(requiresAuth: false);
+      }
+      return true;
+    }
+
     final token = await ref.read(authRepositoryProvider).getIdToken();
     if (token == null) {
       state = state.copyWith(requiresAuth: true, clearError: true);
@@ -116,6 +130,55 @@ class ChatController extends Notifier<ChatState> {
       state = state.copyWith(requiresAuth: false);
     }
     return true;
+  }
+
+  Future<String> _guestAssistantReply(
+    String userMessage, {
+    String? topicSlug,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    final topicHint = topicSlug != null ? ' (tópico: $topicSlug)' : '';
+    return 'Recebi sua mensagem: $userMessage$topicHint. '
+        '(Modo sem cadastro — entre com seu celular para salvar o histórico.)';
+  }
+
+  Future<void> _sendGuestMessage(String content) async {
+    final pendingUserMessage = ChatMessage(
+      id: 'guest-${DateTime.now().millisecondsSinceEpoch}',
+      role: MessageRole.user,
+      content: content,
+      createdAt: DateTime.now(),
+    );
+
+    state = state.copyWith(
+      messages: [...state.messages, pendingUserMessage],
+      isSending: true,
+      clearError: true,
+    );
+
+    try {
+      final reply = await _guestAssistantReply(content);
+      state = state.copyWith(
+        messages: [
+          ...state.messages,
+          ChatMessage(
+            id: 'guest-assistant-${DateTime.now().millisecondsSinceEpoch}',
+            role: MessageRole.assistant,
+            content: reply,
+            createdAt: DateTime.now(),
+          ),
+        ],
+        isSending: false,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isSending: false,
+        errorMessage: 'Não foi possível responder agora. Tente de novo.',
+        messages: state.messages
+            .where((m) => m.id != pendingUserMessage.id)
+            .toList(),
+      );
+    }
   }
 
   Future<void> openConversation(String conversationId) async {
@@ -164,7 +227,10 @@ class ChatController extends Notifier<ChatState> {
     }
   }
 
-  void _applyConversation(ConversationDetail detail, {required bool isOffline}) {
+  void _applyConversation(
+    ConversationDetail detail, {
+    required bool isOffline,
+  }) {
     state = ChatState(
       conversationId: detail.id,
       conversationStatus: detail.status,
@@ -174,9 +240,7 @@ class ChatController extends Notifier<ChatState> {
   }
 
   void showMoreMessages() {
-    state = state.copyWith(
-      visibleMessageLimit: state.visibleMessageLimit + 50,
-    );
+    state = state.copyWith(visibleMessageLimit: state.visibleMessageLimit + 50);
   }
 
   Future<void> refreshConnectivity() async {
@@ -198,11 +262,16 @@ class ChatController extends Notifier<ChatState> {
       return;
     }
 
+    if (_isGuestChatMode) {
+      final shortcut = topicShortcutForSlug(topicSlug);
+      final starterContent =
+          shortcut?.starterMessage ?? 'Quero ajuda com este assunto';
+      await _sendGuestMessage(starterContent);
+      return;
+    }
+
     if (state.isOffline || !await _connectivity.hasConnection()) {
-      state = state.copyWith(
-        isOffline: true,
-        errorMessage: offlineSendMessage,
-      );
+      state = state.copyWith(isOffline: true, errorMessage: offlineSendMessage);
       return;
     }
 
@@ -268,11 +337,13 @@ class ChatController extends Notifier<ChatState> {
       return;
     }
 
+    if (_isGuestChatMode) {
+      await _sendGuestMessage(content);
+      return;
+    }
+
     if (state.isOffline || !await _connectivity.hasConnection()) {
-      state = state.copyWith(
-        isOffline: true,
-        errorMessage: offlineSendMessage,
-      );
+      state = state.copyWith(isOffline: true, errorMessage: offlineSendMessage);
       return;
     }
 
@@ -343,5 +414,6 @@ class ChatController extends Notifier<ChatState> {
   }
 }
 
-final chatControllerProvider =
-    NotifierProvider<ChatController, ChatState>(ChatController.new);
+final chatControllerProvider = NotifierProvider<ChatController, ChatState>(
+  ChatController.new,
+);

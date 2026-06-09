@@ -3,14 +3,26 @@ id: 003-knowledge-base
 unit: 002-knowledge-base
 intent: 001-digital-guidance
 type: ddd-construction-bolt
-status: planned
+status: complete
 stories:
   - 003-knowledge-retrieval-api
 created: 2026-05-28T01:00:00Z
-started: null
-completed: null
+started: 2026-06-02T14:00:00Z
+completed: 2026-06-02T14:45:00Z
 current_stage: null
-stages_completed: []
+stages_completed:
+  - name: model
+    completed: 2026-06-02T14:00:00Z
+    artifact: ddd-01-domain-model.md
+  - name: design
+    completed: 2026-06-02T14:15:00Z
+    artifact: ddd-02-technical-design.md
+  - name: implement
+    completed: 2026-06-02T14:30:00Z
+    artifact: apps/backend/src/modules/knowledge-base/presentation/
+  - name: test
+    completed: 2026-06-02T14:45:00Z
+    artifact: ddd-03-test-report.md
 requires_bolts:
   - 002-knowledge-base
 enables_bolts:
@@ -48,5 +60,5 @@ Endpoints de busca e retrieval por slug operacionais.
 
 ## Success Criteria
 
-- [ ] GET topic by slug e search funcionando
-- [ ] Envelope API conforme convenções
+- [x] GET topic by slug e search funcionando
+- [x] Envelope API conforme convenções

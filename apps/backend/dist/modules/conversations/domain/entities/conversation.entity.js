@@ -9,6 +9,7 @@ class Message {
         this.conversationId = props.conversationId;
         this.role = props.role;
         this.content = props.content;
+        this.metadata = props.metadata ?? null;
         this.createdAt = props.createdAt ?? new Date();
     }
     static create(props) {

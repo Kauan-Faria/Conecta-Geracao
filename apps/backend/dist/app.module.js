@@ -14,6 +14,7 @@ const prisma_module_1 = require("./shared/prisma/prisma.module");
 const auth_module_1 = require("./shared/auth/auth.module");
 const knowledge_base_module_1 = require("./modules/knowledge-base/knowledge-base.module");
 const conversations_module_1 = require("./modules/conversations/conversations.module");
+const maps_module_1 = require("./modules/maps/maps.module");
 const request_id_middleware_1 = require("./shared/http/request-id.middleware");
 const api_response_interceptor_1 = require("./shared/http/api-response.interceptor");
 const http_exception_filter_1 = require("./shared/http/http-exception.filter");
@@ -36,6 +37,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             knowledge_base_module_1.KnowledgeBaseModule,
             conversations_module_1.ConversationsModule,
+            maps_module_1.MapsModule,
         ],
         providers: [
             {

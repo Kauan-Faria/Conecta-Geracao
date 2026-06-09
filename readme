@@ -17,3 +17,9 @@ h List all available interactive commands.
 d Detach (terminate "flutter run" but leave application running).
 c Clear the screen
 q Quit (terminate the application on the device).
+
+pnpm docker:up — sobe API em background (usa Supabase do .env)
+pnpm docker:down — para o container
+pnpm docker:logs — logs da API
+pnpm docker:build — build + sobe em background
+# Swagger: http://localhost:3000/api/docs

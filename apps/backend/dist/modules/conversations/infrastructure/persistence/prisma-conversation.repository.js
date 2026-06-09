@@ -16,6 +16,12 @@ const conversation_entity_1 = require("../../domain/entities/conversation.entity
 const conversation_status_vo_1 = require("../../domain/value-objects/conversation-status.vo");
 const message_content_vo_1 = require("../../domain/value-objects/message-content.vo");
 const message_role_vo_1 = require("../../domain/value-objects/message-role.vo");
+function parseMessageMetadata(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return null;
+    }
+    return value;
+}
 let PrismaConversationRepository = class PrismaConversationRepository {
     constructor(prisma) {
         this.prisma = prisma;
@@ -89,6 +95,7 @@ let PrismaMessageRepository = class PrismaMessageRepository {
             conversationId: row.conversationId,
             role: message_role_vo_1.MessageRole.from(row.role),
             content: message_content_vo_1.MessageContent.create(row.content),
+            metadata: parseMessageMetadata(row.metadata),
             createdAt: row.createdAt,
         });
     }
@@ -125,6 +132,7 @@ let PrismaConversationMessageUnitOfWork = class PrismaConversationMessageUnitOfW
                     conversationId: input.conversationId,
                     role: 'assistant',
                     content: input.assistantContent,
+                    metadata: input.assistantMetadata ?? undefined,
                 },
             });
             await tx.conversation.update({
@@ -143,6 +151,7 @@ let PrismaConversationMessageUnitOfWork = class PrismaConversationMessageUnitOfW
                     conversationId: assistantRow.conversationId,
                     role: message_role_vo_1.MessageRole.assistant(),
                     content: message_content_vo_1.MessageContent.create(assistantRow.content),
+                    metadata: parseMessageMetadata(assistantRow.metadata),
                     createdAt: assistantRow.createdAt,
                 }),
             };

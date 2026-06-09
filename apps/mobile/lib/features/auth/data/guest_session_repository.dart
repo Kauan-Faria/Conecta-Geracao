@@ -12,7 +12,8 @@ abstract class GuestSessionRepository {
   Future<void> clearIfExpired();
 }
 
-class SharedPreferencesGuestSessionRepository implements GuestSessionRepository {
+class SharedPreferencesGuestSessionRepository
+    implements GuestSessionRepository {
   SharedPreferencesGuestSessionRepository(this._prefs);
 
   final SharedPreferences _prefs;

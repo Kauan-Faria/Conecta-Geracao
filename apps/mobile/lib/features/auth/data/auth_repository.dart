@@ -1,4 +1,5 @@
 import 'package:conecta_geracao/features/auth/domain/app_user.dart';
+import 'package:conecta_geracao/features/auth/domain/phone_verification_session.dart';
 
 class AuthException implements Exception {
   const AuthException(this.message, {this.isCancelled = false});
@@ -16,6 +17,15 @@ abstract class AuthRepository {
   Future<AppUser?> getCurrentUser();
 
   Future<AppUser> signInWithGoogle();
+
+  Future<PhoneVerificationSession> startPhoneVerification(String e164Phone);
+
+  Future<AppUser> confirmPhoneOtp({
+    required String verificationId,
+    required String smsCode,
+  });
+
+  Future<AppUser> updateDisplayName(String displayName);
 
   Future<void> signOut();
 

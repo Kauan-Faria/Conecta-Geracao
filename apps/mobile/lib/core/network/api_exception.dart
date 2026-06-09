@@ -31,8 +31,8 @@ class ApiException implements Exception {
     return ApiException(
       statusCode: statusCode,
       code: error['code'] as String? ?? 'UNKNOWN',
-      message: error['message'] as String? ??
-          'Algo deu errado. Tente novamente.',
+      message:
+          error['message'] as String? ?? 'Algo deu errado. Tente novamente.',
       errors: errorsRaw
           .whereType<Map<String, dynamic>>()
           .map(ApiFieldError.fromJson)

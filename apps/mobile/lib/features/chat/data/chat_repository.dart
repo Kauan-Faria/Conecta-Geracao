@@ -34,10 +34,7 @@ class RemoteChatRepository implements ChatRepository {
     required String conversationId,
     required String content,
   }) {
-    return _api.sendMessage(
-      conversationId: conversationId,
-      content: content,
-    );
+    return _api.sendMessage(conversationId: conversationId, content: content);
   }
 
   @override
@@ -55,10 +52,7 @@ class RemoteChatRepository implements ChatRepository {
 }
 
 class CachedChatRepository implements ChatRepository {
-  CachedChatRepository({
-    required this._remote,
-    required this._cache,
-  });
+  CachedChatRepository({required this._remote, required this._cache});
 
   final ChatRepository _remote;
   final ConversationCacheRepository _cache;

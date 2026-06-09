@@ -16,7 +16,6 @@
 
 memory-bank/bolts/*/spike-exploration.md
 memory-bank/bolts/*/spike-report.md
-memory-bank/bolts/*/adr-*.md
 
 # Logs historicos do memory-bank (agentes leem explicitamente quando precisam)
 memory-bank/maintenance-log.md

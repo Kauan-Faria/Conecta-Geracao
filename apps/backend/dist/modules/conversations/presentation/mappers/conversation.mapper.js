@@ -14,12 +14,16 @@ function toConversationSummary(conversation) {
     };
 }
 function toMessageDto(message) {
-    return {
+    const dto = {
         id: message.id,
         role: message.role.value,
         content: message.content.value,
         createdAt: message.createdAt.toISOString(),
     };
+    if (message.metadata?.map_action) {
+        dto.metadata = { map_action: message.metadata.map_action };
+    }
+    return dto;
 }
 function toConversationDetail(conversation) {
     return {

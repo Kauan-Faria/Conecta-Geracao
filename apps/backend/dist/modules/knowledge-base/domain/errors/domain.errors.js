@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TopicNotFoundError = exports.ContentPolicyViolationError = exports.InvalidTopicSlugError = exports.DomainError = void 0;
+exports.InvalidSearchQueryError = exports.TopicNotFoundError = exports.ContentPolicyViolationError = exports.InvalidTopicSlugError = exports.DomainError = void 0;
 class DomainError extends Error {
     constructor(code, message) {
         super(message);
@@ -27,4 +27,10 @@ class TopicNotFoundError extends DomainError {
     }
 }
 exports.TopicNotFoundError = TopicNotFoundError;
+class InvalidSearchQueryError extends DomainError {
+    constructor(message = 'Busca deve ter pelo menos 2 caracteres') {
+        super('INVALID_SEARCH_QUERY', message);
+    }
+}
+exports.InvalidSearchQueryError = InvalidSearchQueryError;
 //# sourceMappingURL=domain.errors.js.map

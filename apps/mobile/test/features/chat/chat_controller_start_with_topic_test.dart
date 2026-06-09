@@ -23,43 +23,46 @@ class FakeConnectivityService extends ConnectivityService {
 
 void main() {
   group('ChatController.startWithTopic', () {
-    test('creates conversation with topicSlug and sends starter message', () async {
-      SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
-      final fakeChat = FakeChatRepository();
+    test(
+      'creates conversation with topicSlug and sends starter message',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final fakeChat = FakeChatRepository();
 
-      final container = ProviderContainer(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(
-            FakeAuthRepository(initialUser: authenticatedTestUser),
-          ),
-          sharedPreferencesProvider.overrideWithValue(prefs),
-          cachedChatRepositoryProvider.overrideWithValue(
-            CachedChatRepository(
-              remote: fakeChat,
-              cache: SharedPreferencesConversationCacheRepository(prefs),
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(
+              FakeAuthRepository(initialUser: authenticatedTestUser),
             ),
-          ),
-          connectivityServiceProvider.overrideWithValue(
-            FakeConnectivityService(true),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            cachedChatRepositoryProvider.overrideWithValue(
+              CachedChatRepository(
+                remote: fakeChat,
+                cache: SharedPreferencesConversationCacheRepository(prefs),
+              ),
+            ),
+            connectivityServiceProvider.overrideWithValue(
+              FakeConnectivityService(true),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      final notifier = container.read(chatControllerProvider.notifier);
-      await notifier.startWithTopic('fazer-pix');
+        final notifier = container.read(chatControllerProvider.notifier);
+        await notifier.startWithTopic('fazer-pix');
 
-      final state = container.read(chatControllerProvider);
-      expect(fakeChat.createCalls, 1);
-      expect(fakeChat.lastCreateTopicSlug, 'fazer-pix');
-      expect(fakeChat.sendCalls, 1);
-      expect(fakeChat.lastSentContent, 'Desejo fazer um PIX');
-      expect(state.conversationId, 'conv-test-1');
-      expect(state.messages, hasLength(2));
-      expect(state.messages.first.content, 'Desejo fazer um PIX');
-      expect(state.isSending, isFalse);
-    });
+        final state = container.read(chatControllerProvider);
+        expect(fakeChat.createCalls, 1);
+        expect(fakeChat.lastCreateTopicSlug, 'fazer-pix');
+        expect(fakeChat.sendCalls, 1);
+        expect(fakeChat.lastSentContent, 'Desejo fazer um PIX');
+        expect(state.conversationId, 'conv-test-1');
+        expect(state.messages, hasLength(2));
+        expect(state.messages.first.content, 'Desejo fazer um PIX');
+        expect(state.isSending, isFalse);
+      },
+    );
 
     test('blocks start when offline', () async {
       SharedPreferences.setMockInitialValues({});
@@ -85,9 +88,9 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      await container.read(chatControllerProvider.notifier).startWithTopic(
-            'fazer-pix',
-          );
+      await container
+          .read(chatControllerProvider.notifier)
+          .startWithTopic('fazer-pix');
 
       final state = container.read(chatControllerProvider);
       expect(fakeChat.createCalls, 0);

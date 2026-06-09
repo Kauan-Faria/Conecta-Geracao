@@ -1,3 +1,5 @@
+import 'package:conecta_geracao/features/maps/domain/map_action.dart';
+
 enum MessageRole { user, assistant }
 
 class ChatMessage {
@@ -6,19 +8,31 @@ class ChatMessage {
     required this.role,
     required this.content,
     required this.createdAt,
+    this.mapAction,
   });
 
   final String id;
   final MessageRole role;
   final String content;
   final DateTime createdAt;
+  final MapAction? mapAction;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    MapAction? mapAction;
+    final metadata = json['metadata'];
+    if (metadata is Map<String, dynamic>) {
+      final rawAction = metadata['map_action'];
+      if (rawAction is Map<String, dynamic>) {
+        mapAction = MapAction.fromJson(rawAction);
+      }
+    }
+
     return ChatMessage(
       id: json['id'] as String,
       role: MessageRole.values.byName(json['role'] as String),
       content: json['content'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      mapAction: mapAction,
     );
   }
 
@@ -28,6 +42,16 @@ class ChatMessage {
       'role': role.name,
       'content': content,
       'createdAt': createdAt.toIso8601String(),
+      if (mapAction != null)
+        'metadata': {
+          'map_action': {
+            'type': 'map_search',
+            'category': mapAction!.category.apiValue,
+            'radiusKm': mapAction!.radiusKm,
+            if (mapAction!.center != null)
+              'center': mapAction!.center!.toJson(),
+          },
+        },
     };
   }
 
@@ -36,12 +60,14 @@ class ChatMessage {
     MessageRole? role,
     String? content,
     DateTime? createdAt,
+    MapAction? mapAction,
   }) {
     return ChatMessage(
       id: id ?? this.id,
       role: role ?? this.role,
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
+      mapAction: mapAction ?? this.mapAction,
     );
   }
 }

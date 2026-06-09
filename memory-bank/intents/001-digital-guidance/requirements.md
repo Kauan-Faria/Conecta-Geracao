@@ -1,8 +1,8 @@
 ---
 intent: 001-digital-guidance
 phase: inception
-status: requirements-approved
-updated: 2026-06-02T12:00:00Z
+status: inception-approved
+updated: 2026-06-02T19:30:00Z
 ---
 
 # Requirements: Orientação digital guiada
@@ -78,11 +78,12 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 - **Priority**: Must
 
 ### FR-6: Histórico de conversas
-- **Description**: O usuário pode ver conversas anteriores para retomar contexto.
+- **Description**: O usuário **autenticado** pode ver conversas anteriores para retomar contexto. Modo convidado **não** persiste histórico (ver FR-8.2).
 - **Acceptance Criteria**:
-  - Lista de conversas passadas acessível no app
+  - Lista de conversas passadas acessível no app (somente usuário logado)
   - Usuário pode abrir conversa anterior e continuar (online)
   - Metadados mínimos: data, tópico inferido ou título, status (em andamento/concluída)
+  - Convidado não vê lista de conversas anteriores na API nem retoma sessões passadas
 - **Priority**: Should
 
 ### FR-7: Acesso offline parcial
@@ -93,12 +94,39 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
   - Limite de contexto renderizado respeitado (conversas muito longas podem truncar ou paginar)
 - **Priority**: Should
 
-### FR-8: Autenticação de usuário (pré-requisito)
-- **Description**: Usuário autenticado (Firebase) para associar conversas e preferências; sem perfil de cuidador.
+### FR-8: Autenticação acessível (telefone como caminho principal)
+- **Description**: Usuários analfabetos digitais entram com **número de celular + código SMS**, sem depender de conta Google ou e-mail. Após validar o código, o app pergunta **como a pessoa quer ser chamada** e persiste o vínculo da conta. Métodos alternativos ficam em fluxo secundário ("Entrar de outra forma"). Autenticação continua via **Firebase Auth**; API valida ID token e associa conversas ao `firebase_uid`.
 - **Acceptance Criteria**:
-  - Login via Firebase (padrão do projeto)
-  - Conversas vinculadas ao `firebase_uid`
-  - Não existe fluxo de "cuidador" ou "conta vinculada"
+  - **Caminho principal**: tela com campo de telefone (máscara Brasil), botão para receber código SMS, campo de 6 dígitos e mensagens em português simples
+  - **Tela do código (OTP)**: texto explicativo fixo de **como o código chega** (SMS no mesmo celular, 6 números, pode demorar alguns segundos) e o que fazer se não chegar (reenviar / "Entrar de outra forma"); sem jargão técnico
+  - **Preenchimento do código**: suporte a **autofill** do SMS no Android e iOS (código sugerido acima do teclado ou preenchimento automático quando o SO permitir), para o usuário não precisar sair do app para copiar manualmente
+  - **Primeiro acesso** (telefone novo no Firebase): após código válido, exibe modal/sheet "Como podemos te chamar?" com um campo **obrigatório** (mín. 2 caracteres, sem opção "Pular") e botão "Continuar"; nome salvo no perfil Firebase (`displayName`)
+  - **Retorno**: usuário com telefone já cadastrado entra direto na home após código válido, sem pedir nome novamente
+  - **Alternativo**: link "Entrar de outra forma" abre tela com **Google** (Must). **E-mail/senha** fica fora do onboarding — usuário pode vincular depois em Configurações, se quiser (fase futura)
+  - Conversas e preferências vinculadas ao `firebase_uid` após login completo
+  - Não existe fluxo de cuidador ou conta vinculada de terceiros
+  - **Modo convidado** (explorar sem conta) permanece opcional na welcome, claramente secundário ao login por telefone (ver FR-8.2)
+  - OTP de login ocorre **somente** na tela de autenticação — a IA do chat **nunca** solicita código SMS (ver FR-5)
+- **Priority**: Must
+
+### FR-8.1: Perfil mínimo do usuário
+- **Description**: Nome de exibição para personalizar saudações na home e futuras mensagens da IA.
+- **Acceptance Criteria**:
+  - Nome exibido na UI vem do `displayName` do Firebase após onboarding
+  - Usuário pode alterar o nome depois em Configurações (Should — story separada se necessário)
+  - Telefone não é exibido em telas sociais do app (privacidade)
+- **Priority**: Must
+
+### FR-8.2: Modo convidado (sessão efêmera)
+- **Description**: Quem ainda não quer criar conta pode usar o app e **conversar com a IA**, mas **sem gravar histórico** na nuvem. Cada nova entrada como convidado inicia **contexto novo** — não retoma conversas de visitas anteriores.
+- **Acceptance Criteria**:
+  - Welcome oferece opção clara de experimentar sem conta (secundária ao login por telefone)
+  - Convidado acessa chat e recebe respostas da IA (mesma qualidade de orientação, dentro dos guardrails)
+  - **Sem persistência remota**: conversas de convidado **não** são salvas na API / Postgres
+  - **Sem retomada**: ao sair e entrar de novo como convidado, **não** há lista de conversas anteriores nem continuação de thread antiga
+  - Durante uma única sessão convidado, o usuário pode conversar com contexto contínuo até fechar o app ou encerrar sessão; ao reentrar, nova janela de contexto
+  - CTA discreto no chat convidando a fazer login por telefone para **salvar** o histórico
+  - Após login com telefone, histórico passa a ser o do usuário autenticado (FR-6)
 - **Priority**: Must
 
 ### FR-9: Preferências de acessibilidade
@@ -202,6 +230,8 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 | 6 tópicos cobrem dúvidas iniciais do MVP | Baixa adoção | Expandir base após feedback dos testes |
 | Usuários conseguem digitar ou usar sugestões | Barreira de entrada | FR-10 + FR-11 atalhos na home e no chat |
 | Latência < 8s é aceitável para o público | Frustração | Indicador "pensando..."; otimizar prompts/RAG |
+| Login por telefone é familiar ao público-alvo | Abandono no onboarding | SMS OTP + textos curtos; Google em segundo plano |
+| Custo de SMS Firebase em testes | Orçamento | Números de teste no console; limitar reenvios |
 
 ---
 
@@ -215,6 +245,10 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 | Entrada por voz no MVP? | Produto | Pendente | Provável Won't no MVP |
 | Manter atalhos MVP no chat vazio além da home? | Produto | 2026-06-02 | Sim — home para intenções genéricas; chat vazio mantém 6 tópicos curados |
 | Ações rápidas fixas (4) ou configuráveis? | Produto | 2026-06-02 | Fixas no MVP conforme mockup |
+| E-mail/senha no MVP ou só Google no alternativo? | Produto | 2026-06-02 | **Resolvido**: só Google no alternativo no bolt 010; e-mail/senha opcional depois em Configurações |
+| Remover modo convidado após login por telefone? | Produto | 2026-06-02 | **Resolvido**: manter convidado; IA ok, sem histórico remoto, nova sessão a cada entrada |
+| Nome obrigatório no 1º acesso? | Produto | 2026-06-02 | **Resolvido**: sim, sem "Pular" |
+| Autofill OTP SMS? | Produto | 2026-06-02 | **Resolvido**: sim, com texto orientativo na tela do código |
 
 ---
 
@@ -222,7 +256,7 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 
 - Perfil ou fluxo de cuidador/familiar
 - Integração Gov.br para autenticação
-- Pedido ou armazenamento de senhas, tokens, OTP
+- Pedido ou armazenamento de senhas, tokens ou OTP **no chat com a IA** (login por SMS na tela de auth é permitido)
 - CMS completo ou marketplace de tutoriais
 - Chat offline com IA (apenas leitura de histórico)
 - Entrada por voz (unless promoted later)

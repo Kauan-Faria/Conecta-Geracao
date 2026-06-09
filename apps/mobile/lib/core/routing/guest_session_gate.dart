@@ -30,6 +30,7 @@ class GuestSessionGate extends ChangeNotifier {
   }
 
   Future<void> enterAsGuest() async {
+    await historyRepository.saveHistory(const []);
     await sessionRepository.enableGuestSession();
     _isGuestActive = true;
     notifyListeners();

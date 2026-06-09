@@ -39,7 +39,9 @@ ThemeData buildAppTheme(AccessibilityPrefs prefs) {
         ? AppColors.highContrastBackground
         : AppColors.surface,
     textTheme: AppTypography.textTheme(scale: fontScale),
-    dividerColor: highContrast ? AppColors.highContrastOnSurface : AppColors.divider,
+    dividerColor: highContrast
+        ? AppColors.highContrastOnSurface
+        : AppColors.divider,
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: colorScheme.primary,
@@ -50,9 +52,7 @@ ThemeData buildAppTheme(AccessibilityPrefs prefs) {
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: colorScheme.primary,
-      ),
+      style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
     ),
     extensions: [
       AccessibilityTheme(prefs: prefs, spacingScale: prefs.spacingMultiplier),

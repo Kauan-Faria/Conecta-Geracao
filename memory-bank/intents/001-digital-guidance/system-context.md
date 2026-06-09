@@ -2,14 +2,14 @@
 intent: 001-digital-guidance
 phase: inception
 status: context-defined
-updated: 2026-05-28T01:00:00Z
+updated: 2026-06-02T19:30:00Z
 ---
 
 # Orientação digital guiada — System Context
 
 ## System Overview
 
-App mobile **Flutter** + API **NestJS** que oferece um **assistente conversacional com IA** para analfabetos digitais. A IA consulta uma **base de conhecimento** curada (6 tópicos MVP), faz **checkpoints** para saber em que etapa o usuário está e orienta passo a passo — sem pedir senhas ou tokens. Autenticação via **Firebase**; conversas persistidas no **Postgres/Supabase**.
+App mobile **Flutter** + API **NestJS** que oferece um **assistente conversacional com IA** para analfabetos digitais. A IA consulta uma **base de conhecimento** curada (6 tópicos MVP), faz **checkpoints** para saber em que etapa o usuário está e orienta passo a passo — sem pedir senhas ou tokens **no chat**. Autenticação via **Firebase Auth** (caminho principal: **telefone + SMS OTP**; alternativo: Google e, futuramente, e-mail/senha); conversas persistidas no **Postgres/Supabase** por `firebase_uid`.
 
 ## Context Diagram
 
@@ -25,7 +25,7 @@ flowchart TB
 
     User -->|"mensagens, checkpoints"| App
     App -->|"REST + Bearer token"| API
-    App -->|"login"| Firebase
+    App -->|"telefone/SMS, Google"| Firebase
     API -->|"valida token"| Firebase
     API -->|"RAG + prompt"| LLM
     API -->|"consulta tópicos/passos"| KB
@@ -36,6 +36,7 @@ flowchart TB
 ## Actors
 
 - **Usuário digital** (Human): Analfabeto digital, smartphone próprio, usa o app sozinho; idade 20–70+.
+- **Visitante convidado** (Human): Experimenta o app sem conta; IA disponível, histórico **não** persistido entre visitas.
 - **Equipe de conteúdo** (Human, interno): Curadoria dos 6 tópicos e checkpoints na base de conhecimento (MVP: seed estático/JSON).
 - **API NestJS** (System): Orquestra chat, RAG, guardrails e persistência.
 - **Provedor LLM** (External System): Gera respostas conversacionais a partir do contexto RAG.
@@ -44,7 +45,7 @@ flowchart TB
 
 | Sistema | Direção | Dados | Protocolo | Risco |
 |---------|---------|-------|-----------|-------|
-| Firebase Auth | App ↔ API | ID token, `firebase_uid` | SDK / Admin SDK | Médio |
+| Firebase Auth | App ↔ API | ID token, `firebase_uid`, `displayName`, phone provider | SDK / Admin SDK | Médio (custo SMS) |
 | Provedor LLM | API → externo | Prompt + contexto RAG (sem PII sensível) | HTTPS REST | Alto |
 | Supabase Postgres | API ↔ DB | Conversas, mensagens, tópicos, passos | Prisma/SQL | Médio |
 | Render | Deploy API | — | HTTPS | Baixo |
@@ -79,6 +80,6 @@ flowchart TB
 ## Key NFR Goals
 
 - Latência IA p95 < 8s (MVP)
-- Guardrails: IA nunca solicita senha, token, OTP ou PIN
+- Guardrails: IA nunca solicita senha, token, OTP ou PIN no chat (OTP só na tela de login)
 - WCAG 2.1 AA no chat e navegação
 - Respostas derivadas da base de conhecimento (RAG), não alucinação livre

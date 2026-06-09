@@ -19,6 +19,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isAuthenticated = ref.watch(authGateProvider).isAuthenticated;
+    final isGuest = ref.watch(guestSessionGateProvider).isGuestActive;
     final listState = isAuthenticated
         ? ref.watch(conversationListControllerProvider)
         : const ConversationListState();
@@ -92,6 +93,7 @@ class HomePage extends ConsumerWidget {
                     _RecentConversationsCard(
                       isLoading: listState.isLoading,
                       items: recentItems,
+                      isGuest: isGuest && !isAuthenticated,
                       onOpenConversation: (id) =>
                           context.go('/chat?conversationId=$id'),
                     ),
@@ -170,10 +172,7 @@ class _HomeHeroSection extends StatelessWidget {
                 children: [
                   Text(
                     'Quero ajuda agora',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   SizedBox(width: AppSpacing.xs),
                   Icon(Icons.chevron_right, size: 20),
@@ -213,10 +212,7 @@ class _HomeQuickActionsGrid extends StatelessWidget {
 }
 
 class _HomeQuickActionCard extends StatelessWidget {
-  const _HomeQuickActionCard({
-    required this.shortcut,
-    required this.onTap,
-  });
+  const _HomeQuickActionCard({required this.shortcut, required this.onTap});
 
   final TopicShortcut shortcut;
   final VoidCallback onTap;
@@ -295,11 +291,13 @@ class _RecentConversationsCard extends StatelessWidget {
     required this.isLoading,
     required this.items,
     required this.onOpenConversation,
+    this.isGuest = false,
   });
 
   final bool isLoading;
   final List<ConversationListItem> items;
   final ValueChanged<String> onOpenConversation;
+  final bool isGuest;
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +320,9 @@ class _RecentConversationsCard extends StatelessWidget {
           border: Border.all(color: brand.cardBorder),
         ),
         child: Text(
-          'Suas conversas recentes aparecerão aqui.',
+          isGuest
+              ? 'Entre com seu celular para salvar suas conversas e vê-las aqui depois.'
+              : 'Suas conversas recentes aparecerão aqui.',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: AppColors.onSurfaceVariant,
           ),
@@ -353,10 +353,7 @@ class _RecentConversationsCard extends StatelessWidget {
 }
 
 class _RecentConversationTile extends StatelessWidget {
-  const _RecentConversationTile({
-    required this.item,
-    required this.onTap,
-  });
+  const _RecentConversationTile({required this.item, required this.onTap});
 
   final ConversationListItem item;
   final VoidCallback onTap;
@@ -373,28 +370,29 @@ class _RecentConversationTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Abrir conversa $title, $dateLabel',
-      child: ListTile(
-        minVerticalPadding: AppSpacing.md,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-        ),
-        title: Text(
-          title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          minVerticalPadding: AppSpacing.md,
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          title: Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        subtitle: Text(
-          dateLabel,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          subtitle: Text(
+            dateLabel,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          trailing: const Icon(
+            Icons.chevron_right,
             color: AppColors.onSurfaceVariant,
           ),
+          onTap: onTap,
         ),
-        trailing: const Icon(
-          Icons.chevron_right,
-          color: AppColors.onSurfaceVariant,
-        ),
-        onTap: onTap,
       ),
     );
   }

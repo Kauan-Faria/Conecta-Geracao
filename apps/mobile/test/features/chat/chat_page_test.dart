@@ -86,8 +86,8 @@ void main() {
 
       expect(fakeChat.createCalls, 1);
       expect(fakeChat.lastCreateTopicSlug, 'fazer-pix');
-      expect(fakeChat.lastSentContent, 'Quero ajuda com PIX');
-      expect(find.text('Quero ajuda com PIX'), findsOneWidget);
+      expect(fakeChat.lastSentContent, 'Desejo fazer um PIX');
+      expect(find.text('Desejo fazer um PIX'), findsOneWidget);
     });
 
     testWidgets('sending message shows user bubble and checkpoint buttons', (
@@ -95,10 +95,7 @@ void main() {
     ) async {
       await pumpChat(tester);
 
-      await tester.enterText(
-        find.byType(TextField),
-        'Quero enviar um pix',
-      );
+      await tester.enterText(find.byType(TextField), 'Quero enviar um pix');
       await tester.testTextInput.receiveAction(TextInputAction.send);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
@@ -111,9 +108,7 @@ void main() {
     });
 
     testWidgets('checkpoint Sim sends affirmative reply', (tester) async {
-      fakeChat = FakeChatRepository(
-        assistantReply: 'Conseguiu fazer isso?',
-      );
+      fakeChat = FakeChatRepository(assistantReply: 'Conseguiu fazer isso?');
 
       await pumpChat(tester);
 
@@ -127,7 +122,7 @@ void main() {
       expect(fakeChat.lastSentContent, 'Sim');
     });
 
-    testWidgets('guest sees login prompt instead of chat input', (tester) async {
+    testWidgets('guest can use chat without login', (tester) async {
       tester.view.physicalSize = const Size(400, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -165,11 +160,8 @@ void main() {
       await tester.tap(find.text('Chat'));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Para conversar com o assistente, entre com sua conta Google.'),
-        findsOneWidget,
-      );
-      expect(find.text('Digite sua mensagem...'), findsNothing);
+      expect(find.textContaining('Modo sem cadastro'), findsOneWidget);
+      expect(find.text('Digite sua mensagem...'), findsOneWidget);
     });
   });
 }

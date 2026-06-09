@@ -1,5 +1,6 @@
 export type DomainErrorCode =
   | 'INVALID_SLUG'
+  | 'INVALID_SEARCH_QUERY'
   | 'CONTENT_POLICY'
   | 'DUPLICATE_SLUG'
   | 'TOPIC_NOT_FOUND';
@@ -29,5 +30,11 @@ export class ContentPolicyViolationError extends DomainError {
 export class TopicNotFoundError extends DomainError {
   constructor(slug: string) {
     super('TOPIC_NOT_FOUND', `Tópico não encontrado: ${slug}`);
+  }
+}
+
+export class InvalidSearchQueryError extends DomainError {
+  constructor(message = 'Busca deve ter pelo menos 2 caracteres') {
+    super('INVALID_SEARCH_QUERY', message);
   }
 }

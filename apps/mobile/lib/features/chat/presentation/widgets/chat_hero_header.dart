@@ -32,75 +32,78 @@ class ChatHeroHeader extends StatelessWidget {
             AppSpacing.md,
           ),
           child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Converse com o Conecta',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: AppColors.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Estou aqui pra te ajudar a evitar erros e usar a '
-                  'tecnologia com mais segurança',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.onPrimary.withValues(alpha: 0.92),
-                    height: 1.35,
-                  ),
-                ),
-                if (onOpenHistory != null) ...[
-                  SizedBox(height: AppSpacing.sm),
-                  Semantics(
-                    button: true,
-                    label: 'Abrir minhas conversas anteriores',
-                    child: TextButton.icon(
-                      onPressed: onOpenHistory,
-                      icon: const Icon(Icons.history, color: AppColors.onPrimary),
-                      label: const Text('Minhas conversas'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.onPrimary,
-                        padding: EdgeInsets.zero,
-                        alignment: Alignment.centerLeft,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Converse com o Conecta',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: AppColors.onPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          SizedBox(width: AppSpacing.sm),
-          Semantics(
-            label: 'Assistente Conecta',
-            child: Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.onPrimary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: brand.cardShadow,
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/images/robo.png',
-                  fit: BoxFit.cover,
-                  semanticLabel: '',
+                    SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Estou aqui pra te ajudar a evitar erros e usar a '
+                      'tecnologia com mais segurança',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.onPrimary.withValues(alpha: 0.92),
+                        height: 1.35,
+                      ),
+                    ),
+                    if (onOpenHistory != null) ...[
+                      SizedBox(height: AppSpacing.sm),
+                      Semantics(
+                        button: true,
+                        label: 'Abrir minhas conversas anteriores',
+                        child: TextButton.icon(
+                          onPressed: onOpenHistory,
+                          icon: const Icon(
+                            Icons.history,
+                            color: AppColors.onPrimary,
+                          ),
+                          label: const Text('Minhas conversas'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.onPrimary,
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.centerLeft,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ),
-          ),
-        ],
+              SizedBox(width: AppSpacing.sm),
+              Semantics(
+                label: 'Assistente Conecta',
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: AppColors.onPrimary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: brand.cardShadow,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/robo.png',
+                      fit: BoxFit.cover,
+                      semanticLabel: '',
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -3,14 +3,23 @@ id: 009-digital-guidance-ui
 unit: 004-digital-guidance-ui
 intent: 001-digital-guidance
 type: simple-construction-bolt
-status: planned
+status: complete
 stories:
   - 006-home-screen
 created: 2026-06-02T12:00:00.000Z
-started: null
-completed: null
+started: 2026-06-03T01:26:25.000Z
+completed: "2026-06-03T01:39:28Z"
 current_stage: null
-stages_completed: []
+stages_completed:
+  - name: plan
+    completed: 2026-06-03T01:32:39.000Z
+    artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-06-03T01:38:55.000Z
+    artifact: implementation-walkthrough.md
+  - name: test
+    completed: 2026-06-03T01:38:55.000Z
+    artifact: test-walkthrough.md
 requires_bolts:
   - 006-digital-guidance-ui
   - 007-digital-guidance-ui
@@ -46,8 +55,8 @@ Transformar a aba Início de placeholder em hub de entrada do assistente, reduzi
 
 ## Success Criteria
 
-- [ ] Layout fiel ao mockup (header, hero, grid 2×2, recentes)
-- [ ] "Quero ajuda agora" abre chat vazio
-- [ ] 4 ações rápidas abrem chat com mensagem starter correta
-- [ ] Verificações recentes e "Ver todas" funcionais
-- [ ] Testes widget cobrindo navegação e mensagens starter
+- [x] Layout fiel ao mockup (header, hero, grid 2×2, recentes)
+- [x] "Quero ajuda agora" abre chat vazio
+- [x] 6 atalhos MVP abrem chat com mensagem starter correta
+- [x] Verificações recentes e "Ver todas" funcionais
+- [x] Testes widget cobrindo navegação e mensagens starter

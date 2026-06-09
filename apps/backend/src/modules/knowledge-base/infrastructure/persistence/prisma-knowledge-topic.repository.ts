@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { KnowledgeTopic } from '../../domain/entities/knowledge-topic.entity';
 import { KnowledgeTopicRepository } from '../../application/ports/knowledge-topic.repository';
 import { TopicSlug } from '../../domain/value-objects/topic-slug.vo';
 
 @Injectable()
 export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findBySlug(slug: TopicSlug): Promise<KnowledgeTopic | null> {
     const row = await this.prisma.knowledgeTopic.findUnique({
@@ -24,6 +24,19 @@ export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository 
       orderBy: { displayOrder: 'asc' },
     });
     return rows.map((row) => this.toDomain(row));
+  }
+
+  async searchActive(query: string): Promise<KnowledgeTopic[]> {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [];
+
+    const all = await this.findAllActive();
+    return all.filter((topic) => {
+      if (topic.slug.includes(normalized)) return true;
+      if (topic.title.toLowerCase().includes(normalized)) return true;
+      if (topic.summary.toLowerCase().includes(normalized)) return true;
+      return topic.keywords.some((keyword) => keyword.toLowerCase().includes(normalized));
+    });
   }
 
   async countBySlugs(slugs: string[]): Promise<number> {

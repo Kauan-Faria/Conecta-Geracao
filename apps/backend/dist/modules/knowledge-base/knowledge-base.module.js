@@ -13,11 +13,14 @@ const knowledge_topic_repository_1 = require("./application/ports/knowledge-topi
 const prisma_knowledge_topic_repository_1 = require("./infrastructure/persistence/prisma-knowledge-topic.repository");
 const seed_knowledge_base_use_case_1 = require("./application/use-cases/seed-knowledge-base.use-case");
 const get_topic_by_slug_use_case_1 = require("./application/use-cases/get-topic-by-slug.use-case");
+const search_topics_use_case_1 = require("./application/use-cases/search-topics.use-case");
+const knowledge_controller_1 = require("./presentation/knowledge.controller");
 let KnowledgeBaseModule = class KnowledgeBaseModule {
 };
 exports.KnowledgeBaseModule = KnowledgeBaseModule;
 exports.KnowledgeBaseModule = KnowledgeBaseModule = __decorate([
     (0, common_1.Module)({
+        controllers: [knowledge_controller_1.KnowledgeController],
         providers: [
             knowledge_content_policy_1.KnowledgeContentPolicy,
             {
@@ -26,11 +29,13 @@ exports.KnowledgeBaseModule = KnowledgeBaseModule = __decorate([
             },
             seed_knowledge_base_use_case_1.SeedKnowledgeBaseUseCase,
             get_topic_by_slug_use_case_1.GetTopicBySlugUseCase,
+            search_topics_use_case_1.SearchTopicsUseCase,
         ],
         exports: [
             knowledge_topic_repository_1.KNOWLEDGE_TOPIC_REPOSITORY,
             seed_knowledge_base_use_case_1.SeedKnowledgeBaseUseCase,
             get_topic_by_slug_use_case_1.GetTopicBySlugUseCase,
+            search_topics_use_case_1.SearchTopicsUseCase,
         ],
     })
 ], KnowledgeBaseModule);

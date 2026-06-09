@@ -48,10 +48,7 @@ class ChatErrorBanner extends StatelessWidget {
                     onPressed: onRetry,
                     child: const Text('Tentar novamente'),
                   ),
-                TextButton(
-                  onPressed: onDismiss,
-                  child: const Text('Fechar'),
-                ),
+                TextButton(onPressed: onDismiss, child: const Text('Fechar')),
               ],
             ),
           ],

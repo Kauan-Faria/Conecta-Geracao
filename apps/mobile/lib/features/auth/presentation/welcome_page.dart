@@ -2,6 +2,7 @@ import 'package:conecta_geracao/core/theme/app_colors.dart';
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/core/theme/brand_theme_extension.dart';
 import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
+import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,7 +31,11 @@ class WelcomePage extends ConsumerWidget {
                 color: brand.divider,
               ),
               SizedBox(height: AppSpacing.md),
-              _HeroSection(theme: theme, brand: brand, colorScheme: colorScheme),
+              _HeroSection(
+                theme: theme,
+                brand: brand,
+                colorScheme: colorScheme,
+              ),
               SizedBox(height: AppSpacing.lg),
               const _RobotIllustration(),
               SizedBox(height: AppSpacing.lg),
@@ -45,6 +50,7 @@ class WelcomePage extends ConsumerWidget {
               _GuestLink(
                 brand: brand,
                 onPressed: () async {
+                  ref.invalidate(chatControllerProvider);
                   await ref.read(guestSessionGateProvider).enterAsGuest();
                   if (context.mounted) {
                     context.go('/home');
@@ -125,9 +131,7 @@ class _HeroSection extends StatelessWidget {
         SizedBox(height: AppSpacing.sm),
         Text(
           'Vamos te ajudar a evitar erros no dia a dia',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: brand.subtitle,
-          ),
+          style: theme.textTheme.bodyLarge?.copyWith(color: brand.subtitle),
           textAlign: TextAlign.center,
         ),
       ],
@@ -164,10 +168,7 @@ class _RobotIllustration extends StatelessWidget {
 }
 
 class _FeatureHighlights extends StatelessWidget {
-  const _FeatureHighlights({
-    required this.brand,
-    required this.theme,
-  });
+  const _FeatureHighlights({required this.brand, required this.theme});
 
   final BrandTheme brand;
   final ThemeData theme;
@@ -201,11 +202,7 @@ class _FeatureHighlights extends StatelessWidget {
                 theme: theme,
               ),
             ),
-            VerticalDivider(
-              width: 1,
-              thickness: 1,
-              color: brand.divider,
-            ),
+            VerticalDivider(width: 1, thickness: 1, color: brand.divider),
             Expanded(
               child: _FeatureItem(
                 iconPath: 'assets/icons/passo-a-passo.png',
@@ -213,11 +210,7 @@ class _FeatureHighlights extends StatelessWidget {
                 theme: theme,
               ),
             ),
-            VerticalDivider(
-              width: 1,
-              thickness: 1,
-              color: brand.divider,
-            ),
+            VerticalDivider(width: 1, thickness: 1, color: brand.divider),
             Expanded(
               child: _FeatureItem(
                 iconPath: 'assets/icons/mais-seguranca.png',
@@ -250,12 +243,7 @@ class _FeatureItem extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            iconPath,
-            height: 32,
-            width: 32,
-            semanticLabel: label,
-          ),
+          Image.asset(iconPath, height: 32, width: 32, semanticLabel: label),
           SizedBox(height: AppSpacing.sm),
           Text(
             label,
@@ -304,10 +292,7 @@ class _StartButton extends StatelessWidget {
             children: [
               Text(
                 'Começar agora',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               SizedBox(width: AppSpacing.xs),
               Icon(Icons.chevron_right, size: 20),
@@ -320,10 +305,7 @@ class _StartButton extends StatelessWidget {
 }
 
 class _GuestLink extends StatelessWidget {
-  const _GuestLink({
-    required this.brand,
-    required this.onPressed,
-  });
+  const _GuestLink({required this.brand, required this.onPressed});
 
   final BrandTheme brand;
   final VoidCallback onPressed;

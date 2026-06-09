@@ -15,7 +15,16 @@ import {
 } from '../../application/ports/conversation.repository';
 import { ConversationStatus } from '../../domain/value-objects/conversation-status.vo';
 import { MessageContent } from '../../domain/value-objects/message-content.vo';
+import { MessageMetadataJson } from '../../domain/value-objects/message-metadata.vo';
 import { MessageRole } from '../../domain/value-objects/message-role.vo';
+import { Prisma } from '@prisma/client';
+
+function parseMessageMetadata(value: Prisma.JsonValue | null): MessageMetadataJson | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+  return value as MessageMetadataJson;
+}
 
 @Injectable()
 export class PrismaConversationRepository implements ConversationRepository {
@@ -100,6 +109,7 @@ export class PrismaMessageRepository {
     conversationId: string;
     role: PrismaMessageRole;
     content: string;
+    metadata: Prisma.JsonValue | null;
     createdAt: Date;
   }): Message {
     return Message.create({
@@ -107,6 +117,7 @@ export class PrismaMessageRepository {
       conversationId: row.conversationId,
       role: MessageRole.from(row.role),
       content: MessageContent.create(row.content),
+      metadata: parseMessageMetadata(row.metadata),
       createdAt: row.createdAt,
     });
   }
@@ -123,6 +134,7 @@ export class PrismaConversationMessageUnitOfWork {
     assistantContent: string;
     nextCurrentStep: number;
     topicSlug?: string | null;
+    assistantMetadata?: MessageMetadataJson | null;
   }): Promise<{ assistantMessage: Message }> {
     return this.prisma.$transaction(async (tx) => {
       const conversation = await tx.conversation.findFirst({
@@ -150,6 +162,7 @@ export class PrismaConversationMessageUnitOfWork {
           conversationId: input.conversationId,
           role: 'assistant',
           content: input.assistantContent,
+          metadata: (input.assistantMetadata as Prisma.InputJsonValue) ?? undefined,
         },
       });
 
@@ -170,6 +183,7 @@ export class PrismaConversationMessageUnitOfWork {
           conversationId: assistantRow.conversationId,
           role: MessageRole.assistant(),
           content: MessageContent.create(assistantRow.content),
+          metadata: parseMessageMetadata(assistantRow.metadata),
           createdAt: assistantRow.createdAt,
         }),
       };

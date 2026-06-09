@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const result_1 = require("../../../../shared/result");
 const domain_errors_1 = require("../../domain/errors/domain.errors");
 const message_content_vo_1 = require("../../domain/value-objects/message-content.vo");
+const message_metadata_vo_1 = require("../../domain/value-objects/message-metadata.vo");
 const assistant_reply_generator_1 = require("../ports/assistant-reply.generator");
 const message_repository_1 = require("../ports/message.repository");
 const conversation_repository_1 = require("../ports/conversation.repository");
@@ -47,6 +48,9 @@ let SendMessageUseCase = class SendMessageUseCase {
                 currentStep: owned.currentStep,
                 messageHistory,
             });
+            const assistantMetadata = assistantReply.mapAction
+                ? message_metadata_vo_1.MessageMetadata.fromMapAction(assistantReply.mapAction)
+                : null;
             const result = await this.unitOfWork.sendMessage({
                 conversationId,
                 firebaseUid,
@@ -54,6 +58,7 @@ let SendMessageUseCase = class SendMessageUseCase {
                 assistantContent: assistantReply.content.value,
                 nextCurrentStep: assistantReply.nextCurrentStep,
                 topicSlug: assistantReply.resolvedTopicSlug ?? owned.topicSlug,
+                assistantMetadata,
             });
             return (0, result_1.ok)(result.assistantMessage);
         }

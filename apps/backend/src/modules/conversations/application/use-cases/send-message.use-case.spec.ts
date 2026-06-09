@@ -56,6 +56,7 @@ describe('SendMessageUseCase', () => {
       assistantContent: 'Resposta stub',
       nextCurrentStep: 0,
       topicSlug: null,
+      assistantMetadata: null,
     });
   });
 

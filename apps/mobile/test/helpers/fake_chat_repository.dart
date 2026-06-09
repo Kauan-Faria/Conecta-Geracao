@@ -13,12 +13,13 @@ class FakeChatRepository implements ChatRepository {
 
   final Future<ConversationSummary> Function()? onCreate;
   final Future<ChatMessage> Function(String conversationId, String content)?
-      onSend;
+  onSend;
   final Future<ConversationDetail> Function(String conversationId)? onGet;
   final Future<PaginatedResult<ConversationSummary>> Function({
     int page,
     int limit,
-  })? onList;
+  })?
+  onList;
   final String assistantReply;
 
   int createCalls = 0;

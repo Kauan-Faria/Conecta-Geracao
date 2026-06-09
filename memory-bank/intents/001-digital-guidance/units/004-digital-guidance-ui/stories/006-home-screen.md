@@ -2,11 +2,11 @@
 id: 006-home-screen
 unit: 004-digital-guidance-ui
 intent: 001-digital-guidance
-status: ready
+status: complete
 priority: must
-updated: 2026-06-02T14:00:00.000Z
+updated: 2026-06-03T01:39:28Z
 assigned_bolt: 009-digital-guidance-ui
-implemented: false
+implemented: true
 ---
 
 # Story: 006-home-screen

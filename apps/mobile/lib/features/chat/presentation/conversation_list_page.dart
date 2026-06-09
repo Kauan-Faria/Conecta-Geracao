@@ -56,13 +56,13 @@ class _ConversationListPageState extends ConsumerState<ConversationListPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Entre com sua conta Google para ver suas conversas anteriores.',
+              'Entre com seu celular para ver suas conversas salvas.',
               style: theme.textTheme.bodyLarge,
             ),
             SizedBox(height: AppSpacing.lg),
             AppButton(
-              label: 'Entrar com Google',
-              semanticLabel: 'Entrar com Google para ver conversas',
+              label: 'Entrar com celular',
+              semanticLabel: 'Entrar com celular para ver conversas',
               onPressed: () => context.push('/login'),
             ),
           ],
@@ -148,10 +148,7 @@ class _ConversationListPageState extends ConsumerState<ConversationListPage> {
                 'Conversa $title, atualizada em ${_formatDate(item.summary.updatedAt)}',
             child: ListTile(
               minVerticalPadding: AppSpacing.md,
-              title: Text(
-                title,
-                style: theme.textTheme.titleMedium,
-              ),
+              title: Text(title, style: theme.textTheme.titleMedium),
               subtitle: Text(
                 _formatDate(item.summary.updatedAt),
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -160,9 +157,7 @@ class _ConversationListPageState extends ConsumerState<ConversationListPage> {
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-                context.go(
-                  '/chat?conversationId=${item.summary.id}',
-                );
+                context.go('/chat?conversationId=${item.summary.id}');
               },
             ),
           );

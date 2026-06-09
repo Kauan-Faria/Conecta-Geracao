@@ -1,4 +1,5 @@
 import { MessageContent } from '../../domain/value-objects/message-content.vo';
+import { MapAction } from '../../domain/value-objects/map-action.vo';
 
 export interface AssistantMessageTurn {
   role: 'user' | 'assistant';
@@ -17,6 +18,7 @@ export interface AssistantReplyResult {
   content: MessageContent;
   nextCurrentStep: number;
   resolvedTopicSlug?: string | null;
+  mapAction?: MapAction;
 }
 
 export const ASSISTANT_REPLY_GENERATOR = Symbol('ASSISTANT_REPLY_GENERATOR');

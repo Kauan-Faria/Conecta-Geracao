@@ -1,6 +1,7 @@
 import { ConversationClosedError } from '../errors/domain.errors';
 import { ConversationStatus } from '../value-objects/conversation-status.vo';
 import { MessageContent } from '../value-objects/message-content.vo';
+import { MessageMetadataJson } from '../value-objects/message-metadata.vo';
 import { MessageRole } from '../value-objects/message-role.vo';
 
 export interface MessageProps {
@@ -8,6 +9,7 @@ export interface MessageProps {
   conversationId: string;
   role: MessageRole;
   content: MessageContent;
+  metadata?: MessageMetadataJson | null;
   createdAt?: Date;
 }
 
@@ -16,6 +18,7 @@ export class Message {
   readonly conversationId: string;
   readonly role: MessageRole;
   readonly content: MessageContent;
+  readonly metadata: MessageMetadataJson | null;
   readonly createdAt: Date;
 
   private constructor(props: MessageProps) {
@@ -23,6 +26,7 @@ export class Message {
     this.conversationId = props.conversationId;
     this.role = props.role;
     this.content = props.content;
+    this.metadata = props.metadata ?? null;
     this.createdAt = props.createdAt ?? new Date();
   }
 

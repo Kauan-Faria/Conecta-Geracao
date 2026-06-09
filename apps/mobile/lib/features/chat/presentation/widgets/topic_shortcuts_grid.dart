@@ -5,10 +5,7 @@ import 'package:conecta_geracao/features/chat/domain/topic_shortcuts.dart';
 import 'package:flutter/material.dart';
 
 class TopicShortcutsGrid extends StatelessWidget {
-  const TopicShortcutsGrid({
-    required this.onTopicSelected,
-    super.key,
-  });
+  const TopicShortcutsGrid({required this.onTopicSelected, super.key});
 
   final ValueChanged<TopicShortcut> onTopicSelected;
 
@@ -48,10 +45,7 @@ class TopicShortcutsGrid extends StatelessWidget {
 }
 
 class _TopicShortcutCard extends StatelessWidget {
-  const _TopicShortcutCard({
-    required this.shortcut,
-    required this.onTap,
-  });
+  const _TopicShortcutCard({required this.shortcut, required this.onTap});
 
   final TopicShortcut shortcut;
   final VoidCallback onTap;

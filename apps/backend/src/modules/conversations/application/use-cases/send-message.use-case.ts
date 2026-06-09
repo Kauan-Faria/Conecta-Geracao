@@ -3,6 +3,7 @@ import { ok, err, Result } from '../../../../shared/result';
 import { Message } from '../../domain/entities/conversation.entity';
 import { DomainError } from '../../domain/errors/domain.errors';
 import { MessageContent } from '../../domain/value-objects/message-content.vo';
+import { MessageMetadata } from '../../domain/value-objects/message-metadata.vo';
 import {
   ASSISTANT_REPLY_GENERATOR,
   AssistantReplyGenerator,
@@ -58,6 +59,10 @@ export class SendMessageUseCase {
         messageHistory,
       });
 
+      const assistantMetadata = assistantReply.mapAction
+        ? MessageMetadata.fromMapAction(assistantReply.mapAction)
+        : null;
+
       const result = await this.unitOfWork.sendMessage({
         conversationId,
         firebaseUid,
@@ -65,6 +70,7 @@ export class SendMessageUseCase {
         assistantContent: assistantReply.content.value,
         nextCurrentStep: assistantReply.nextCurrentStep,
         topicSlug: assistantReply.resolvedTopicSlug ?? owned.topicSlug,
+        assistantMetadata,
       });
 
       return ok(result.assistantMessage);

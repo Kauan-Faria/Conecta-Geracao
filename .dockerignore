@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+.git
+.cursor
+apps/mobile
+memory-bank
+**/*.md
+.env
+.env.*
+!.env.example
+!.env.docker.example
+**/*spec.ts
+**/test

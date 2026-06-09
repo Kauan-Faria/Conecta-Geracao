@@ -11,15 +11,17 @@ implemented: true
 
 # Story: 001-firebase-login-google
 
+> **Nota (2026-06-02)**: Login Google permanece válido, mas passa a ser **caminho alternativo** (story `006-alternative-login-methods`). A tela principal de login é telefone + SMS (`004-phone-otp-primary-login`).
+
 ## User Story
 
-**As a** usuário digital
-**I want** entrar no app com minha conta Google
-**So that** minhas conversas fiquem salvas para mim
+**As a** usuário que prefere conta Google
+**I want** entrar no app com minha conta Google na tela "Entrar de outra forma"
+**So that** minhas conversas fiquem salvas sem usar SMS
 
 ## Acceptance Criteria
 
-- [ ] **Given** não estou logado, **When** toco em "Entrar com Google", **Then** completo login via Firebase e vejo a tela inicial
+- [ ] **Given** estou na tela "Entrar de outra forma", **When** toco em "Entrar com Google", **Then** completo login via Firebase e vejo a tela inicial (ou onboarding de nome se aplicável)
 - [ ] **Given** login falha, **When** retorno ao app, **Then** vejo mensagem simples em português explicando o erro
 - [ ] **Given** estou logado, **When** reabro o app, **Then** permaneço autenticado sem novo login
 
@@ -45,4 +47,5 @@ implemented: true
 
 ## Out of Scope
 
-- Outros provedores de login no MVP
+- Tela principal de login (telefone) — ver `004-phone-otp-primary-login`
+- E-mail/senha — ver `006-alternative-login-methods`

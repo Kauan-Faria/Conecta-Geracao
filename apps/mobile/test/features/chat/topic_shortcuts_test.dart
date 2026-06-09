@@ -5,10 +5,14 @@ void main() {
   group('mvpTopicShortcuts', () {
     test('contains 6 MVP topics with short labels from story', () {
       expect(mvpTopicShortcuts, hasLength(6));
-      expect(
-        mvpTopicShortcuts.map((s) => s.shortLabel).toList(),
-        ['PIX', 'Gov.br', 'WhatsApp', 'Wi-Fi', 'Boleto', 'Golpe'],
-      );
+      expect(mvpTopicShortcuts.map((s) => s.shortLabel).toList(), [
+        'PIX',
+        'Gov.br',
+        'WhatsApp',
+        'Wi-Fi',
+        'Boleto',
+        'Golpe',
+      ]);
     });
 
     test('topicShortcutForSlug resolves known slug', () {

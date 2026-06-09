@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaKnowledgeTopicRepository = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require("@prisma/client");
+const prisma_service_1 = require("../../../../shared/prisma/prisma.service");
 const knowledge_topic_entity_1 = require("../../domain/entities/knowledge-topic.entity");
 let PrismaKnowledgeTopicRepository = class PrismaKnowledgeTopicRepository {
     constructor(prisma) {
@@ -33,6 +33,21 @@ let PrismaKnowledgeTopicRepository = class PrismaKnowledgeTopicRepository {
             orderBy: { displayOrder: 'asc' },
         });
         return rows.map((row) => this.toDomain(row));
+    }
+    async searchActive(query) {
+        const normalized = query.trim().toLowerCase();
+        if (!normalized)
+            return [];
+        const all = await this.findAllActive();
+        return all.filter((topic) => {
+            if (topic.slug.includes(normalized))
+                return true;
+            if (topic.title.toLowerCase().includes(normalized))
+                return true;
+            if (topic.summary.toLowerCase().includes(normalized))
+                return true;
+            return topic.keywords.some((keyword) => keyword.toLowerCase().includes(normalized));
+        });
     }
     async countBySlugs(slugs) {
         return this.prisma.knowledgeTopic.count({
@@ -94,6 +109,6 @@ let PrismaKnowledgeTopicRepository = class PrismaKnowledgeTopicRepository {
 exports.PrismaKnowledgeTopicRepository = PrismaKnowledgeTopicRepository;
 exports.PrismaKnowledgeTopicRepository = PrismaKnowledgeTopicRepository = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [client_1.PrismaClient])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], PrismaKnowledgeTopicRepository);
 //# sourceMappingURL=prisma-knowledge-topic.repository.js.map

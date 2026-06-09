@@ -69,6 +69,7 @@ model Message {
   conversationId String       @map("conversation_id")
   role           MessageRole
   content        String       @db.VarChar(4000)
+  metadata       Json?
   createdAt      DateTime     @default(now()) @map("created_at")
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 

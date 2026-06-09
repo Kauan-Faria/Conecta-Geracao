@@ -71,7 +71,8 @@ void main() {
       await tester.tap(find.text('Começar agora'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Entrar com Google'), findsOneWidget);
+      expect(find.text('Receber código'), findsOneWidget);
+      expect(find.text('Entrar de outra forma'), findsOneWidget);
     });
   });
 }

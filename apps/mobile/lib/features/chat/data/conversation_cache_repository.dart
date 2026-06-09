@@ -54,8 +54,9 @@ class SharedPreferencesConversationCacheRepository
   @override
   Future<void> upsertDetail(ConversationDetail detail) async {
     final details = await _loadAllDetails();
-    final withoutCurrent =
-        details.where((item) => item.id != detail.id).toList();
+    final withoutCurrent = details
+        .where((item) => item.id != detail.id)
+        .toList();
     withoutCurrent.insert(0, detail);
     await _saveDetails(withoutCurrent.take(maxCachedConversations).toList());
   }

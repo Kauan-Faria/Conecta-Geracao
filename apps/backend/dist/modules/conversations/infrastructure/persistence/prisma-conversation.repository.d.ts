@@ -1,6 +1,7 @@
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { Conversation, Message } from '../../domain/entities/conversation.entity';
 import { ConversationRepository, PaginatedConversations, PaginationParams } from '../../application/ports/conversation.repository';
+import { MessageMetadataJson } from '../../domain/value-objects/message-metadata.vo';
 export declare class PrismaConversationRepository implements ConversationRepository {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -25,6 +26,7 @@ export declare class PrismaConversationMessageUnitOfWork {
         assistantContent: string;
         nextCurrentStep: number;
         topicSlug?: string | null;
+        assistantMetadata?: MessageMetadataJson | null;
     }): Promise<{
         assistantMessage: Message;
     }>;

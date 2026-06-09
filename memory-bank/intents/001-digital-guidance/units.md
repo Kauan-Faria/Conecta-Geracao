@@ -2,7 +2,7 @@
 intent: 001-digital-guidance
 phase: inception
 status: units-decomposed
-updated: 2026-05-28T01:00:00Z
+updated: 2026-06-02T18:00:00Z
 ---
 
 # Orientação digital guiada — Unit Decomposition
@@ -18,7 +18,9 @@ updated: 2026-05-28T01:00:00Z
 | FR-5 | Guardrails de segurança e privacidade | `003-ai-assistant-api` |
 | FR-6 | Histórico de conversas | `003-ai-assistant-api` |
 | FR-7 | Acesso offline parcial | `004-digital-guidance-ui` |
-| FR-8 | Autenticação de usuário | `001-mobile-auth-shell` |
+| FR-8 | Autenticação acessível (telefone + alternativas) | `001-mobile-auth-shell` |
+| FR-8.1 | Perfil mínimo (nome de exibição) | `001-mobile-auth-shell` |
+| FR-8.2 | Modo convidado (sessão efêmera) | `001-mobile-auth-shell` |
 | FR-9 | Preferências de acessibilidade | `001-mobile-auth-shell` |
 | FR-10 | Entrada assistida por sugestões | `004-digital-guidance-ui` |
 | FR-11 | Tela inicial (Home) | `004-digital-guidance-ui` |
@@ -29,11 +31,11 @@ Este intent decompõe em **4 units**:
 
 ### Unit 1: `001-mobile-auth-shell`
 
-**Description**: Shell do app Flutter, login Firebase e preferências de acessibilidade.
+**Description**: Shell do app Flutter, autenticação acessível (telefone SMS + alternativas), onboarding de nome e preferências de acessibilidade.
 
-**Stories**: 3 | **Complexity**: M | **Priority**: Must
+**Stories**: 7 | **Complexity**: M | **Priority**: Must
 
-**Deliverables**: Login Google, navegação base, tema/fonte/contraste persistidos.
+**Deliverables**: Login por telefone (OTP + autofill + textos orientativos), nome obrigatório, Google alternativo, convidado efêmero (IA sem histórico remoto), navegação e acessibilidade.
 
 **Dependencies**: Nenhuma
 

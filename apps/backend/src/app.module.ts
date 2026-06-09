@@ -12,6 +12,8 @@ import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.mod
 
 import { ConversationsModule } from './modules/conversations/conversations.module';
 
+import { MapsModule } from './modules/maps/maps.module';
+
 import { RequestIdMiddleware } from './shared/http/request-id.middleware';
 
 import { ApiResponseInterceptor } from './shared/http/api-response.interceptor';
@@ -43,6 +45,8 @@ import { HttpExceptionFilter } from './shared/http/http-exception.filter';
     KnowledgeBaseModule,
 
     ConversationsModule,
+
+    MapsModule,
 
   ],
 

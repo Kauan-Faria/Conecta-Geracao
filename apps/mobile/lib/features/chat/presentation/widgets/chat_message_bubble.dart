@@ -2,12 +2,14 @@ import 'package:conecta_geracao/core/theme/app_colors.dart';
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/core/theme/brand_theme_extension.dart';
 import 'package:conecta_geracao/features/chat/domain/chat_message.dart';
+import 'package:conecta_geracao/features/maps/presentation/widgets/map_action_button.dart';
 import 'package:flutter/material.dart';
 
 class ChatMessageBubble extends StatelessWidget {
-  const ChatMessageBubble({required this.message, super.key});
+  const ChatMessageBubble({required this.message, this.onOpenMap, super.key});
 
   final ChatMessage message;
+  final VoidCallback? onOpenMap;
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +20,14 @@ class ChatMessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment:
-                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isUser) ...[
@@ -54,9 +58,7 @@ class ChatMessageBubble extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isUser ? AppColors.surface : AppColors.background,
                     borderRadius: BorderRadius.circular(brand.borderRadius + 4),
-                    border: isUser
-                        ? null
-                        : Border.all(color: AppColors.border),
+                    border: isUser ? null : Border.all(color: AppColors.border),
                   ),
                   child: Text(
                     message.content,
@@ -69,6 +71,11 @@ class ChatMessageBubble extends StatelessWidget {
               ),
             ],
           ),
+          if (!isUser && message.mapAction != null && onOpenMap != null)
+            MapActionButton(
+              mapAction: message.mapAction!,
+              onPressed: onOpenMap!,
+            ),
           SizedBox(height: AppSpacing.xs),
           Padding(
             padding: EdgeInsets.only(

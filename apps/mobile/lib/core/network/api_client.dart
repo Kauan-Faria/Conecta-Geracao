@@ -15,8 +15,8 @@ class ApiClient {
     ),
     http.Client? httpClient,
     Uuid? uuid,
-  })  : _http = httpClient ?? http.Client(),
-        _uuid = uuid ?? const Uuid();
+  }) : _http = httpClient ?? http.Client(),
+       _uuid = uuid ?? const Uuid();
 
   final IdTokenProvider getIdToken;
   final String baseUrl;

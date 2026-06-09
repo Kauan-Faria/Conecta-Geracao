@@ -1,4 +1,5 @@
 import { Message } from '../../domain/entities/conversation.entity';
+import { MessageMetadataJson } from '../../domain/value-objects/message-metadata.vo';
 export declare const MESSAGE_REPOSITORY: unique symbol;
 export interface MessageRepository {
     listByConversationId(conversationId: string): Promise<Message[]>;
@@ -10,6 +11,7 @@ export interface SendMessageTransactionInput {
     assistantContent: string;
     nextCurrentStep: number;
     topicSlug?: string | null;
+    assistantMetadata?: MessageMetadataJson | null;
 }
 export interface SendMessageTransactionResult {
     assistantMessage: Message;

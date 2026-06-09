@@ -35,9 +35,7 @@ class ConversationsApi {
     int page = 1,
     int limit = 20,
   }) async {
-    final json = await _client.get(
-      '$_basePath?page=$page&limit=$limit',
-    );
+    final json = await _client.get('$_basePath?page=$page&limit=$limit');
     final meta = unwrapMeta(json);
     final items = unwrapDataList(json)
         .whereType<Map<String, dynamic>>()

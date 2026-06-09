@@ -9,7 +9,8 @@ abstract class GuestHistoryRepository {
   Future<void> clearIfExpired(GuestSessionRepository sessionRepository);
 }
 
-class SharedPreferencesGuestHistoryRepository implements GuestHistoryRepository {
+class SharedPreferencesGuestHistoryRepository
+    implements GuestHistoryRepository {
   SharedPreferencesGuestHistoryRepository(this._prefs);
 
   final SharedPreferences _prefs;

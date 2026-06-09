@@ -170,7 +170,7 @@ class ConversationListController extends Notifier<ConversationListState> {
   Future<void> refresh() => loadInitial();
 }
 
-final conversationListControllerProvider = NotifierProvider<
-    ConversationListController, ConversationListState>(
-  ConversationListController.new,
-);
+final conversationListControllerProvider =
+    NotifierProvider<ConversationListController, ConversationListState>(
+      ConversationListController.new,
+    );

@@ -2,8 +2,13 @@ import 'package:conecta_geracao/core/routing/routing_providers.dart';
 import 'package:conecta_geracao/core/theme/app_colors.dart';
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/core/widgets/app_button.dart';
+import 'package:conecta_geracao/features/chat/domain/chat_message.dart';
 import 'package:conecta_geracao/features/chat/domain/checkpoint_detector.dart';
 import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
+import 'package:conecta_geracao/features/maps/domain/map_action.dart';
+import 'package:conecta_geracao/features/maps/domain/maps_context.dart';
+import 'package:conecta_geracao/features/maps/presentation/maps_providers.dart';
+import 'package:conecta_geracao/features/maps/presentation/maps_search_controller.dart';
 import 'package:conecta_geracao/features/chat/presentation/widgets/chat_error_banner.dart';
 import 'package:conecta_geracao/features/chat/presentation/widgets/chat_hero_header.dart';
 import 'package:conecta_geracao/features/chat/presentation/widgets/chat_input_bar.dart';
@@ -20,12 +25,14 @@ class ChatPage extends ConsumerStatefulWidget {
     this.initialConversationId,
     this.initialTopicSlug,
     this.startNewChat = false,
+    this.initialMapsContext,
     super.key,
   });
 
   final String? initialConversationId;
   final String? initialTopicSlug;
   final bool startNewChat;
+  final MapsContext? initialMapsContext;
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();
@@ -90,7 +97,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
     _loadedConversationId = conversationId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(chatControllerProvider.notifier).openConversation(conversationId);
+      ref
+          .read(chatControllerProvider.notifier)
+          .openConversation(conversationId);
     });
   }
 
@@ -129,10 +138,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     _scrollToBottom();
   }
 
+  void _openMapFromMessage(MapAction action) {
+    ref.read(mapsHandoffProvider.notifier).setHandoff(action);
+    ref
+        .read(mapsSearchControllerProvider.notifier)
+        .applySuggestion(category: action.category, radiusKm: action.radiusKm);
+    context.go(
+      '/maps?category=${action.category.apiValue}&radiusKm=${action.radiusKm}',
+    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Abri o mapa para você')));
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatControllerProvider);
     final isAuthenticated = ref.watch(authGateProvider).isAuthenticated;
+    final isGuest = ref.watch(guestSessionGateProvider).isGuestActive;
+    final canUseChat = isAuthenticated || isGuest;
     final theme = Theme.of(context);
 
     ref.listen(chatControllerProvider, (previous, next) {
@@ -140,6 +164,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           next.isSending != (previous?.isSending ?? false) ||
           next.visibleMessageLimit != (previous?.visibleMessageLimit ?? 0)) {
         _scrollToBottom();
+      }
+
+      final mapsContext = widget.initialMapsContext;
+      if (mapsContext == null || next.messages.isEmpty) {
+        return;
+      }
+      if (next.messages.length <= (previous?.messages.length ?? 0)) {
+        return;
+      }
+      final lastMessage = next.messages.last;
+      if (lastMessage.role == MessageRole.assistant &&
+          lastMessage.mapAction != null) {
+        final action = lastMessage.mapAction!;
+        ref
+            .read(mapsSearchControllerProvider.notifier)
+            .applySuggestion(
+              category: action.category,
+              radiusKm: action.radiusKm,
+            );
       }
     });
 
@@ -149,7 +192,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       conversationStatus: chatState.conversationStatus,
     );
 
-    final showTopicShortcuts = isAuthenticated &&
+    final showTopicShortcuts =
+        canUseChat &&
         !chatState.requiresAuth &&
         !chatState.isLoadingConversation &&
         !chatState.isOffline &&
@@ -165,6 +209,55 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ? () => context.push('/conversations')
                 : null,
           ),
+          if (widget.initialMapsContext != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              child: Material(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  child: Text(
+                    widget.initialMapsContext!.bannerMessage,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ),
+            ),
+          if (isGuest && canUseChat)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              child: Material(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Modo sem cadastro: suas mensagens não ficam salvas '
+                        'para a próxima visita. Entre com seu celular para guardar o histórico.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => context.push('/login'),
+                          child: const Text('Entrar com celular'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           if (chatState.isOffline)
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -178,12 +271,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
               ),
             ),
-          if (!isAuthenticated || chatState.requiresAuth)
-            _GuestAuthBanner(onLogin: () => context.push('/login'))
-          else if (chatState.isLoadingConversation)
-            const Expanded(
-              child: Center(child: CircularProgressIndicator()),
+          if (!canUseChat || chatState.requiresAuth)
+            _GuestAuthBanner(
+              isGuest: isGuest,
+              onLogin: () => context.push('/login'),
             )
+          else if (chatState.isLoadingConversation)
+            const Expanded(child: Center(child: CircularProgressIndicator()))
           else
             Expanded(
               child: Column(
@@ -233,7 +327,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                             ),
                           ),
                         ...chatState.displayMessages.map(
-                          (message) => ChatMessageBubble(message: message),
+                          (message) => ChatMessageBubble(
+                            message: message,
+                            onOpenMap: message.mapAction == null
+                                ? null
+                                : () => _openMapFromMessage(message.mapAction!),
+                          ),
                         ),
                         if (chatState.isSending) const ChatTypingIndicator(),
                         if (chatState.errorMessage != null)
@@ -246,9 +345,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                                         _lastFailedContent ?? '';
                                     if (retryContent.isNotEmpty) {
                                       ref
-                                          .read(
-                                            chatControllerProvider.notifier,
-                                          )
+                                          .read(chatControllerProvider.notifier)
                                           .retryLastMessage(retryContent);
                                     }
                                   },
@@ -287,9 +384,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 }
 
 class _GuestAuthBanner extends StatelessWidget {
-  const _GuestAuthBanner({required this.onLogin});
+  const _GuestAuthBanner({required this.onLogin, this.isGuest = false});
 
   final VoidCallback onLogin;
+  final bool isGuest;
 
   @override
   Widget build(BuildContext context) {
@@ -302,14 +400,16 @@ class _GuestAuthBanner extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Para conversar com o assistente, entre com sua conta Google.',
+              isGuest
+                  ? 'Entre com seu celular para salvar suas conversas e retomar depois.'
+                  : 'Para conversar com o assistente, entre com seu celular.',
               style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: AppSpacing.lg),
             AppButton(
-              label: 'Entrar com Google',
-              semanticLabel: 'Entrar com Google para usar o chat',
+              label: 'Entrar com celular',
+              semanticLabel: 'Entrar com celular para usar o chat',
               onPressed: onLogin,
             ),
           ],

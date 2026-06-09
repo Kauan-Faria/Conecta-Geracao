@@ -6,7 +6,7 @@ status: draft
 priority: must
 created: 2026-05-28T01:00:00Z
 assigned_bolt: 003-knowledge-base
-implemented: false
+implemented: true
 ---
 
 # Story: 003-knowledge-retrieval-api
@@ -19,9 +19,9 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] **Given** slug válido, **When** GET `/api/v1/knowledge/topics/:slug`, **Then** retorno tópico com passos ordenados (auth required)
-- [ ] **Given** query de busca, **When** GET `/api/v1/knowledge/search?q=`, **Then** retorno tópicos matching keywords
-- [ ] **Given** resposta, **When** formato envelope, **Then** segue `api-conventions.md`
+- [x] **Given** slug válido, **When** GET `/api/v1/knowledge/topics/:slug`, **Then** retorno tópico com passos ordenados (auth required)
+- [x] **Given** query de busca, **When** GET `/api/v1/knowledge/search?q=`, **Then** retorno tópicos matching keywords
+- [x] **Given** resposta, **When** formato envelope, **Then** segue `api-conventions.md`
 
 ## Technical Notes
 

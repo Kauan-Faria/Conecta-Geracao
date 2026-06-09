@@ -1,0 +1,15 @@
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+    # Descomente para montar credenciais Firebase (GOOGLE_APPLICATION_CREDENTIALS no .env):
+    # volumes:
+    #   - ./firebase-service-account.json:/app/apps/backend/firebase-service-account.json:ro

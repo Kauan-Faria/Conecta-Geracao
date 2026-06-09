@@ -26,13 +26,13 @@ class SettingsPage extends ConsumerWidget {
             SizedBox(height: AppSpacing.lg),
             Text(
               'Você está usando o app sem cadastro. '
-              'Seu histórico fica salvo por alguns dias neste aparelho.',
+              'Suas conversas desta visita não ficam salvas para a próxima vez.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             SizedBox(height: AppSpacing.md),
             AppButton(
-              label: 'Entrar com Google',
-              semanticLabel: 'Entrar com Google para salvar suas conversas',
+              label: 'Entrar com celular',
+              semanticLabel: 'Entrar com celular para salvar suas conversas',
               onPressed: () => context.push('/login'),
             ),
           ],

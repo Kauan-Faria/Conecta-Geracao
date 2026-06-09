@@ -1,5 +1,17 @@
 import { Conversation } from '../../domain/entities/conversation.entity';
 import { Message } from '../../domain/entities/conversation.entity';
+import { MessageMetadataJson } from '../../domain/value-objects/message-metadata.vo';
+
+export interface MapActionDto {
+  type: 'map_search';
+  category: string;
+  radiusKm: number;
+  center?: { lat: number; lon: number } | null;
+}
+
+export interface MessageMetadataDto {
+  map_action?: MapActionDto;
+}
 
 export interface ConversationSummaryDto {
   id: string;
@@ -14,6 +26,7 @@ export interface MessageDto {
   id: string;
   role: string;
   content: string;
+  metadata?: MessageMetadataDto | null;
   createdAt: string;
 }
 
@@ -33,12 +46,18 @@ export function toConversationSummary(conversation: Conversation): ConversationS
 }
 
 export function toMessageDto(message: Message): MessageDto {
-  return {
+  const dto: MessageDto = {
     id: message.id!,
     role: message.role.value,
     content: message.content.value,
     createdAt: message.createdAt.toISOString(),
   };
+
+  if (message.metadata?.map_action) {
+    dto.metadata = { map_action: message.metadata.map_action };
+  }
+
+  return dto;
 }
 
 export function toConversationDetail(conversation: Conversation): ConversationDetailDto {
