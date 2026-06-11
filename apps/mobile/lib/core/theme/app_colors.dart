@@ -62,4 +62,7 @@ abstract final class AppColors {
 
   /// Alias legado — preferir [primary].
   static const Color secondary = primary;
+
+  /// CTA secundário (ex.: "Continua sem Cadastro" na tela de login).
+  static const Color secondaryCta = Color(0xFF0077FF);
 }

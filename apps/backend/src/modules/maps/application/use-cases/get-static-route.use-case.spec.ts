@@ -1,6 +1,6 @@
 import { GetStaticRouteUseCase } from './get-static-route.use-case';
 import { RouteResult } from '../../domain/entities/maps.entities';
-import { OsrmGateway } from '../ports/maps.gateways';
+import { RouteGateway } from '../ports/maps.gateways';
 
 describe('GetStaticRouteUseCase', () => {
   const route = RouteResult.create({
@@ -9,11 +9,11 @@ describe('GetStaticRouteUseCase', () => {
     durationSeconds: 180,
   });
 
-  it('retorna rota quando OSRM responde', async () => {
-    const osrm: Pick<OsrmGateway, 'getRoute'> = {
+  it('retorna rota quando Google Directions responde', async () => {
+    const routeGateway: Pick<RouteGateway, 'getRoute'> = {
       getRoute: jest.fn().mockResolvedValue(route),
     };
-    const useCase = new GetStaticRouteUseCase(osrm as OsrmGateway);
+    const useCase = new GetStaticRouteUseCase(routeGateway as RouteGateway);
 
     const result = await useCase.execute({
       originLat: -22.9056,
@@ -29,10 +29,10 @@ describe('GetStaticRouteUseCase', () => {
   });
 
   it('rejeita origem igual ao destino', async () => {
-    const osrm: Pick<OsrmGateway, 'getRoute'> = {
+    const routeGateway: Pick<RouteGateway, 'getRoute'> = {
       getRoute: jest.fn(),
     };
-    const useCase = new GetStaticRouteUseCase(osrm as OsrmGateway);
+    const useCase = new GetStaticRouteUseCase(routeGateway as RouteGateway);
 
     const result = await useCase.execute({
       originLat: -22.9056,
@@ -45,14 +45,14 @@ describe('GetStaticRouteUseCase', () => {
     if (!result.ok) {
       expect(result.error.code).toBe('SAME_ORIGIN_DESTINATION');
     }
-    expect(osrm.getRoute).not.toHaveBeenCalled();
+    expect(routeGateway.getRoute).not.toHaveBeenCalled();
   });
 
-  it('retorna erro quando OSRM não encontra rota', async () => {
-    const osrm: Pick<OsrmGateway, 'getRoute'> = {
+  it('retorna erro quando Google Directions não encontra rota', async () => {
+    const routeGateway: Pick<RouteGateway, 'getRoute'> = {
       getRoute: jest.fn().mockResolvedValue(null),
     };
-    const useCase = new GetStaticRouteUseCase(osrm as OsrmGateway);
+    const useCase = new GetStaticRouteUseCase(routeGateway as RouteGateway);
 
     const result = await useCase.execute({
       originLat: -22.9056,

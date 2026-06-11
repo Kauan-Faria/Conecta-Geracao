@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConversationsModule = void 0;
 const common_1 = require("@nestjs/common");
 const knowledge_base_module_1 = require("../knowledge-base/knowledge-base.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 const conversation_ownership_policy_1 = require("./domain/services/conversation-ownership.policy");
 const conversation_repository_1 = require("./application/ports/conversation.repository");
 const message_repository_1 = require("./application/ports/message.repository");
@@ -31,7 +32,7 @@ let ConversationsModule = class ConversationsModule {
 exports.ConversationsModule = ConversationsModule;
 exports.ConversationsModule = ConversationsModule = __decorate([
     (0, common_1.Module)({
-        imports: [knowledge_base_module_1.KnowledgeBaseModule],
+        imports: [knowledge_base_module_1.KnowledgeBaseModule, notifications_module_1.NotificationsModule],
         controllers: [conversations_controller_1.ConversationsController],
         providers: [
             conversation_ownership_policy_1.ConversationOwnershipPolicy,

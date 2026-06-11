@@ -77,7 +77,7 @@ export class MapsController {
         throw new ServiceUnavailableException({
           error: { code: 'SERVICE_UNAVAILABLE', message: error.message },
         });
-      case 'OVERPASS_TIMEOUT':
+      case 'MAPS_SEARCH_TIMEOUT':
       case 'PROVIDER_TIMEOUT':
         throw new GatewayTimeoutException({
           error: { code: 'GATEWAY_TIMEOUT', message: error.message },

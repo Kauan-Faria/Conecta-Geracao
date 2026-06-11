@@ -1,7 +1,8 @@
 ---
 bolt: 011-maps-services-api
 created: 2026-06-08T23:07:16Z
-status: accepted
+status: superseded
+superseded_by: adr-011-google-maps-platform
 ---
 
 # ADR-003: Stack OSM pública gratuita como dependência de maps

@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "notification_delivery_logs_firebase_uid_notification_type_idx" RENAME TO "notification_delivery_logs_firebase_uid_notification_type_s_idx";

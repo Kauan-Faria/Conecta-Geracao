@@ -15,7 +15,7 @@ created: 2026-06-08T23:55:00Z
 **Rationale**:
 
 - Reutiliza `POST /api/v1/conversations/:id/messages` e `SendMessageUseCase` existentes (bolts 004/005).
-- `map_action` representa **somente a intenção de handoff** para o app abrir/executar busca no `MapsModule`; a busca real (`SearchPoisUseCase`, Overpass/Nominatim/OSRM) permanece exclusivamente no bolt 011.
+- `map_action` representa **somente a intenção de handoff** para o app abrir/executar busca no `MapsModule`; a busca real (`SearchPoisUseCase`, Google Maps Platform) permanece exclusivamente no bolt 011.
 - Orquestração LLM estendida via tool `search_nearby_place` — estrutura parâmetros, não executa busca.
 - VOs `PoiCategory` e `SearchRadius` compartilhados via import de tipos do módulo `maps` (sem injetar use cases maps no chat).
 
@@ -227,7 +227,7 @@ SendMessageUseCase.execute(firebaseUid, conversationId, content)
 **Proibições no fluxo**:
 
 - ❌ Chamar `SearchPoisUseCase`, `GeocodePlaceUseCase`, `GetStaticRouteUseCase`
-- ❌ HTTP para Overpass, Nominatim, OSRM
+- ❌ HTTP para Google Maps Platform
 - ❌ Importar `MapsModule` no `ConversationsModule`
 
 **Handoff mobile** (bolt 015): app lê `metadata.map_action` → navega para Mapas → chama `POST /api/v1/maps/search` com `category`, `radiusKm`, `lat/lon` (GPS).
@@ -449,7 +449,7 @@ ConversationsModule
 
 MapsModule (bolt 011 — inalterado neste bolt)
 ├── SearchPoisUseCase, GeocodePlaceUseCase, GetStaticRouteUseCase
-└── Gateways Overpass/Nominatim/OSRM
+└── Gateways Google Maps (Places/Geocoding/Directions)
     ↑ consumido pelo Flutter via REST, NÃO pelo SendMessageUseCase
 ```
 

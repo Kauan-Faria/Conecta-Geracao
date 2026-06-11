@@ -6,4 +6,3 @@ export declare class MapsHttpClient {
     assertOk(response: Response, service: string): void;
     private serviceFromUrl;
 }
-export declare function buildOverpassQuery(lat: number, lon: number, radiusMeters: number, tagFilters: Array<Record<string, string>>, timeoutSeconds: number): string;

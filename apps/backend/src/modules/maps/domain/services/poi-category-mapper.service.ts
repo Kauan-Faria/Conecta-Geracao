@@ -1,22 +1,16 @@
 import { PoiCategory, PoiCategoryValue } from '../value-objects/poi-category.vo';
 
-export type OverpassTagFilter = Record<string, string>;
-
 export class PoiCategoryMapper {
-  toOverpassFilters(category: PoiCategory): OverpassTagFilter[] {
-    return CATEGORY_FILTERS[category.value];
+  toGooglePlaceType(category: PoiCategory): string {
+    return GOOGLE_PLACE_TYPES[category.value];
   }
 }
 
-const CATEGORY_FILTERS: Record<PoiCategoryValue, OverpassTagFilter[]> = {
-  pharmacy: [{ amenity: 'pharmacy' }],
-  health_post: [
-    { amenity: 'clinic' },
-    { healthcare: 'centre' },
-    { amenity: 'health_post' },
-  ],
-  hospital: [{ amenity: 'hospital' }, { emergency: 'emergency_ward_entrance' }],
-  bank: [{ amenity: 'bank' }, { amenity: 'bureau_de_change' }, { shop: 'lottery' }],
-  post_office: [{ amenity: 'post_office' }],
-  supermarket: [{ shop: 'supermarket' }],
+const GOOGLE_PLACE_TYPES: Record<PoiCategoryValue, string> = {
+  pharmacy: 'pharmacy',
+  health_post: 'doctor',
+  hospital: 'hospital',
+  bank: 'bank',
+  post_office: 'post_office',
+  supermarket: 'supermarket',
 };

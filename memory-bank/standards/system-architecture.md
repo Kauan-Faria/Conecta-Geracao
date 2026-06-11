@@ -9,7 +9,7 @@
 **Modular monolith** (MVP)
 
 - Um deploy da API no Render
-- Módulos por domínio (`apps/api/src/modules/{domain}/`)
+- Módulos por domínio (`apps/backend/src/modules/{domain}/`)
 - Camadas: `domain` → `application` → `infrastructure` → `presentation`
 - Evolução futura: extrair bounded contexts para serviços se necessário
 
@@ -28,7 +28,7 @@
 - Implementação: Hive / Isar / SharedPreferences conforme o caso
 - Regras críticas e dados de negócio: sempre da API
 
-**Cache servidor (API)**: nenhum no MVP; Postgres/Supabase direto; Redis avaliado sob demanda
+**Cache servidor (API)**: nenhum para dados de negócio no MVP; exceção escopada: cache in-memory de geocode no módulo maps (ADR-002); Redis avaliado sob demanda
 
 ## State Management (Flutter)
 
@@ -60,5 +60,5 @@
 ## Decision Relationships
 
 - Hexagonal: ports na `application`, adapters em `infrastructure` (Prisma, Firebase, HTTP)
-- OpenAPI é contrato entre `apps/api` e `apps/mobile`
+- OpenAPI é contrato entre `apps/backend` e `apps/mobile`
 - Cache Flutter nunca substitui validação de regras na API

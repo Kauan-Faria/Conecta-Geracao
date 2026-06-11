@@ -12,7 +12,7 @@ Completar o fluxo Mapas no mobile: rota estática após seleção de POI, handof
 
 ### Deliverables
 
-- **MapsRoutePage** — mapa com marcadores origem/destino, polyline OSRM, distância/tempo em texto simples, botão "Centralizar" (≥ 48dp), retry em falha OSRM
+- **MapsRoutePage** — mapa com marcadores origem/destino, polyline Directions, distância/tempo em texto simples, botão "Centralizar" (≥ 48dp), retry em falha Directions
 - **Route layer mobile** — `MapsRouteRepository` + `RouteController` (Riverpod) chamando `POST /api/v1/maps/route`
 - **MapAction model + parsing** — estender `ChatMessage` com `metadata.map_action`; botão inline "Ver no mapa" no bubble assistant
 - **Chat→Mapas handoff** — `ChatController` detecta `map_action`, navega para `/maps` com estado pré-preenchido (categoria, raio, center opcional)
@@ -75,10 +75,10 @@ Extensões em features existentes:
 3. Decodificar polyline (formato retornado pela API — alinhar com `RouteResponseDto` do backend)
 4. Renderizar `MarkerLayer` (origem/destino) + `PolylineLayer` sobre `MapsMapWidget`
 5. Texto abaixo: formatar distância ("cerca de 1,2 km") e tempo ("15 min a pé") em PT-BR simples
-6. Erro OSRM: banner amigável + `AppButton` "Tentar de novo"
+6. Erro Directions: banner amigável + `AppButton` "Tentar de novo"
 7. Botão flutuante "Centralizar": `MapController.fitCamera` com bounds origem+destino+polyline
 
-**Modo OSRM**: foot/walking para MVP (alinhado a idosos a pé); confirmar adapter backend (`get-static-route.use-case`).
+**Modo Directions**: `travelMode: DRIVE` no backend (`get-static-route.use-case`); tempo/distância exibidos em texto simples.
 
 #### 3. Story 007 — Chat→Mapas handoff
 
@@ -102,9 +102,9 @@ Extensões em features existentes:
 
 ### Acceptance Criteria
 
-- [ ] **006**: POI selecionado exibe marcadores origem/destino e polyline OSRM
+- [ ] **006**: POI selecionado exibe marcadores origem/destino e polyline Directions
 - [ ] **006**: Distância e tempo em linguagem simples abaixo do mapa
-- [ ] **006**: Falha OSRM mostra mensagem amigável + retry, sem crash
+- [ ] **006**: Falha Directions mostra mensagem amigável + retry, sem crash
 - [ ] **006**: Botão "Centralizar" (≥ 48dp) enquadra rota completa
 - [ ] **007**: Resposta com `map_action` mostra botão "Ver no mapa"; tap navega para aba Mapas
 - [ ] **007**: Categoria e raio pré-preenchidos conforme payload

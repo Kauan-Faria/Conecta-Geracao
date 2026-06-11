@@ -20,7 +20,7 @@ stages_completed:
     artifact: ddd-02-technical-design.md
   - name: adr-analysis
     completed: 2026-06-08T23:07:16.000Z
-    artifact: adr-001-public-maps-endpoints.md, adr-002-in-memory-geocode-cache.md, adr-003-public-osm-stack.md
+    artifact: adr-001-public-maps-endpoints.md, adr-002-in-memory-geocode-cache.md, adr-003-public-osm-stack.md, adr-011-google-maps-platform.md
   - name: implement
     completed: 2026-06-08T23:33:00.000Z
     artifact: apps/backend/src/modules/maps/
@@ -44,16 +44,16 @@ complexity:
 
 ## Overview
 
-Fundação backend: proxy OSM (Overpass, Nominatim, OSRM) e mapeamento das 6 categorias POI MVP.
+Fundação backend: proxy **Google Maps Platform** (Geocoding, Places, Directions) e mapeamento das 6 categorias POI MVP.
 
 ## Objective
 
-API NestJS expõe busca de lugares, geocoding e rota estática com stack gratuita OpenStreetMap.
+API NestJS expõe busca de lugares, geocoding (cidade/bairro/CEP) e rota estática via Google Maps Platform.
 
 ## Stories Included
 
-- **001-osm-proxy-endpoints**: Proxy Overpass/Nominatim/OSRM (Must)
-- **002-poi-category-queries**: 6 categorias + raio 2/5/10 km (Must)
+- **001-osm-proxy-endpoints**: Proxy REST `/maps/*` sobre Google Maps (Must) — contrato REST mantido
+- **002-poi-category-queries**: 6 categorias → Google Places types + raio 2/5/10 km (Must)
 
 ## Bolt Type
 
@@ -79,6 +79,6 @@ API NestJS expõe busca de lugares, geocoding e rota estática com stack gratuit
 
 ## Success Criteria
 
-- [ ] Endpoints /maps/search, /maps/geocode, /maps/route funcionais
-- [ ] 6 categorias retornam resultados em área de teste
-- [ ] Testes com mocks Overpass/OSRM passando
+- [x] Endpoints /maps/search, /maps/geocode, /maps/route funcionais (Google Maps)
+- [x] 6 categorias retornam resultados via Places Nearby Search
+- [x] Testes com mocks Google passando (57 testes maps)

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProviderTimeoutError = exports.OverpassTimeoutError = exports.ExternalServiceUnavailableError = exports.RouteNotFoundError = exports.PlaceNotFoundError = exports.SameOriginDestinationError = exports.InvalidPlaceQueryError = exports.InvalidSearchRadiusError = exports.InvalidPoiCategoryError = exports.InvalidGeoPointError = exports.DomainError = void 0;
+exports.ProviderTimeoutError = exports.OverpassTimeoutError = exports.MapsSearchTimeoutError = exports.ExternalServiceUnavailableError = exports.RouteNotFoundError = exports.PlaceNotFoundError = exports.SameOriginDestinationError = exports.InvalidPlaceQueryError = exports.InvalidSearchRadiusError = exports.InvalidPoiCategoryError = exports.InvalidGeoPointError = exports.DomainError = void 0;
 class DomainError extends Error {
     constructor(code, message) {
         super(message);
@@ -57,10 +57,13 @@ class ExternalServiceUnavailableError extends DomainError {
     }
 }
 exports.ExternalServiceUnavailableError = ExternalServiceUnavailableError;
-class OverpassTimeoutError extends DomainError {
+class MapsSearchTimeoutError extends DomainError {
     constructor() {
-        super('OVERPASS_TIMEOUT', 'Busca demorou demais; tente novamente');
+        super('MAPS_SEARCH_TIMEOUT', 'Busca demorou demais; tente novamente');
     }
+}
+exports.MapsSearchTimeoutError = MapsSearchTimeoutError;
+class OverpassTimeoutError extends MapsSearchTimeoutError {
 }
 exports.OverpassTimeoutError = OverpassTimeoutError;
 class ProviderTimeoutError extends DomainError {

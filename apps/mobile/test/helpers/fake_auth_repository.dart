@@ -12,6 +12,9 @@ class FakeAuthRepository implements AuthRepository {
 
   AppUser? _user;
   final StreamController<AppUser?> _controller = StreamController.broadcast();
+  bool signUpShouldFail = false;
+  bool signInShouldFail = false;
+  bool emailVerifiedAfterReload = false;
 
   @override
   Stream<AppUser?> authStateChanges() {
@@ -70,10 +73,73 @@ class FakeAuthRepository implements AuthRepository {
       uid: _user?.uid ?? 'test-uid',
       displayName: displayName,
       email: _user?.email,
+      emailVerified: _user?.emailVerified ?? true,
     );
     _controller.add(_user);
     return _user!;
   }
+
+  @override
+  Future<AppUser> signUpWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    if (signUpShouldFail) {
+      throw const AuthException('Este e-mail já está em uso');
+    }
+    _user = AppUser(
+      uid: 'email-signup-uid',
+      displayName: null,
+      email: email,
+      emailVerified: false,
+    );
+    _controller.add(_user);
+    return _user!;
+  }
+
+  @override
+  Future<AppUser> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    if (signInShouldFail) {
+      throw const AuthException('E-mail ou senha incorretos');
+    }
+    _user = AppUser(
+      uid: 'email-signin-uid',
+      displayName: null,
+      email: email,
+      emailVerified: emailVerifiedAfterReload,
+    );
+    _controller.add(_user);
+    return _user!;
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {}
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {}
+
+  @override
+  Future<AppUser?> reloadCurrentUser() async {
+    if (_user == null) {
+      return null;
+    }
+    if (emailVerifiedAfterReload) {
+      _user = AppUser(
+        uid: _user!.uid,
+        displayName: _user!.displayName,
+        email: _user!.email,
+        emailVerified: true,
+      );
+      _controller.add(_user);
+    }
+    return _user;
+  }
+
+  @override
+  Future<bool> isEmailVerified() async => _user?.emailVerified ?? false;
 
   @override
   Future<void> signOut() async {
@@ -89,4 +155,11 @@ const authenticatedTestUser = AppUser(
   uid: 'test-uid',
   displayName: 'Test User',
   email: 'test@example.com',
+);
+
+const unverifiedEmailTestUser = AppUser(
+  uid: 'email-signup-uid',
+  displayName: null,
+  email: 'user@example.com',
+  emailVerified: false,
 );

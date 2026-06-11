@@ -76,3 +76,116 @@ model Message {
   @@index([conversationId, createdAt(sort: Asc)])
   @@map("messages")
 }
+
+enum DevicePlatform {
+  ios
+  android
+
+  @@map("device_platform")
+}
+
+model DeviceToken {
+  id          String         @id @default(cuid())
+  firebaseUid String         @map("firebase_uid") @db.VarChar(128)
+  token       String         @db.VarChar(512)
+  platform    DevicePlatform
+  isActive    Boolean        @default(true) @map("is_active")
+  lastSeenAt  DateTime       @default(now()) @map("last_seen_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@unique([firebaseUid, token])
+  @@index([firebaseUid, isActive])
+  @@map("device_tokens")
+}
+
+model NotificationPreference {
+  firebaseUid String   @id @map("firebase_uid") @db.VarChar(128)
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("notification_preferences")
+}
+
+enum NotificationDeliveryStatus {
+  sent
+  skipped
+
+  @@map("notification_delivery_status")
+}
+
+enum NotificationDeliveryType {
+  reminder
+  ai_response
+  tip
+  campaign
+
+  @@map("notification_delivery_type")
+}
+
+model NotificationDeliveryLog {
+  id               String                     @id @default(cuid())
+  firebaseUid      String                     @map("firebase_uid") @db.VarChar(128)
+  conversationId   String?                    @map("conversation_id") @db.VarChar(128)
+  notificationType NotificationDeliveryType   @map("notification_type")
+  status           NotificationDeliveryStatus
+  fcmMessageId     String?                    @map("fcm_message_id") @db.VarChar(256)
+  skippedReason    String?                    @map("skipped_reason") @db.VarChar(64)
+  sentAt           DateTime                   @default(now()) @map("sent_at")
+
+  @@index([conversationId, notificationType, sentAt(sort: Desc)])
+  @@index([firebaseUid, notificationType, sentAt(sort: Desc)])
+  @@index([firebaseUid, sentAt(sort: Desc)])
+  @@map("notification_delivery_logs")
+}
+
+model EducationalTip {
+  id        String   @id @default(cuid())
+  title     String   @db.VarChar(120)
+  body      String   @db.Text
+  deepLink  String   @map("deep_link") @db.VarChar(256)
+  topicTag  String?  @unique @map("topic_tag") @db.VarChar(64)
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([isActive, sortOrder])
+  @@map("educational_tips")
+}
+
+enum CampaignSegmentType {
+  all_active
+  uid_list
+
+  @@map("campaign_segment_type")
+}
+
+enum CampaignStatus {
+  pending
+  processing
+  completed
+  failed
+
+  @@map("campaign_status")
+}
+
+model Campaign {
+  id             String              @id @default(cuid())
+  title          String              @db.VarChar(120)
+  body           String              @db.Text
+  deepLink       String              @map("deep_link") @db.VarChar(256)
+  segmentType    CampaignSegmentType   @map("segment_type")
+  segmentPayload Json?               @map("segment_payload")
+  status         CampaignStatus      @default(pending)
+  requestedBy    String              @map("requested_by") @db.VarChar(128)
+  requestedAt    DateTime            @default(now()) @map("requested_at")
+  completedAt    DateTime?           @map("completed_at")
+  sentCount      Int                 @default(0) @map("sent_count")
+  skippedCount   Int                 @default(0) @map("skipped_count")
+  idempotencyKey String?             @map("idempotency_key") @db.VarChar(128)
+
+  @@index([status, requestedAt(sort: Desc)])
+  @@index([idempotencyKey, requestedAt])
+  @@map("campaigns")
+}

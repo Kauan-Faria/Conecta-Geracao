@@ -4,8 +4,8 @@ unit: 001-mobile-auth-shell
 intent: 001-digital-guidance
 status: complete
 priority: must
-created: 2026-06-02T18:00:00Z
-assigned_bolt: 010-mobile-auth-phone
+created: 2026-06-02T18:00:00.000Z
+assigned_bolt: 021-mobile-auth-login-gate-refactor
 implemented: true
 ---
 
@@ -20,6 +20,7 @@ implemented: true
 ## Acceptance Criteria
 
 - [ ] **Given** não estou logado, **When** abro a tela de entrar, **Then** vejo primeiro o campo de telefone (máscara +55) e o botão "Receber código" em destaque
+- [ ] **Given** estou na tela de login, **When** rolo até o final, **Then** vejo link secundário "Sem cadastro, sem complicações" para entrar sem conta (story 007)
 - [ ] **Given** informo telefone válido, **When** toco "Receber código", **Then** Firebase Phone Auth envia SMS e exibo tela de código com:
   - Título curto (ex.: "Código no seu celular")
   - Texto explicativo: o código chega por **SMS** no mesmo número digitado; são **6 números**; pode levar alguns segundos; o usuário **não precisa sair do app** se o celular sugerir o código
@@ -38,8 +39,8 @@ implemented: true
 - Formato E.164 (+55…) antes de chamar Firebase
 - Limitar reenvio de código (cooldown 60s) e contador de tentativas na UI
 - Números de teste do Firebase para desenvolvimento (evitar custo SMS)
-- `LoginPage` deixa de ser "só Google" — telefone é layout principal
-- Welcome: CTA "Começar" pode ir direto para login por telefone
+- `LoginPage` é a **porta de entrada** para usuários não autenticados — telefone em destaque + link convidado
+- Welcome **não** faz parte do fluxo de gate (remover redirect para `/welcome`)
 - **Autofill OTP**: `AutofillHints.oneTimeCode` no campo; considerar pacote `sms_autofill` ou `pinput` com listener de SMS no Android; validar em dispositivo real (emulador pode não receber SMS)
 - **Copy sugerido (PT-BR simples)** na tela OTP:
   - "Enviamos um código de 6 números por mensagem de texto para o celular que você informou."

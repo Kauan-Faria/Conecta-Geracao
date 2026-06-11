@@ -6,19 +6,19 @@ import {
   PlaceNotFoundError,
 } from '../../domain/errors/domain.errors';
 import { PlaceQuery } from '../../domain/value-objects/place-query.vo';
-import { NOMINATIM_GATEWAY, NominatimGateway } from '../ports/maps.gateways';
+import { GEOCODING_GATEWAY, GeocodingGateway } from '../ports/maps.gateways';
 
 @Injectable()
 export class GeocodePlaceUseCase {
   constructor(
-    @Inject(NOMINATIM_GATEWAY)
-    private readonly nominatim: NominatimGateway,
+    @Inject(GEOCODING_GATEWAY)
+    private readonly geocoding: GeocodingGateway,
   ) {}
 
   async execute(queryText: string): Promise<Result<GeocodeResult, DomainError>> {
     try {
       const query = PlaceQuery.create(queryText);
-      const result = await this.nominatim.geocode(query);
+      const result = await this.geocoding.geocode(query);
 
       if (!result) {
         return err(new PlaceNotFoundError());

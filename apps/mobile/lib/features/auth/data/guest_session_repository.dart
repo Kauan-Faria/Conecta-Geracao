@@ -8,54 +8,40 @@ abstract class GuestSessionRepository {
   DateTime? getGuestSessionStartedAt();
 
   Future<void> clearGuestSession();
-
-  Future<void> clearIfExpired();
 }
 
-class SharedPreferencesGuestSessionRepository
-    implements GuestSessionRepository {
-  SharedPreferencesGuestSessionRepository(this._prefs);
+/// Guest session lives only in memory for the current app visit.
+class InMemoryGuestSessionRepository implements GuestSessionRepository {
+  DateTime? _startedAt;
+
+  @override
+  Future<void> enableGuestSession() async {
+    _startedAt = DateTime.now();
+  }
+
+  @override
+  DateTime? getGuestSessionStartedAt() => _startedAt;
+
+  @override
+  bool isGuestSessionActive() => _startedAt != null;
+
+  @override
+  Future<void> clearGuestSession() async {
+    _startedAt = null;
+  }
+}
+
+/// Removes legacy guest keys written by older app versions.
+class GuestSessionLegacyCleaner {
+  GuestSessionLegacyCleaner(this._prefs);
 
   final SharedPreferences _prefs;
 
   static const guestSessionStartedAtKey = 'guest_session_started_at';
-  static const retentionDays = 7;
+  static const historyKey = 'guest_history_entries';
 
-  @override
-  Future<void> enableGuestSession() async {
-    await _prefs.setInt(
-      guestSessionStartedAtKey,
-      DateTime.now().millisecondsSinceEpoch,
-    );
-  }
-
-  @override
-  DateTime? getGuestSessionStartedAt() {
-    final millis = _prefs.getInt(guestSessionStartedAtKey);
-    if (millis == null) {
-      return null;
-    }
-    return DateTime.fromMillisecondsSinceEpoch(millis);
-  }
-
-  @override
-  bool isGuestSessionActive() {
-    final startedAt = getGuestSessionStartedAt();
-    if (startedAt == null) {
-      return false;
-    }
-    return DateTime.now().difference(startedAt).inDays < retentionDays;
-  }
-
-  @override
-  Future<void> clearGuestSession() async {
+  Future<void> clearLegacyGuestData() async {
     await _prefs.remove(guestSessionStartedAtKey);
-  }
-
-  @override
-  Future<void> clearIfExpired() async {
-    if (getGuestSessionStartedAt() != null && !isGuestSessionActive()) {
-      await clearGuestSession();
-    }
+    await _prefs.remove(historyKey);
   }
 }

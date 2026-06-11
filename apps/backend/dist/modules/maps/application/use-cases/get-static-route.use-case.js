@@ -20,8 +20,8 @@ const domain_errors_1 = require("../../domain/errors/domain.errors");
 const geo_point_vo_1 = require("../../domain/value-objects/geo-point.vo");
 const maps_gateways_1 = require("../ports/maps.gateways");
 let GetStaticRouteUseCase = class GetStaticRouteUseCase {
-    constructor(osrm) {
-        this.osrm = osrm;
+    constructor(routeGateway) {
+        this.routeGateway = routeGateway;
     }
     async execute(input) {
         try {
@@ -30,7 +30,7 @@ let GetStaticRouteUseCase = class GetStaticRouteUseCase {
             if (origin.equals(destination)) {
                 return (0, result_1.err)(new domain_errors_1.SameOriginDestinationError());
             }
-            const route = await this.osrm.getRoute(origin, destination);
+            const route = await this.routeGateway.getRoute(origin, destination);
             if (!route) {
                 return (0, result_1.err)(new domain_errors_1.RouteNotFoundError());
             }
@@ -50,7 +50,7 @@ let GetStaticRouteUseCase = class GetStaticRouteUseCase {
 exports.GetStaticRouteUseCase = GetStaticRouteUseCase;
 exports.GetStaticRouteUseCase = GetStaticRouteUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(maps_gateways_1.OSRM_GATEWAY)),
+    __param(0, (0, common_1.Inject)(maps_gateways_1.ROUTE_GATEWAY)),
     __metadata("design:paramtypes", [Object])
 ], GetStaticRouteUseCase);
 //# sourceMappingURL=get-static-route.use-case.js.map

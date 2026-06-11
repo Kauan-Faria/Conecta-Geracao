@@ -8,6 +8,7 @@ import 'package:conecta_geracao/features/chat/data/conversation_cache_repository
 import 'package:conecta_geracao/features/chat/data/conversations_api.dart';
 import 'package:conecta_geracao/features/chat/domain/chat_message.dart';
 import 'package:conecta_geracao/features/chat/domain/topic_shortcuts.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notification_permission_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const offlineSendMessage = 'Precisa de internet para falar com o assistente';
@@ -311,6 +312,7 @@ class ChatController extends Notifier<ChatState> {
         messages: [...state.messages, assistantMessage],
         isSending: false,
       );
+      _maybePromptForNotifications();
     } on ApiException catch (error) {
       state = state.copyWith(
         isSending: false,
@@ -380,6 +382,7 @@ class ChatController extends Notifier<ChatState> {
         messages: [...state.messages, assistantMessage],
         isSending: false,
       );
+      _maybePromptForNotifications();
     } on ApiException catch (error) {
       state = state.copyWith(
         isSending: false,
@@ -407,6 +410,15 @@ class ChatController extends Notifier<ChatState> {
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  void _maybePromptForNotifications() {
+    if (_isGuestChatMode) {
+      return;
+    }
+    ref
+        .read(notificationPermissionControllerProvider.notifier)
+        .onFirstAssistantReply();
   }
 
   void resetForNewConversation() {

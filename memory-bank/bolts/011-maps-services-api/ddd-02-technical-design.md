@@ -14,7 +14,7 @@ created: 2026-06-08T23:01:12Z
 
 **Rationale**:
 
-- Operações read-only via proxy HTTP para APIs OSM externas.
+- Operações read-only via proxy HTTP para **Google Maps Platform** (Geocoding, Places Nearby Search, Directions).
 - Ports na camada `application`/`domain`; adapters HTTP em `infrastructure/external`.
 - Padrão alinhado aos módulos existentes (`knowledge-base`, `conversations`): controller → use cases → mappers → envelope API.
 - Guest pode usar maps no MVP (sem `FirebaseAuthGuard`); rate limiting global protege abuso.
@@ -38,23 +38,24 @@ apps/backend/src/modules/maps/
 │   ├── services/
 │   │   ├── poi-category-mapper.service.ts
 │   │   ├── geo-distance-calculator.service.ts
-│   │   └── osm-response-normalizer.service.ts
+│   │   └── poi-response-normalizer.service.ts
 │   └── errors/
 │       └── domain.errors.ts
 ├── application/
 │   ├── ports/
-│   │   ├── overpass.gateway.ts
-│   │   ├── nominatim.gateway.ts
-│   │   └── osrm.gateway.ts
+│   │   └── maps.gateways.ts
 │   └── use-cases/
 │       ├── search-pois.use-case.ts
 │       ├── geocode-place.use-case.ts
 │       └── get-static-route.use-case.ts
 ├── infrastructure/
 │   ├── external/
-│   │   ├── http-overpass.gateway.ts
-│   │   ├── http-nominatim.gateway.ts
-│   │   └── http-osrm.gateway.ts
+│   │   ├── http-google-places.gateway.ts
+│   │   ├── http-google-geocoding.gateway.ts
+│   │   ├── http-google-directions.gateway.ts
+│   │   └── maps-http.client.ts
+│   ├── config/
+│   │   └── maps.config.ts
 │   └── cache/
 │       └── in-memory-geocode.cache.ts
 ├── presentation/
@@ -165,41 +166,41 @@ Envelope via `ApiResponseInterceptor` + `HttpExceptionFilter` existentes (`{ dat
 
 ## External HTTP Integration
 
-| Serviço | URL base (default) | Propósito | Timeout |
-|---------|-------------------|-----------|---------|
-| **Overpass** | `https://overpass-api.de/api/interpreter` | Busca POI `around:` | 25s |
-| **Nominatim** | `https://nominatim.openstreetmap.org` | Geocoding forward | 10s |
-| **OSRM** | `https://router.project-osrm.org` | Rota driving | 15s |
+| Serviço | URL | Propósito | Timeout |
+|---------|-----|-----------|---------|
+| **Geocoding API** | `https://maps.googleapis.com/maps/api/geocode/json` | Geocode cidade/bairro/CEP + reverse | 25s |
+| **Places API (New)** | `POST https://places.googleapis.com/v1/places:searchNearby` | Busca POI por categoria + raio | 25s |
+| **Routes API** | `POST https://routes.googleapis.com/directions/v2:computeRoutes` | Rota driving + polyline | 25s |
 
-### Overpass query (exemplo `pharmacy`, raio 5 km)
+Autenticação: Geocoding usa query param `key`; Places e Routes usam header `X-Goog-Api-Key` + `X-Goog-FieldMask`.
 
-```overpass
-[out:json][timeout:25];
-(
-  node["amenity"="pharmacy"](around:5000,-22.9056,-47.0608);
-  way["amenity"="pharmacy"](around:5000,-22.9056,-47.0608);
-);
-out center tags;
-```
-
-Filtros por categoria gerados por `PoiCategoryMapper` conforme domain model.
-
-### Nominatim request
+### Places API (New) — searchNearby (exemplo `pharmacy`, raio 5 km)
 
 ```
-GET /search?q={encodedQuery}&format=json&limit=1&addressdetails=1
-Headers:
-  User-Agent: ConectaGeracao/1.0 (contact@conectageracao.app)
-  Accept-Language: pt-BR,pt;q=0.9
+POST https://places.googleapis.com/v1/places:searchNearby
+Headers: X-Goog-Api-Key, X-Goog-FieldMask: places.id,places.displayName,...
+Body: { "includedTypes": ["pharmacy"], "locationRestriction": { "circle": { ... } } }
 ```
 
-**Rate limit**: max 1 req/s por instância — throttle interno no adapter + cache (abaixo).
+Tipos por categoria gerados por `PoiCategoryMapper.toGooglePlaceType()`.
 
-### OSRM request
+### Geocoding request
 
 ```
-GET /route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=full&geometries=polyline&steps=false
+GET /geocode/json?address={encodedQuery}&key=...&language=pt-BR&region=br&components=country:BR
 ```
+
+Suporta CEP (`13010-000`), bairro e cidade. Cache in-memory (ADR-002) reduz chamadas repetidas.
+
+### Routes API — computeRoutes
+
+```
+POST https://routes.googleapis.com/directions/v2:computeRoutes
+Headers: X-Goog-Api-Key, X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline
+Body: { "origin": {...}, "destination": {...}, "travelMode": "DRIVE" }
+```
+
+Polyline em `routes[0].polyline.encodedPolyline` (formato encoded compatível com Flutter).
 
 ---
 
@@ -207,14 +208,13 @@ GET /route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=full&geometries=polyl
 
 | Variável | Default | Descrição |
 |----------|---------|-----------|
-| `MAPS_OVERPASS_URL` | `https://overpass-api.de/api/interpreter` | Endpoint Overpass |
-| `MAPS_NOMINATIM_URL` | `https://nominatim.openstreetmap.org` | Base Nominatim |
-| `MAPS_OSRM_URL` | `https://router.project-osrm.org` | Base OSRM |
-| `MAPS_USER_AGENT` | `ConectaGeracao/1.0 (contact@conectageracao.app)` | User-Agent obrigatório Nominatim |
-| `MAPS_GEOCODE_CACHE_TTL_MS` | `600000` (10 min) | TTL cache geocode in-memory |
-| `MAPS_NOMINATIM_MIN_INTERVAL_MS` | `1000` | Intervalo mínimo entre calls Nominatim |
+| `GOOGLEMAPS_API_KEY` | — (obrigatória) | Chave Google Maps Platform (Geocoding + Places + Directions) |
+| `MAPS_HTTP_TIMEOUT_MS` | `25000` | Timeout HTTP dos adapters |
+| `MAPS_DEFAULT_RADIUS_KM` | `5` | Raio default busca POI |
+| `MAPS_MAX_RADIUS_KM` | `10` | Raio máximo busca POI |
+| `MAPS_USER_AGENT` | `ConectaGeracao/1.0 (...)` | User-Agent em requests HTTP |
 
-Registradas via `ConfigModule` / `@nestjs/config` no `MapsModule`.
+Registradas via factory `createMapsConfigFromEnv()` no `MapsModule`.
 
 ---
 
@@ -224,10 +224,8 @@ Registradas via `ConfigModule` / `@nestjs/config` no `MapsModule`.
 
 | Dado | Storage | Retention |
 |------|---------|-----------|
-| Cache geocode | In-memory `Map<string, { result, expiresAt }>` | TTL 10 min (configurável) |
+| Cache geocode | In-memory `Map<string, { result, expiresAt }>` | TTL 10 min |
 | Resultados POI/rota | — | Não persistir (stateless) |
-
-Redis avaliado no futuro se múltiplas instâncias Render; MVP single-instance aceita cache local.
 
 ---
 
@@ -239,7 +237,8 @@ Redis avaliado no futuro se múltiplas instâncias Render; MVP single-instance a
 | **Authorization** | N/A neste bolt |
 | **Rate limiting** | `ThrottlerGuard` global existente (30 req/min por IP) |
 | **Input validation** | DTOs + `class-validator` na borda; VOs revalidam no domínio |
-| **SSRF prevention** | URLs base fixas via env; sem URL arbitrária do cliente |
+| **SSRF prevention** | URLs Google fixas; sem URL arbitrária do cliente |
+| **Chave API** | `GOOGLEMAPS_API_KEY` somente no backend; nunca exposta ao Flutter |
 | **Logging** | Sem coordenadas precisas em produção se PII concern; logar categoria + raio + requestId |
 
 ---
@@ -248,9 +247,9 @@ Redis avaliado no futuro se múltiplas instâncias Render; MVP single-instance a
 
 | Requirement | Design Approach |
 |-------------|-----------------|
-| **Performance (p95 POI < 4s)** | Timeout Overpass 25s; cache geocode quente; resposta normalizada in-memory |
+| **Performance (p95 POI < 4s)** | Timeout 25s; cache geocode; resposta normalizada in-memory |
 | **Reliability** | Retry 0 no MVP; erro 503/504 amigável; circuit breaker futuro |
-| **Degradação graciosa** | `ExternalServiceUnavailable` → 503; `OverpassTimeout` → 504 |
+| **Degradação graciosa** | `ExternalServiceUnavailable` → 503; `MapsSearchTimeout` → 504 |
 | **Swagger** | `@ApiTags('maps')`, `@ApiOperation` nos 3 endpoints |
 | **Observability** | Log Pino com `requestId`; métrica de latência por gateway (futuro) |
 
@@ -262,10 +261,10 @@ Redis avaliado no futuro se múltiplas instâncias Render; MVP single-instance a
 |---------|------|--------------|---------------|
 | Validação DTO (lat/lon/categoria) | 400 | `VALIDATION_ERROR` | Campos inválidos |
 | Categoria inválida | 400 | `VALIDATION_ERROR` | Categoria de lugar inválida |
-| Lugar não encontrado (Nominatim vazio) | 404 | `NOT_FOUND` | Lugar não encontrado |
-| Rota indisponível (OSRM) | 422 | `UNPROCESSABLE_ENTITY` | Não foi possível calcular a rota |
-| Serviço OSM indisponível | 503 | `SERVICE_UNAVAILABLE` | Serviço de mapas temporariamente indisponível |
-| Overpass timeout | 504 | `GATEWAY_TIMEOUT` | Busca demorou demais; tente novamente |
+| Lugar não encontrado (Geocoding vazio) | 404 | `NOT_FOUND` | Lugar não encontrado |
+| Rota indisponível (Directions) | 422 | `UNPROCESSABLE_ENTITY` | Não foi possível calcular a rota |
+| Serviço Google indisponível | 503 | `SERVICE_UNAVAILABLE` | Serviço de mapas temporariamente indisponível |
+| Busca POI timeout | 504 | `GATEWAY_TIMEOUT` | Busca demorou demais; tente novamente |
 | Erro interno | 500 | `INTERNAL_ERROR` | Algo deu errado |
 
 `MapsController` / exception filter mapeia `DomainError` → HTTP conforme tabela acima.
@@ -276,16 +275,15 @@ Redis avaliado no futuro se múltiplas instâncias Render; MVP single-instance a
 
 ```text
 MapsModule
-├── imports: [HttpModule.register({ timeout: 25000 }), ConfigModule]
 ├── controllers: [MapsController]
 ├── providers:
 │   ├── SearchPoisUseCase, GeocodePlaceUseCase, GetStaticRouteUseCase
-│   ├── PoiCategoryMapper, GeoDistanceCalculator, OsmResponseNormalizer
-│   ├── { provide: OVERPASS_GATEWAY, useClass: HttpOverpassGateway }
-│   ├── { provide: NOMINATIM_GATEWAY, useClass: HttpNominatimGateway }
-│   ├── { provide: OSRM_GATEWAY, useClass: HttpOsrmGateway }
+│   ├── PoiCategoryMapper, GeoDistanceCalculator, PoiResponseNormalizer
+│   ├── { provide: POI_SEARCH_GATEWAY, useClass: HttpGooglePlacesGateway }
+│   ├── { provide: GEOCODING_GATEWAY, useClass: HttpGoogleGeocodingGateway }
+│   ├── { provide: ROUTE_GATEWAY, useClass: HttpGoogleDirectionsGateway }
 │   └── InMemoryGeocodeCache
-└── exports: [SearchPoisUseCase, GeocodePlaceUseCase]  # para bolt 012 (chat)
+└── exports: [SearchPoisUseCase, GeocodePlaceUseCase, GetStaticRouteUseCase]
 ```
 
 Registrar `MapsModule` em `AppModule`.
@@ -296,15 +294,13 @@ Registrar `MapsModule` em `AppModule`.
 
 | Tipo | Alvo | Abordagem |
 |------|------|-----------|
-| **Unit** | `GeoPoint`, `PoiCategory`, `SearchRadius`, `PlaceQuery` VOs | Validação de limites e enum |
-| **Unit** | `PoiCategoryMapper` | 6 categorias → fragmentos Overpass corretos |
-| **Unit** | `GeoDistanceCalculator` | Haversine conhecido |
-| **Unit** | `OsmResponseNormalizer` | Fallback nome/endereço; ordenação |
+| **Unit** | VOs geográficos | Validação de limites e enum |
+| **Unit** | `PoiCategoryMapper` | 6 categorias → Google Places `type` |
+| **Unit** | `PoiResponseNormalizer` | Fallback nome/endereço; ordenação |
 | **Unit** | Use cases | Mock dos 3 gateways; cenários sucesso/erro |
-| **Unit** | `MapsController` | Mock use cases; envelope + status HTTP |
-| **Integration** | Gateways HTTP | `nock` ou `msw` mockando Overpass/Nominatim/OSRM |
+| **Unit** | Gateways HTTP | Mock `fetch` com respostas Google JSON |
 
-Sem testes E2E contra APIs OSM reais no CI (instabilidade/rate limit).
+Sem testes E2E contra APIs Google reais no CI (billing/quota).
 
 ---
 
@@ -312,15 +308,15 @@ Sem testes E2E contra APIs OSM reais no CI (instabilidade/rate limit).
 
 | Story | Entregável |
 |-------|------------|
-| **001-osm-proxy-endpoints** | 3 gateways HTTP, 3 use cases, 3 endpoints POST, erros 503/504/404/422 |
-| **002-poi-category-queries** | `PoiCategory` enum + mapper, raio 2/5/10 km, normalização e sort por distância |
+| **001-osm-proxy-endpoints** | 3 gateways Google, 3 use cases, 3 endpoints POST (contrato REST mantido) |
+| **002-poi-category-queries** | `PoiCategory` enum + mapper Google Places, raio 2/5/10 km |
 
 ---
 
 ## Implementation Notes
 
-1. **Token symbols**: `OVERPASS_GATEWAY`, `NOMINATIM_GATEWAY`, `OSRM_GATEWAY` como injection tokens.
-2. **Result pattern**: use cases retornam `Result<T, DomainError>`; controller converte via mapper existente no projeto.
+1. **Token symbols**: `POI_SEARCH_GATEWAY`, `GEOCODING_GATEWAY`, `ROUTE_GATEWAY`.
+2. **Campo `osmId`**: mantido na API; contém `place_id` do Google (compatibilidade mobile).
 3. **Zero resultados POI**: HTTP 200 com `results: []` (não 404).
-4. **Origem = destino na rota**: rejeitar no use case com 400 antes de chamar OSRM.
-5. **Export use cases**: bolt `012` reutilizará `SearchPoisUseCase` / `GeocodePlaceUseCase` na extensão do chat.
+4. **Origem = destino na rota**: rejeitar no use case com 422 antes de chamar Directions.
+5. **ADR-011**: substitui stack OSM backend (ADR-003); tiles Flutter continuam OSM.

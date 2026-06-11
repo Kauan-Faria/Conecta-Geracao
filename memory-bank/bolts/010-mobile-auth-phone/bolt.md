@@ -77,7 +77,7 @@ Usuários analfabetos digitais entram sem Google; nome pessoal vinculado à cont
 - [x] Primeiro acesso coleta nome; retorno não repete
 - [x] Google acessível só via "Entrar de outra forma"
 - [x] Tela OTP com textos orientativos + autofill SMS
-- [x] Convidado: chat com IA, sem persistência remota; nova sessão a cada reentrada
+- [x] Convidado: chat com IA, sem persistência remota; nova sessão a cada reentrada *(refinamento pendente em bolt 021)*
 - [ ] TalkBack/VoiceOver no fluxo telefone + modal de nome
 - [x] Story `001-firebase-login-google` realinhada na UI (sem regressão de sessão)
 

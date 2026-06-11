@@ -54,6 +54,31 @@ class ApiClient {
     return _decodeResponse(response);
   }
 
+  Future<Map<String, dynamic>> put(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
+    final uri = Uri.parse('$baseUrl$path');
+    final headers = await buildHeaders();
+    final response = await _http.put(
+      uri,
+      headers: headers,
+      body: body == null ? null : jsonEncode(body),
+    );
+    return _decodeResponse(response);
+  }
+
+  Future<void> delete(String path, {Map<String, dynamic>? body}) async {
+    final uri = Uri.parse('$baseUrl$path');
+    final headers = await buildHeaders();
+    final response = await _http.delete(
+      uri,
+      headers: headers,
+      body: body == null ? null : jsonEncode(body),
+    );
+    _ensureSuccess(response);
+  }
+
   Map<String, dynamic> _decodeResponse(http.Response response) {
     final body = response.body.isEmpty
         ? <String, dynamic>{}
@@ -63,6 +88,17 @@ class ApiClient {
       return body;
     }
 
+    throw ApiException.fromResponse(response.statusCode, body);
+  }
+
+  void _ensureSuccess(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+
+    final body = response.body.isEmpty
+        ? <String, dynamic>{}
+        : jsonDecode(response.body) as Map<String, dynamic>;
     throw ApiException.fromResponse(response.statusCode, body);
   }
 }

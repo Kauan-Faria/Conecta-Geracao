@@ -19,18 +19,20 @@ const domain_errors_1 = require("../../domain/errors/domain.errors");
 const message_content_vo_1 = require("../../domain/value-objects/message-content.vo");
 const message_metadata_vo_1 = require("../../domain/value-objects/message-metadata.vo");
 const assistant_reply_generator_1 = require("../ports/assistant-reply.generator");
+const assistant_reply_notification_trigger_1 = require("../../../notifications/application/ports/assistant-reply-notification.trigger");
 const message_repository_1 = require("../ports/message.repository");
 const conversation_repository_1 = require("../ports/conversation.repository");
 const conversation_ownership_policy_1 = require("../../domain/services/conversation-ownership.policy");
 let SendMessageUseCase = class SendMessageUseCase {
-    constructor(conversations, unitOfWork, replyGenerator, messages, ownership) {
+    constructor(conversations, unitOfWork, replyGenerator, messages, ownership, assistantReplyTrigger) {
         this.conversations = conversations;
         this.unitOfWork = unitOfWork;
         this.replyGenerator = replyGenerator;
         this.messages = messages;
         this.ownership = ownership;
+        this.assistantReplyTrigger = assistantReplyTrigger;
     }
-    async execute(firebaseUid, conversationId, rawContent) {
+    async execute(firebaseUid, conversationId, rawContent, options) {
         try {
             const conversation = await this.conversations.findByIdForUser(conversationId, firebaseUid);
             const owned = this.ownership.assertOwner(conversation, firebaseUid);
@@ -60,6 +62,11 @@ let SendMessageUseCase = class SendMessageUseCase {
                 topicSlug: assistantReply.resolvedTopicSlug ?? owned.topicSlug,
                 assistantMetadata,
             });
+            void this.assistantReplyTrigger.onAssistantReplyReady({
+                conversationId,
+                firebaseUid,
+                appInBackground: options?.appInBackground ?? false,
+            });
             return (0, result_1.ok)(result.assistantMessage);
         }
         catch (error) {
@@ -77,6 +84,7 @@ exports.SendMessageUseCase = SendMessageUseCase = __decorate([
     __param(1, (0, common_1.Inject)(message_repository_1.CONVERSATION_MESSAGE_UOW)),
     __param(2, (0, common_1.Inject)(assistant_reply_generator_1.ASSISTANT_REPLY_GENERATOR)),
     __param(3, (0, common_1.Inject)(message_repository_1.MESSAGE_REPOSITORY)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, conversation_ownership_policy_1.ConversationOwnershipPolicy])
+    __param(5, (0, common_1.Inject)(assistant_reply_notification_trigger_1.ASSISTANT_REPLY_NOTIFICATION_TRIGGER)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, conversation_ownership_policy_1.ConversationOwnershipPolicy, Object])
 ], SendMessageUseCase);
 //# sourceMappingURL=send-message.use-case.js.map

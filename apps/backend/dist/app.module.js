@@ -10,11 +10,13 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const throttler_1 = require("@nestjs/throttler");
+const schedule_1 = require("@nestjs/schedule");
 const prisma_module_1 = require("./shared/prisma/prisma.module");
 const auth_module_1 = require("./shared/auth/auth.module");
 const knowledge_base_module_1 = require("./modules/knowledge-base/knowledge-base.module");
 const conversations_module_1 = require("./modules/conversations/conversations.module");
 const maps_module_1 = require("./modules/maps/maps.module");
+const notifications_module_1 = require("./modules/notifications/notifications.module");
 const request_id_middleware_1 = require("./shared/http/request-id.middleware");
 const api_response_interceptor_1 = require("./shared/http/api-response.interceptor");
 const http_exception_filter_1 = require("./shared/http/http-exception.filter");
@@ -33,11 +35,13 @@ exports.AppModule = AppModule = __decorate([
                     limit: 30,
                 },
             ]),
+            schedule_1.ScheduleModule.forRoot(),
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
             knowledge_base_module_1.KnowledgeBaseModule,
             conversations_module_1.ConversationsModule,
             maps_module_1.MapsModule,
+            notifications_module_1.NotificationsModule,
         ],
         providers: [
             {

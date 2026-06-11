@@ -8,7 +8,7 @@ created: 2026-06-09T00:09:52Z
 
 ### Summary
 
-Implementado o fluxo Mapas no mobile: aba no shell, busca de POIs, rota estática OSRM, handoff chat→Mapas via `map_action` e botão "Pedir ajuda à IA". Inclui scaffolding mínimo dos bolts 013/014 (aba, mapa base, busca e GPS) necessário para E2E.
+Implementado o fluxo Mapas no mobile: aba no shell, busca de POIs, rota estática (Google Directions via backend), handoff chat→Mapas via `map_action` e botão "Pedir ajuda à IA". Inclui scaffolding mínimo dos bolts 013/014 (aba, mapa base, busca e GPS) necessário para E2E.
 
 ### Structure Overview
 
@@ -27,7 +27,7 @@ Feature `maps` em camadas domain/data/presentation com Riverpod. Integração no
 - [x] `apps/mobile/lib/features/maps/presentation/maps_providers.dart` — providers + handoff
 - [x] `apps/mobile/lib/features/maps/presentation/location_controller.dart` — GPS + geocode fallback
 - [x] `apps/mobile/lib/features/maps/presentation/maps_search_controller.dart` — busca e handoff
-- [x] `apps/mobile/lib/features/maps/presentation/maps_route_controller.dart` — carrega rota OSRM
+- [x] `apps/mobile/lib/features/maps/presentation/maps_route_controller.dart` — carrega rota via POST /maps/route
 - [x] `apps/mobile/lib/features/maps/presentation/maps_search_page.dart` — tela busca + resultados
 - [x] `apps/mobile/lib/features/maps/presentation/maps_route_page.dart` — rota estática no mapa
 - [x] `apps/mobile/lib/features/maps/presentation/widgets/maps_map_widget.dart` — flutter_map + OSM
@@ -46,7 +46,7 @@ Feature `maps` em camadas domain/data/presentation com Riverpod. Integração no
 
 - **Scaffolding 013/014 inline**: bolts dependentes ainda `planned`; entregue o mínimo (aba, busca, GPS) no mesmo diff para fluxo funcional.
 - **Confirmação explícita no handoff**: botão "Ver no mapa" — sem auto-navegação.
-- **Polyline decode inline**: algoritmo Google polyline sem dependência extra (OSRM retorna mesmo formato).
+- **Polyline decode inline**: algoritmo Google polyline sem dependência extra (Google Directions retorna polyline encoded compatível).
 
 ### Deviations from Plan
 

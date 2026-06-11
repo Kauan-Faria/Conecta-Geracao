@@ -27,6 +27,15 @@ const create_conversation_dto_1 = require("./dto/create-conversation.dto");
 const send_message_dto_1 = require("./dto/send-message.dto");
 const list_conversations_query_dto_1 = require("./dto/list-conversations.query.dto");
 const conversation_mapper_1 = require("./mappers/conversation.mapper");
+function resolveAppInBackground(appStateHeader, appStateBody) {
+    if (appStateHeader) {
+        return appStateHeader.toLowerCase() === 'background';
+    }
+    if (appStateBody) {
+        return appStateBody === 'background';
+    }
+    return false;
+}
 let ConversationsController = class ConversationsController {
     constructor(createConversation, listConversations, getConversation, sendMessage) {
         this.createConversation = createConversation;
@@ -55,8 +64,11 @@ let ConversationsController = class ConversationsController {
             throw this.mapDomainError(result.error);
         return (0, conversation_mapper_1.toConversationDetail)(result.value);
     }
-    async postMessage(user, id, dto) {
-        const result = await this.sendMessage.execute(user.uid, id, dto.content);
+    async postMessage(user, id, dto, appStateHeader) {
+        const appInBackground = resolveAppInBackground(appStateHeader, dto.appState);
+        const result = await this.sendMessage.execute(user.uid, id, dto.content, {
+            appInBackground,
+        });
         if (!result.ok)
             throw this.mapDomainError(result.error);
         return (0, conversation_mapper_1.toMessageDto)(result.value);
@@ -119,8 +131,9 @@ __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
+    __param(3, (0, common_1.Headers)('x-app-state')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, send_message_dto_1.SendMessageDto]),
+    __metadata("design:paramtypes", [Object, String, send_message_dto_1.SendMessageDto, String]),
     __metadata("design:returntype", Promise)
 ], ConversationsController.prototype, "postMessage", null);
 exports.ConversationsController = ConversationsController = __decorate([

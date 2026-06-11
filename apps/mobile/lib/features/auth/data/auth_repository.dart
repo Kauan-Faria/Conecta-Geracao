@@ -27,6 +27,18 @@ abstract class AuthRepository {
 
   Future<AppUser> updateDisplayName(String displayName);
 
+  Future<AppUser> signUpWithEmailAndPassword(String email, String password);
+
+  Future<AppUser> signInWithEmailAndPassword(String email, String password);
+
+  Future<void> sendEmailVerification();
+
+  Future<void> sendPasswordResetEmail(String email);
+
+  Future<AppUser?> reloadCurrentUser();
+
+  Future<bool> isEmailVerified();
+
   Future<void> signOut();
 
   Future<String?> getIdToken();

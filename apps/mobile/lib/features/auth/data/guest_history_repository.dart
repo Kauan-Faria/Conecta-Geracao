@@ -1,5 +1,4 @@
 import 'package:conecta_geracao/features/auth/data/guest_session_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class GuestHistoryRepository {
   Future<List<String>> loadHistory();
@@ -9,28 +8,22 @@ abstract class GuestHistoryRepository {
   Future<void> clearIfExpired(GuestSessionRepository sessionRepository);
 }
 
-class SharedPreferencesGuestHistoryRepository
-    implements GuestHistoryRepository {
-  SharedPreferencesGuestHistoryRepository(this._prefs);
-
-  final SharedPreferences _prefs;
-
-  static const historyKey = 'guest_history_entries';
+/// Guest history is not persisted between app visits.
+class InMemoryGuestHistoryRepository implements GuestHistoryRepository {
+  List<String> _entries = const [];
 
   @override
-  Future<List<String>> loadHistory() async {
-    return _prefs.getStringList(historyKey) ?? const [];
-  }
+  Future<List<String>> loadHistory() async => List.unmodifiable(_entries);
 
   @override
   Future<void> saveHistory(List<String> entries) async {
-    await _prefs.setStringList(historyKey, entries);
+    _entries = List.unmodifiable(entries);
   }
 
   @override
   Future<void> clearIfExpired(GuestSessionRepository sessionRepository) async {
     if (!sessionRepository.isGuestSessionActive()) {
-      await _prefs.remove(historyKey);
+      _entries = const [];
     }
   }
 }

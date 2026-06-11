@@ -3,18 +3,18 @@ import { SearchPoisUseCase } from './application/use-cases/search-pois.use-case'
 import { GeocodePlaceUseCase } from './application/use-cases/geocode-place.use-case';
 import { GetStaticRouteUseCase } from './application/use-cases/get-static-route.use-case';
 import {
-  NOMINATIM_GATEWAY,
-  OSRM_GATEWAY,
-  OVERPASS_GATEWAY,
+  GEOCODING_GATEWAY,
+  POI_SEARCH_GATEWAY,
+  ROUTE_GATEWAY,
 } from './application/ports/maps.gateways';
 import { PoiCategoryMapper } from './domain/services/poi-category-mapper.service';
 import { GeoDistanceCalculator } from './domain/services/geo-distance-calculator.service';
-import { OsmResponseNormalizer } from './domain/services/osm-response-normalizer.service';
+import { PoiResponseNormalizer } from './domain/services/poi-response-normalizer.service';
 import { InMemoryGeocodeCache } from './infrastructure/cache/in-memory-geocode.cache';
 import { createMapsConfigFromEnv, MAPS_CONFIG } from './infrastructure/config/maps.config';
-import { HttpOverpassGateway } from './infrastructure/external/http-overpass.gateway';
-import { HttpNominatimGateway } from './infrastructure/external/http-nominatim.gateway';
-import { HttpOsrmGateway } from './infrastructure/external/http-osrm.gateway';
+import { HttpGoogleGeocodingGateway } from './infrastructure/external/http-google-geocoding.gateway';
+import { HttpGooglePlacesGateway } from './infrastructure/external/http-google-places.gateway';
+import { HttpGoogleDirectionsGateway } from './infrastructure/external/http-google-directions.gateway';
 import { MapsHttpClient } from './infrastructure/external/maps-http.client';
 import { MapsController } from './presentation/maps.controller';
 
@@ -29,18 +29,18 @@ import { MapsController } from './presentation/maps.controller';
     InMemoryGeocodeCache,
     PoiCategoryMapper,
     GeoDistanceCalculator,
-    OsmResponseNormalizer,
+    PoiResponseNormalizer,
     {
-      provide: OVERPASS_GATEWAY,
-      useClass: HttpOverpassGateway,
+      provide: POI_SEARCH_GATEWAY,
+      useClass: HttpGooglePlacesGateway,
     },
     {
-      provide: NOMINATIM_GATEWAY,
-      useClass: HttpNominatimGateway,
+      provide: GEOCODING_GATEWAY,
+      useClass: HttpGoogleGeocodingGateway,
     },
     {
-      provide: OSRM_GATEWAY,
-      useClass: HttpOsrmGateway,
+      provide: ROUTE_GATEWAY,
+      useClass: HttpGoogleDirectionsGateway,
     },
     SearchPoisUseCase,
     GeocodePlaceUseCase,

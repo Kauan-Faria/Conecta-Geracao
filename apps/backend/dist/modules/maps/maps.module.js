@@ -14,12 +14,12 @@ const get_static_route_use_case_1 = require("./application/use-cases/get-static-
 const maps_gateways_1 = require("./application/ports/maps.gateways");
 const poi_category_mapper_service_1 = require("./domain/services/poi-category-mapper.service");
 const geo_distance_calculator_service_1 = require("./domain/services/geo-distance-calculator.service");
-const osm_response_normalizer_service_1 = require("./domain/services/osm-response-normalizer.service");
+const poi_response_normalizer_service_1 = require("./domain/services/poi-response-normalizer.service");
 const in_memory_geocode_cache_1 = require("./infrastructure/cache/in-memory-geocode.cache");
 const maps_config_1 = require("./infrastructure/config/maps.config");
-const http_overpass_gateway_1 = require("./infrastructure/external/http-overpass.gateway");
-const http_nominatim_gateway_1 = require("./infrastructure/external/http-nominatim.gateway");
-const http_osrm_gateway_1 = require("./infrastructure/external/http-osrm.gateway");
+const http_google_geocoding_gateway_1 = require("./infrastructure/external/http-google-geocoding.gateway");
+const http_google_places_gateway_1 = require("./infrastructure/external/http-google-places.gateway");
+const http_google_directions_gateway_1 = require("./infrastructure/external/http-google-directions.gateway");
 const maps_http_client_1 = require("./infrastructure/external/maps-http.client");
 const maps_controller_1 = require("./presentation/maps.controller");
 let MapsModule = class MapsModule {
@@ -37,18 +37,18 @@ exports.MapsModule = MapsModule = __decorate([
             in_memory_geocode_cache_1.InMemoryGeocodeCache,
             poi_category_mapper_service_1.PoiCategoryMapper,
             geo_distance_calculator_service_1.GeoDistanceCalculator,
-            osm_response_normalizer_service_1.OsmResponseNormalizer,
+            poi_response_normalizer_service_1.PoiResponseNormalizer,
             {
-                provide: maps_gateways_1.OVERPASS_GATEWAY,
-                useClass: http_overpass_gateway_1.HttpOverpassGateway,
+                provide: maps_gateways_1.POI_SEARCH_GATEWAY,
+                useClass: http_google_places_gateway_1.HttpGooglePlacesGateway,
             },
             {
-                provide: maps_gateways_1.NOMINATIM_GATEWAY,
-                useClass: http_nominatim_gateway_1.HttpNominatimGateway,
+                provide: maps_gateways_1.GEOCODING_GATEWAY,
+                useClass: http_google_geocoding_gateway_1.HttpGoogleGeocodingGateway,
             },
             {
-                provide: maps_gateways_1.OSRM_GATEWAY,
-                useClass: http_osrm_gateway_1.HttpOsrmGateway,
+                provide: maps_gateways_1.ROUTE_GATEWAY,
+                useClass: http_google_directions_gateway_1.HttpGoogleDirectionsGateway,
             },
             search_pois_use_case_1.SearchPoisUseCase,
             geocode_place_use_case_1.GeocodePlaceUseCase,

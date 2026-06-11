@@ -36,7 +36,7 @@ flowchart TB
 ## Actors
 
 - **Usuário digital** (Human): Analfabeto digital, smartphone próprio, usa o app sozinho; idade 20–70+.
-- **Visitante convidado** (Human): Experimenta o app sem conta; IA disponível, histórico **não** persistido entre visitas.
+- **Visitante convidado** (Human): Abre o app sem login → tela de login → escolhe entrar sem conta; IA disponível na visita atual, histórico **não** persistido entre aberturas do app.
 - **Equipe de conteúdo** (Human, interno): Curadoria dos 6 tópicos e checkpoints na base de conhecimento (MVP: seed estático/JSON).
 - **API NestJS** (System): Orquestra chat, RAG, guardrails e persistência.
 - **Provedor LLM** (External System): Gera respostas conversacionais a partir do contexto RAG.

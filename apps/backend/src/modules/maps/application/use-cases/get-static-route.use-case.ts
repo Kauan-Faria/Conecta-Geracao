@@ -7,13 +7,13 @@ import {
   SameOriginDestinationError,
 } from '../../domain/errors/domain.errors';
 import { GeoPoint } from '../../domain/value-objects/geo-point.vo';
-import { OSRM_GATEWAY, OsrmGateway } from '../ports/maps.gateways';
+import { ROUTE_GATEWAY, RouteGateway } from '../ports/maps.gateways';
 
 @Injectable()
 export class GetStaticRouteUseCase {
   constructor(
-    @Inject(OSRM_GATEWAY)
-    private readonly osrm: OsrmGateway,
+    @Inject(ROUTE_GATEWAY)
+    private readonly routeGateway: RouteGateway,
   ) {}
 
   async execute(input: {
@@ -30,7 +30,7 @@ export class GetStaticRouteUseCase {
         return err(new SameOriginDestinationError());
       }
 
-      const route = await this.osrm.getRoute(origin, destination);
+      const route = await this.routeGateway.getRoute(origin, destination);
       if (!route) {
         return err(new RouteNotFoundError());
       }

@@ -3,7 +3,7 @@ intent: 002-in-app-maps-navigation
 phase: inception
 status: inception-complete
 created: 2026-06-08T18:00:00Z
-updated: 2026-06-08T20:00:00Z
+updated: 2026-06-10T14:00:00Z
 ---
 
 # Requirements: Mapas e lugares próximos no app
@@ -12,7 +12,7 @@ updated: 2026-06-08T20:00:00Z
 
 Adicionar uma **nova aba de Mapas** ao lado do Chat no shell do app, integrada ao assistente conversacional. Quando o usuário fizer uma pergunta relacionada a **endereços ou lugares próximos** (ex.: "qual a farmácia mais próxima?"), o chat **detecta a intenção**, solicita **permissão de localização**, busca estabelecimentos **no raio do usuário** e **redireciona para a aba Mapas** dentro do app, exibindo o resultado e **traçando rota estática** até o destino.
 
-O usuário também pode **buscar diretamente na aba Mapas**, com auxílio da IA quando necessário. Stack de mapas **100% gratuita**: **OpenStreetMap** (tiles) + **flutter_map** no Flutter; busca de POIs via **Overpass API**; geocodificação de cidade/bairro via **Nominatim**; rota estática via **OSRM**.
+O usuário também pode **buscar diretamente na aba Mapas**, com auxílio da IA quando necessário. **Renderização do mapa**: **OpenStreetMap** (tiles) + **flutter_map** no Flutter (gratuito). **Backend proxy**: **Google Maps Platform** — Geocoding API (cidade/bairro/CEP), Places Nearby Search (POIs) e Directions API (rota estática), via chave `GOOGLEMAPS_API_KEY` no servidor.
 
 Esta intent complementa `001-digital-guidance`, estendendo o assistente para necessidades do dia a dia que envolvem geolocalização — com linguagem simples e fluxo acessível para analfabetos digitais.
 
@@ -28,7 +28,7 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 | Usuário encontra lugar pela aba Mapas diretamente | % de buscas manuais na aba que exibem resultado | Must |
 | Fluxo acessível sem conhecimento prévio de mapas | Feedback positivo em testes de usabilidade | Must |
 | Permissão de localização clara com fallback | Fallback por cidade/bairro funcional quando GPS negado | Must |
-| Custo zero de APIs de mapas no MVP | Nenhuma API paga obrigatória (OSM stack) | Must |
+| Geocodificação BR (CEP/cidade/bairro) funcional em dev | Busca por CEP e bairro retorna coordenadas via Geocoding API | Must |
 
 ---
 
@@ -57,18 +57,18 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 - **Acceptance Criteria**:
   - Diálogo explica por que a localização é necessária (frases curtas, sem jargão)
   - **Se concedida**: busca usa coordenadas atuais do usuário (GPS)
-  - **Se negada**: assistente/app pergunta **cidade ou bairro**; geocodifica via Nominatim e usa ponto central para busca no raio
+  - **Se negada**: assistente/app pergunta **cidade, bairro ou CEP**; geocodifica via **Google Geocoding API** (proxy backend) e usa ponto central para busca no raio
   - Mensagem clara quando geocodificação falha (ex.: "Não encontrei esse lugar. Tente outro bairro ou cidade.")
 - **Priority**: Must
 
 ### FR-4: Busca de lugares no raio (POI)
-- **Description**: Sistema busca estabelecimentos das categorias MVP dentro de um raio a partir do centro (GPS ou geocodificado), via Overpass API (OSM).
+- **Description**: Sistema busca estabelecimentos das categorias MVP dentro de um raio a partir do centro (GPS ou geocodificado), via **Google Places Nearby Search** (proxy backend).
 - **Acceptance Criteria**:
   - **Raio padrão**: 5 km
   - **Raio configurável** na sessão: 2 km, 5 km ou 10 km (IA pode sugerir; usuário confirma)
   - Retorna lista ordenada por distância
   - Exibe nome, endereço resumido e distância em linguagem acessível (ex.: "a 800 metros")
-  - **Categorias MVP** (mapeadas para tags OSM/Overpass):
+  - **Categorias MVP** (mapeadas para Google Places `type`):
     1. Farmácia
     2. UBS / Posto de Saúde
     3. Hospital / UPA
@@ -82,9 +82,9 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 - **Description**: Ao selecionar um resultado (chat ou aba Mapas), o mapa centraliza origem e destino e desenha **rota estática** (polilinha) entre eles. Sem navegação turn-by-turn no MVP.
 - **Acceptance Criteria**:
   - Mapa exibe marcador de origem (usuário ou centro geocodificado) e destino (POI selecionado)
-  - Rota estática visível como linha no mapa (via OSRM ou equivalente gratuito)
+  - Rota estática visível como linha no mapa (via **Google Directions API**, proxy backend)
   - Usuário pode ampliar/reduzir mapa com gestos; controles acessíveis (≥ 48dp) para centralizar rota
-  - Distância e tempo estimado exibidos em texto simples (quando OSRM retornar)
+  - Distância e tempo estimado exibidos em texto simples (quando Directions retornar)
   - **Fora de escopo MVP**: instruções passo a passo, voz, recálculo em tempo real
 - **Priority**: Must
 
@@ -123,9 +123,9 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 | Requirement | Metric | Target |
 |-------------|--------|--------|
 | Tempo até mapa visível | p95 após permissão concedida | < 3s |
-| Busca de POIs (Overpass) | p95 latência | < 4s |
-| Geocodificação (Nominatim) | p95 latência | < 3s |
-| Rota estática (OSRM) | p95 latência | < 3s |
+| Busca de POIs (Places) | p95 latência | < 4s |
+| Geocodificação (Geocoding API) | p95 latência | < 3s |
+| Rota estática (Directions API) | p95 latência | < 3s |
 
 ### Accessibility
 | Requirement | Standard | Notes |
@@ -143,8 +143,8 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 ### Reliability
 | Requirement | Metric | Target |
 |-------------|--------|--------|
-| APIs OSM públicas | Degradação graciosa | Mensagem amigável se Overpass/Nominatim/OSRM indisponível; opção de tentar novamente |
-| Rate limiting | Nominatim/Overpass | Proxy na API NestJS recomendado para respeitar limites e cache curto |
+| Google Maps Platform (backend) | Degradação graciosa | Mensagem amigável se Geocoding/Places/Directions indisponível; opção de tentar novamente |
+| Rate limiting / quota Google | Proxy NestJS + ThrottlerGuard | Chave no servidor; cache geocode in-memory |
 
 ---
 
@@ -152,24 +152,24 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 
 ### Technical Constraints
 
-**Stack gratuita (decisão de produto)**:
+**Stack híbrida (decisão atualizada 2026-06-10)**:
 | Componente | Tecnologia | Custo |
 |------------|------------|-------|
-| Mapa | `flutter_map` + tiles OSM | Gratuito (atribuição obrigatória) |
-| POI search | Overpass API | Gratuito |
-| Geocoding | Nominatim | Gratuito (rate limit; User-Agent obrigatório) |
-| Rota estática | OSRM (instância pública ou self-hosted) | Gratuito |
+| Mapa (tiles) | `flutter_map` + tiles OSM | Gratuito (atribuição obrigatória) |
+| POI search (backend) | Google Places Nearby Search | Chave demo / billing Google |
+| Geocoding (backend) | Google Geocoding API | Chave demo / billing Google |
+| Rota estática (backend) | Google Directions API | Chave demo / billing Google |
 
 **Intent-specific**:
 - Integrar com shell/navegação existente (GoRouter)
-- Proxy NestJS recomendado para Overpass/Nominatim/OSRM (cache, rate limit, User-Agent único)
+- Proxy NestJS com `GOOGLEMAPS_API_KEY` — chave nunca no app mobile
 - Detecção de intenção no chat: estender assistente IA existente (`003-ai-assistant-api`)
-- Mapeamento categoria → query Overpass definido na Construction (tags OSM variam por região)
+- Mapeamento categoria → Google Places `type` (ADR-011)
 
 ### Business Constraints
 - Público-alvo de baixa literacia digital: fluxo guiado, poucos passos
 - Complementa `001-digital-guidance`; não substitui orientação passo a passo do chat
-- Custo zero de licenças de mapas no MVP
+- Custo de APIs Google após créditos demo — monitorar billing
 
 ---
 
@@ -177,9 +177,9 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 
 | Assumption | Risk if Invalid | Mitigation |
 |------------|-----------------|------------|
-| Dados OSM cobrem POIs nas regiões dos testes de usuário | Resultados incompletos em cidades menores | Validar em testes; mensagem clara quando vazio |
-| Instância pública OSRM atende volume MVP | Indisponibilidade ou lentidão | Self-host OSRM ou fallback "rota em linha reta" |
-| Overpass/Nominatim públicos respeitam rate limits com proxy | Bloqueio temporário | Cache na API; backoff; limitar requisições por sessão |
+| Google Places cobre POIs nas regiões dos testes | Resultados incompletos em áreas rurais | Validar em testes; mensagem clara quando vazio |
+| Quota Google Maps Platform | Indisponibilidade ou billing | ThrottlerGuard; monitorar console Google |
+| Geocoding BR (CEP/bairro) | Endereços ambíguos | `components=country:BR`; fallback mensagem amigável |
 | Detecção de intenção via IA + confirmação no chat | Falsos positivos | Confirmação de categoria e raio antes de buscar |
 
 ---
@@ -188,7 +188,8 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 
 | Question | Resolution | Date |
 |----------|------------|------|
-| Provedor de mapas | OpenStreetMap + flutter_map (gratuito) | 2026-06-08 |
+| Provedor backend maps | Google Maps Platform (Geocoding + Places + Directions) | 2026-06-10 |
+| Provedor tiles mapa | OpenStreetMap + flutter_map (gratuito) | 2026-06-08 |
 | Raio padrão | 5 km; IA sugere 2, 5 ou 10 km | 2026-06-08 |
 | Categorias MVP | Farmácia, UBS/Posto, Hospital/UPA, Banco/Lotérica, Correios, Supermercado | 2026-06-08 |
 | Tipo de rota | Rota estática apenas (sem turn-by-turn) | 2026-06-08 |
@@ -205,4 +206,4 @@ Esta intent complementa `001-digital-guidance`, estendendo o assistente para nec
 - Compartilhar rota via WhatsApp (intent futura)
 - Busca por voz
 - Integração com transporte público em tempo real
-- Google Maps / APIs pagas de Places
+- SDK Google Maps nativo no Flutter (tiles continuam OSM via flutter_map)

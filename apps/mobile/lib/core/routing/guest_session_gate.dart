@@ -20,8 +20,6 @@ class GuestSessionGate extends ChangeNotifier {
   bool get isGuestActive => _isGuestActive;
 
   Future<void> refresh() async {
-    await sessionRepository.clearIfExpired();
-    await historyRepository.clearIfExpired(sessionRepository);
     final active = sessionRepository.isGuestSessionActive();
     if (active != _isGuestActive) {
       _isGuestActive = active;

@@ -1,10 +1,13 @@
 import 'package:conecta_geracao/core/routing/routing_providers.dart';
-import 'package:conecta_geracao/features/auth/presentation/alternative_login_page.dart';
+import 'package:conecta_geracao/features/auth/presentation/email_auth_controller.dart';
+import 'package:conecta_geracao/features/auth/presentation/email_auth_page.dart';
+import 'package:conecta_geracao/features/auth/presentation/email_verification_gate.dart';
+import 'package:conecta_geracao/features/auth/presentation/email_verification_page.dart';
 import 'package:conecta_geracao/features/auth/presentation/display_name_gate.dart';
 import 'package:conecta_geracao/features/auth/presentation/display_name_onboarding_page.dart';
 import 'package:conecta_geracao/features/auth/presentation/login_page.dart';
+import 'package:conecta_geracao/features/auth/presentation/phone_login_page.dart';
 import 'package:conecta_geracao/features/auth/presentation/phone_otp_page.dart';
-import 'package:conecta_geracao/features/auth/presentation/welcome_page.dart';
 import 'package:conecta_geracao/features/chat/presentation/chat_page.dart';
 import 'package:conecta_geracao/features/chat/presentation/conversation_list_page.dart';
 import 'package:conecta_geracao/features/home/presentation/home_page.dart';
@@ -19,24 +22,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authGate = ref.watch(authGateProvider);
   final guestGate = ref.watch(guestSessionGateProvider);
-  final needsDisplayName = ref.watch(needsDisplayNameProvider);
   final routerRefresh = ref.watch(routerRefreshProvider);
 
   return GoRouter(
-    initialLocation: '/welcome',
+    initialLocation: '/login',
     refreshListenable: routerRefresh,
     redirect: (context, state) {
-      final location = state.matchedLocation;
-      final isWelcome = location == '/welcome';
-      final isLoginFlow = location.startsWith('/login');
-      final isOnboarding = location == '/onboarding/display-name';
-      final isPublicRoute = isWelcome || isLoginFlow || isOnboarding;
-      final isAuthenticated = authGate.isAuthenticated;
-      final hasAccess = isAuthenticated || guestGate.isGuestActive;
+      final authGate = ref.read(authGateProvider);
+      final currentGuestGate = ref.read(guestSessionGateProvider);
+      final user = authGate.user;
+      final needsEmailVerification = userNeedsEmailVerification(user);
+      final needsDisplayName = userNeedsDisplayName(user);
 
-      if (isAuthenticated && needsDisplayName && !isOnboarding) {
+      final path = state.uri.path;
+      final isLoginFlow = path.startsWith('/login');
+      final isOnboarding = path == '/onboarding/display-name';
+      final isPublicRoute = isLoginFlow || isOnboarding;
+      final isAuthenticated = authGate.isAuthenticated;
+      final hasAccess = isAuthenticated || currentGuestGate.isGuestActive;
+
+      if (isAuthenticated && needsEmailVerification) {
+        final isEmailVerify = path == '/login/email-verify';
+        final isEmailEdit = path == '/login/email';
+        if (!isEmailVerify && !isEmailEdit) {
+          return '/login/email-verify';
+        }
+      }
+
+      if (isAuthenticated &&
+          needsDisplayName &&
+          !isOnboarding &&
+          !needsEmailVerification) {
         return '/onboarding/display-name';
       }
 
@@ -44,25 +61,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/home';
       }
 
-      if (hasAccess && (isWelcome || isLoginFlow) && !needsDisplayName) {
+      if (hasAccess &&
+          isLoginFlow &&
+          !needsDisplayName &&
+          !needsEmailVerification) {
         return '/home';
       }
 
       if (!hasAccess && !isPublicRoute) {
-        return '/welcome';
+        return '/login';
       }
 
       return null;
     },
     routes: [
       GoRoute(
-        path: '/welcome',
-        builder: (context, state) => const WelcomePage(),
-      ),
-      GoRoute(
         path: '/login',
         builder: (context, state) => const LoginPage(),
         routes: [
+          GoRoute(
+            path: 'phone',
+            builder: (context, state) => const PhoneLoginPage(),
+          ),
           GoRoute(
             path: 'otp',
             builder: (context, state) {
@@ -71,8 +91,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           ),
           GoRoute(
+            path: 'email',
+            builder: (context, state) {
+              final mode = state.uri.queryParameters['mode'];
+              final initialMode = mode == 'signin'
+                  ? EmailAuthMode.signIn
+                  : EmailAuthMode.signUp;
+              return EmailAuthPage(initialMode: initialMode);
+            },
+          ),
+          GoRoute(
+            path: 'email-verify',
+            builder: (context, state) => const EmailVerificationPage(),
+          ),
+          GoRoute(
             path: 'alternative',
-            builder: (context, state) => const AlternativeLoginPage(),
+            redirect: (context, state) => '/login/email',
           ),
         ],
       ),

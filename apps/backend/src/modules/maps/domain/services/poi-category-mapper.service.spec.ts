@@ -1,25 +1,30 @@
-import { PoiCategory } from '../value-objects/poi-category.vo';
 import { PoiCategoryMapper } from './poi-category-mapper.service';
-import { buildOverpassQuery } from '../../infrastructure/external/maps-http.client';
+import { PoiCategory } from '../value-objects/poi-category.vo';
 
 describe('PoiCategoryMapper', () => {
   const mapper = new PoiCategoryMapper();
 
-  it('mapeia pharmacy para amenity=pharmacy', () => {
-    const filters = mapper.toOverpassFilters(PoiCategory.create('pharmacy'));
-    expect(filters).toEqual([{ amenity: 'pharmacy' }]);
+  it('mapeia pharmacy para type Google Places', () => {
+    expect(mapper.toGooglePlaceType(PoiCategory.create('pharmacy'))).toBe('pharmacy');
   });
 
-  it('mapeia health_post com múltiplos filtros', () => {
-    const filters = mapper.toOverpassFilters(PoiCategory.create('health_post'));
-    expect(filters).toHaveLength(3);
-    expect(filters).toContainEqual({ amenity: 'clinic' });
+  it('mapeia health_post para type Google Places', () => {
+    expect(mapper.toGooglePlaceType(PoiCategory.create('health_post'))).toBe('doctor');
   });
 
-  it('gera query Overpass com raio correto', () => {
-    const filters = mapper.toOverpassFilters(PoiCategory.create('pharmacy'));
-    const query = buildOverpassQuery(-22.9, -47.0, 5000, filters, 25);
-    expect(query).toContain('around:5000,-22.9,-47');
-    expect(query).toContain('["amenity"="pharmacy"]');
+  it('mapeia hospital para type Google Places', () => {
+    expect(mapper.toGooglePlaceType(PoiCategory.create('hospital'))).toBe('hospital');
+  });
+
+  it('mapeia bank para type Google Places', () => {
+    expect(mapper.toGooglePlaceType(PoiCategory.create('bank'))).toBe('bank');
+  });
+
+  it('mapeia post_office para type Google Places', () => {
+    expect(mapper.toGooglePlaceType(PoiCategory.create('post_office'))).toBe('post_office');
+  });
+
+  it('mapeia supermarket para type Google Places', () => {
+    expect(mapper.toGooglePlaceType(PoiCategory.create('supermarket'))).toBe('supermarket');
   });
 });

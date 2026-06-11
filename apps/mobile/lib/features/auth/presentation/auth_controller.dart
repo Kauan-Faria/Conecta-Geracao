@@ -2,6 +2,7 @@ import 'package:conecta_geracao/core/network/api_client.dart';
 import 'package:conecta_geracao/features/auth/data/auth_repository.dart';
 import 'package:conecta_geracao/features/auth/data/firebase_auth_repository.dart';
 import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -35,6 +36,7 @@ class AuthController extends AsyncNotifier<void> {
   Future<void> signOut() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      await ref.read(notificationsRepositoryProvider).deactivateCurrentToken();
       await ref.read(authRepositoryProvider).signOut();
       await ref.read(guestSessionGateProvider).exitGuest();
     });

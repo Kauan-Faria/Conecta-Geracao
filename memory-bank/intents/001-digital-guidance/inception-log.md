@@ -1,26 +1,24 @@
----
-intent: 001-digital-guidance
-created: 2026-05-27T23:15:00Z
-completed: null
-status: in-progress
----
-
 # Inception Log: 001-digital-guidance
 
-## Summary
+## 2026-06-11T12:00:00Z — Refinamento: login como porta de entrada
 
-| Metric | Count |
-|--------|-------|
-| Functional Requirements | 10 |
-| Units | 4 |
-| Stories | 16 |
-| Bolts Planned | 8 |
+**Origem**: observação do produto (sessão inception)
 
-## Ready for Construction
+**Decisão**:
+- Usuário sem login **sempre** cai na tela de login ao abrir o app
+- Na tela de login, escolhe: fazer login por telefone **ou** entrar sem conta
+- Modo convidado **não** persiste entre cold starts — cada abertura sem login reinicia o fluxo e o chat
+- Welcome deixa de ser porta de entrada (redirect `/welcome` → `/login`)
 
-- [x] Requirements documented
-- [x] System context defined
-- [x] Units decomposed
-- [x] Stories created
-- [x] Bolts planned
-- [ ] Human review complete (Checkpoint 3)
+**Artefatos atualizados**:
+- `requirements.md` (FR-8, FR-8.2, Open Questions)
+- `system-context.md`
+- Stories: `002-app-shell-navigation`, `004-phone-otp-primary-login`, `007-guest-ephemeral-sessions`
+
+**Gap de implementação** (Construction):
+- `app_router.dart`: `initialLocation` ainda é `/welcome`; guest persiste 7 dias em SharedPreferences
+- `WelcomePage` ainda contém link convidado; `LoginPage` ainda não tem
+
+**Próximo passo sugerido**: bolt de ajuste em `010-mobile-auth-phone` ou novo bolt simples
+
+**Bolt criado**: \`021-mobile-auth-login-gate-refactor\` (2026-06-11T12:30:00Z)

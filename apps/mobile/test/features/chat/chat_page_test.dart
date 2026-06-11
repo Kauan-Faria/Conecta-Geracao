@@ -2,10 +2,11 @@ import 'package:conecta_geracao/app.dart';
 import 'package:conecta_geracao/core/network/connectivity_service.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/accessibility_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
-import 'package:conecta_geracao/features/auth/data/guest_session_repository.dart';
 import 'package:conecta_geracao/features/chat/data/chat_repository.dart';
 import 'package:conecta_geracao/features/chat/data/conversation_cache_repository.dart';
 import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_providers.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_bootstrap.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/fake_auth_repository.dart';
 import '../../helpers/fake_chat_repository.dart';
+import '../../helpers/fake_notifications_remote_port.dart';
+import '../../helpers/fake_push_messaging_client.dart';
 
 class _OnlineConnectivityService extends ConnectivityService {
   _OnlineConnectivityService() : super(Connectivity());
@@ -53,6 +56,13 @@ void main() {
               _OnlineConnectivityService(),
             ),
             sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+            pushMessagingClientProvider.overrideWithValue(
+              FakePushMessagingClient(authorized: true, token: 'fake-token'),
+            ),
+            notificationsApiProvider.overrideWithValue(
+              FakeNotificationsRemotePort(),
+            ),
+            notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
           ],
           child: const ConectaGeracaoApp(),
         ),
@@ -129,10 +139,6 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       final fakeAuth = FakeAuthRepository();
-      SharedPreferences.setMockInitialValues({
-        SharedPreferencesGuestSessionRepository.guestSessionStartedAtKey:
-            DateTime.now().millisecondsSinceEpoch,
-      });
       final sharedPreferences = await SharedPreferences.getInstance();
 
       await tester.pumpWidget(
@@ -151,11 +157,20 @@ void main() {
               _OnlineConnectivityService(),
             ),
             sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+            pushMessagingClientProvider.overrideWithValue(
+              FakePushMessagingClient(authorized: true, token: 'fake-token'),
+            ),
+            notificationsApiProvider.overrideWithValue(
+              FakeNotificationsRemotePort(),
+            ),
+            notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
           ],
           child: const ConectaGeracaoApp(),
         ),
       );
 
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Continua sem Cadastro'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Chat'));
       await tester.pumpAndSettle();

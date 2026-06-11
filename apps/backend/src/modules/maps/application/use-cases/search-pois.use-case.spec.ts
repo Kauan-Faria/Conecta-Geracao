@@ -1,42 +1,39 @@
 import { SearchPoisUseCase } from './search-pois.use-case';
 import { PoiCategoryMapper } from '../../domain/services/poi-category-mapper.service';
 import { GeoDistanceCalculator } from '../../domain/services/geo-distance-calculator.service';
-import { OsmResponseNormalizer } from '../../domain/services/osm-response-normalizer.service';
-import { OverpassGateway } from '../ports/maps.gateways';
+import { PoiResponseNormalizer } from '../../domain/services/poi-response-normalizer.service';
+import { PoiSearchGateway } from '../ports/maps.gateways';
 import { MapsConfig } from '../../infrastructure/config/maps.config';
 
 const config: MapsConfig = {
-  nominatimBaseUrl: 'https://nominatim.example',
-  overpassBaseUrl: 'https://overpass.example',
-  osrmBaseUrl: 'https://osrm.example',
+  googleMapsApiKey: 'test-api-key',
   httpTimeoutMs: 25_000,
   defaultRadiusKm: 5,
   maxRadiusKm: 10,
   geocodeCacheTtlMs: 600_000,
-  nominatimMinIntervalMs: 1_000,
   userAgent: 'test',
 };
 
 describe('SearchPoisUseCase', () => {
-  let overpass: jest.Mocked<Pick<OverpassGateway, 'searchAround'>>;
+  let poiSearch: jest.Mocked<Pick<PoiSearchGateway, 'searchAround'>>;
   let useCase: SearchPoisUseCase;
 
   beforeEach(() => {
-    overpass = {
+    poiSearch = {
       searchAround: jest.fn().mockResolvedValue([
         {
-          type: 'node',
-          id: 1,
+          externalId: 'ChIJ123',
+          name: 'Farmácia',
+          address: 'Rua A',
           lat: -22.906,
           lon: -47.061,
-          tags: { name: 'Farmácia' },
         },
       ]),
     };
     useCase = new SearchPoisUseCase(
-      overpass as OverpassGateway,
+      poiSearch as PoiSearchGateway,
       new PoiCategoryMapper(),
-      new OsmResponseNormalizer(new GeoDistanceCalculator()),
+      new PoiResponseNormalizer(new GeoDistanceCalculator()),
       config,
     );
   });
@@ -55,10 +52,10 @@ describe('SearchPoisUseCase', () => {
       expect(result.value.category.value).toBe('pharmacy');
       expect(result.value.radius.kilometers).toBe(5);
     }
-    expect(overpass.searchAround).toHaveBeenCalledWith(
+    expect(poiSearch.searchAround).toHaveBeenCalledWith(
       expect.objectContaining({ lat: -22.9056, lon: -47.0608 }),
       5000,
-      [{ amenity: 'pharmacy' }],
+      'pharmacy',
     );
   });
 
@@ -75,8 +72,8 @@ describe('SearchPoisUseCase', () => {
     }
   });
 
-  it('retorna lista vazia quando Overpass não encontra resultados', async () => {
-    overpass.searchAround.mockResolvedValue([]);
+  it('retorna lista vazia quando Google Places não encontra resultados', async () => {
+    poiSearch.searchAround.mockResolvedValue([]);
     const result = await useCase.execute({
       lat: -22.9056,
       lon: -47.0608,

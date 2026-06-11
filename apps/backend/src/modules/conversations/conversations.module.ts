@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ConversationOwnershipPolicy } from './domain/services/conversation-ownership.policy';
 import { CONVERSATION_REPOSITORY } from './application/ports/conversation.repository';
 import {
@@ -26,7 +27,7 @@ import { SendMessageUseCase } from './application/use-cases/send-message.use-cas
 import { ConversationsController } from './presentation/conversations.controller';
 
 @Module({
-  imports: [KnowledgeBaseModule],
+  imports: [KnowledgeBaseModule, NotificationsModule],
   controllers: [ConversationsController],
   providers: [
     ConversationOwnershipPolicy,

@@ -1,12 +1,18 @@
 import 'package:conecta_geracao/app.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/accessibility_controller.dart';
+import 'package:conecta_geracao/features/auth/data/guest_session_repository.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_bootstrap.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/fake_auth_repository.dart';
+import '../../helpers/fake_notifications_remote_port.dart';
+import '../../helpers/fake_push_messaging_client.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +36,13 @@ void main() {
           overrides: [
             authRepositoryProvider.overrideWithValue(fakeAuth),
             sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+            pushMessagingClientProvider.overrideWithValue(
+              FakePushMessagingClient(),
+            ),
+            notificationsApiProvider.overrideWithValue(
+              FakeNotificationsRemotePort(),
+            ),
+            notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
           ],
           child: const ConectaGeracaoApp(),
         ),
@@ -38,41 +51,83 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    Future<void> scrollTo(WidgetTester tester, Finder finder) async {
-      await tester.scrollUntilVisible(
-        finder,
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-    }
-
-    testWidgets('unauthenticated user sees welcome page', (tester) async {
+    testWidgets('unauthenticated user sees login page', (tester) async {
       await pumpApp(tester);
 
-      expect(find.text('Começar agora'), findsOneWidget);
-      expect(find.text('Sem cadastro, sem complicações'), findsOneWidget);
+      expect(find.text('Fazer cadastro'), findsOneWidget);
+      expect(find.text('Continua sem Cadastro'), findsOneWidget);
+      expect(find.text('Evite erros'), findsOneWidget);
+      expect(find.text('Avançar'), findsNothing);
+    });
+
+    testWidgets('register button opens phone login', (tester) async {
+      await pumpApp(tester);
+
+      await tester.tap(find.text('Fazer cadastro'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
+      expect(find.text('Avançar'), findsOneWidget);
+    });
+
+    testWidgets('alternative registration opens email auth route', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+
+      await tester.tap(find.text('Fazer cadastro'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Se cadastrar de outra forma'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
+      expect(find.text('E-mail'), findsOneWidget);
+    });
+
+    testWidgets('legacy alternative route redirects to email auth', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+
+      await tester.tap(find.text('Fazer cadastro'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Se cadastrar de outra forma'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
+
+      final context = tester.element(find.text('Vamos fazer seu cadastro'));
+      GoRouter.of(context).go('/login/alternative');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
+      expect(find.text('E-mail'), findsOneWidget);
     });
 
     testWidgets('guest user reaches home without login', (tester) async {
       await pumpApp(tester);
 
-      await scrollTo(tester, find.text('Sem cadastro, sem complicações'));
-      await tester.tap(find.text('Sem cadastro, sem complicações'));
+      await tester.tap(find.text('Continua sem Cadastro'));
       await tester.pumpAndSettle();
 
       expect(find.text('Antes de fazer algo importante...'), findsOneWidget);
       expect(find.text('Quero ajuda agora'), findsOneWidget);
     });
 
-    testWidgets('start button opens login page', (tester) async {
+    testWidgets('legacy guest prefs do not restore session on cold start', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        GuestSessionLegacyCleaner.guestSessionStartedAtKey:
+            DateTime.now().millisecondsSinceEpoch,
+      });
+
       await pumpApp(tester);
 
-      await scrollTo(tester, find.text('Começar agora'));
-      await tester.tap(find.text('Começar agora'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Receber código'), findsOneWidget);
-      expect(find.text('Entrar de outra forma'), findsOneWidget);
+      expect(find.text('Fazer cadastro'), findsOneWidget);
+      expect(find.text('Antes de fazer algo importante...'), findsNothing);
     });
   });
 }

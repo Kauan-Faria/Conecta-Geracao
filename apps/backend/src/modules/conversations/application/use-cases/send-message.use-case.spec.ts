@@ -35,20 +35,32 @@ describe('SendMessageUseCase', () => {
       }),
     };
 
+    const assistantReplyTrigger = {
+      onAssistantReplyReady: jest.fn().mockResolvedValue(undefined),
+    };
+
     const useCase = new SendMessageUseCase(
       conversations as never,
       unitOfWork as never,
       replyGenerator as never,
       messages as never,
       { assertOwner: (c: Conversation | null) => c! } as never,
+      assistantReplyTrigger as never,
     );
 
-    const result = await useCase.execute('user-a', 'conv-1', 'Olá');
+    const result = await useCase.execute('user-a', 'conv-1', 'Olá', {
+      appInBackground: true,
+    });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.id).toBe('msg-2');
     }
+    expect(assistantReplyTrigger.onAssistantReplyReady).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      firebaseUid: 'user-a',
+      appInBackground: true,
+    });
     expect(unitOfWork.sendMessage).toHaveBeenCalledWith({
       conversationId: 'conv-1',
       firebaseUid: 'user-a',
@@ -73,6 +85,7 @@ describe('SendMessageUseCase', () => {
       { generateReply: jest.fn() } as never,
       { listByConversationId: jest.fn() } as never,
       { assertOwner: (c: Conversation | null) => c! } as never,
+      { onAssistantReplyReady: jest.fn() } as never,
     );
 
     const result = await useCase.execute('user-a', 'conv-1', 'Olá');

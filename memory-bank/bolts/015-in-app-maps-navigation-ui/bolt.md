@@ -48,7 +48,7 @@ Fluxo completo: chat "farmácia perto" → Mapas com rota; busca na aba com ajud
 
 ## Stories Included
 
-- **006-static-route-display**: Polyline OSRM no mapa (Must)
+- **006-static-route-display**: Polyline Directions no mapa (Must)
 - **007-chat-to-maps-handoff**: Redirecionamento do chat (Must)
 - **008-maps-ai-assist**: Pedir ajuda à IA (Should)
 

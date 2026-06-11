@@ -4,6 +4,7 @@ import 'package:conecta_geracao/core/widgets/app_button.dart';
 import 'package:conecta_geracao/core/widgets/app_scaffold.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/settings_accessibility_section.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
+import 'package:conecta_geracao/features/notifications/presentation/settings_notifications_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +23,7 @@ class SettingsPage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SettingsAccessibilitySection(),
+          const SettingsNotificationsSection(),
           if (isGuest && !isAuthenticated) ...[
             SizedBox(height: AppSpacing.lg),
             Text(

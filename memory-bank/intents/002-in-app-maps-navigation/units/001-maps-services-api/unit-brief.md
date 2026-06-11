@@ -4,20 +4,20 @@ intent: 002-in-app-maps-navigation
 phase: inception
 status: complete
 created: 2026-06-08T20:00:00Z
-updated: 2026-06-09T00:45:00Z
+updated: 2026-06-10T14:00:00Z
 ---
 
 # Unit Brief: Maps Services API
 
 ## Purpose
 
-Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodificação e rota estática via stack OSM gratuita, e estende o assistente IA para detectar intenções de localização no chat.
+Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodificação (cidade/bairro/CEP) e rota estática via **Google Maps Platform**, e estende o assistente IA para detectar intenções de localização no chat.
 
 ## Scope
 
 ### In Scope
-- Proxy/cache para Overpass API, Nominatim e OSRM
-- Mapeamento das 6 categorias MVP para queries Overpass
+- Proxy para Google Geocoding API, Places Nearby Search e Directions API
+- Mapeamento das 6 categorias MVP para Google Places `type`
 - Endpoints: `POST /maps/search`, `POST /maps/geocode`, `POST /maps/route`
 - Extensão do fluxo de chat: detecção de intenção geográfica + payload `map_action`
 - Sugestão de raio (2, 5 ou 10 km) na resposta estruturada da IA
@@ -36,7 +36,7 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 |----|-------------|----------|
 | FR-2 | Detecção de intenção de localização no chat | Must |
 | FR-4 | Busca de lugares no raio (backend) | Must |
-| FR-5 | Rota estática (backend — polyline OSRM) | Must |
+| FR-5 | Rota estática (backend — polyline Directions API) | Must |
 | FR-8 | Auxílio da IA (backend — sugestão raio/categoria) | Should |
 
 ---
@@ -49,7 +49,7 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 |--------|-------------|------------|
 | PoiCategory | Categoria de estabelecimento MVP | enum: pharmacy, health_post, hospital, bank, post_office, supermarket |
 | GeoPoint | Coordenada geográfica | lat, lon |
-| PoiResult | Estabelecimento encontrado | osmId, name, address, lat, lon, distanceMeters |
+| PoiResult | Estabelecimento encontrado | osmId (place_id Google), name, address, lat, lon, distanceMeters |
 | MapAction | Ação estruturada para o app mobile | category, radiusKm, center, selectedPoi? |
 | RouteResult | Rota estática | polyline, distanceMeters, durationSeconds |
 
@@ -58,7 +58,7 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 | Operation | Description | Inputs | Outputs |
 |-----------|-------------|--------|---------|
 | searchPois | Busca POIs no raio | center, radiusKm, category | PoiResult[] |
-| geocodePlace | Cidade/bairro → coordenadas | query text | GeoPoint |
+| geocodePlace | Cidade/bairro/CEP → coordenadas | query text | GeoPoint |
 | getStaticRoute | Rota A→B | origin, destination | RouteResult |
 | detectLocationIntent | IA identifica busca geográfica | chat message | MapAction draft |
 
@@ -77,8 +77,8 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 
 | Story ID | Title | Priority | Status |
 |----------|-------|----------|--------|
-| 001-osm-proxy-endpoints | Proxy Overpass/Nominatim/OSRM | Must | Planned |
-| 002-poi-category-queries | Mapeamento 6 categorias Overpass | Must | Planned |
+| 001-osm-proxy-endpoints | Proxy Google Maps REST `/maps/*` | Must | Complete |
+| 002-poi-category-queries | Mapeamento 6 categorias Google Places | Must | Complete |
 | 003-location-intent-chat | Detecção intenção no chat | Must | Planned |
 | 004-radius-suggestion-response | Sugestão raio 2/5/10 km | Should | Planned |
 
@@ -102,9 +102,7 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 
 | System | Purpose | Risk |
 |--------|---------|------|
-| Overpass API | Busca POIs OSM | Médio |
-| Nominatim | Geocoding cidade/bairro | Médio |
-| OSRM | Rota estática | Médio |
+| Google Maps Platform | Geocoding + Places + Directions | Médio (quota/billing) |
 | Provedor LLM | Detecção intenção | Baixo |
 
 ---
@@ -112,9 +110,9 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 ## Technical Context
 
 ### Suggested Technology
-- NestJS module `maps` com HttpService/axios
-- Cache in-memory ou Redis leve para Nominatim (TTL 5–15 min)
-- User-Agent identificável conforme política Nominatim
+- NestJS module `maps` com adapters Google (Geocoding, Places, Directions)
+- Cache in-memory geocode (TTL 10 min) — ADR-002
+- Env `GOOGLEMAPS_API_KEY` (somente backend)
 
 ### Integration Points
 
@@ -122,7 +120,7 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 |-------------|------|----------|
 | Flutter app | REST API | JSON/HTTPS |
 | ai-assistant-api | Internal service | NestJS DI |
-| Overpass/Nominatim/OSRM | External HTTP | HTTPS |
+| Google Maps Platform | External HTTP | HTTPS |
 
 ### Data Storage
 
@@ -135,8 +133,8 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 
 ## Constraints
 
-- Respeitar rate limits Nominatim (max 1 req/s por instância)
-- Não expor chaves de APIs pagas (não aplicável — stack gratuita)
+- Monitorar quota/billing Google Maps Platform
+- Não expor `GOOGLEMAPS_API_KEY` no app mobile
 - Respostas em português; erros amigáveis para o app exibir
 
 ---
@@ -151,11 +149,11 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 
 ### Non-Functional
 - [ ] p95 busca POI < 4s com cache quente
-- [ ] Degradação graciosa com mensagem quando Overpass/OSRM indisponível
+- [ ] Degradação graciosa com mensagem quando Google Maps indisponível
 
 ### Quality
 - [ ] Testes unitários mapeamento categorias
-- [ ] Testes integração com mocks Overpass/OSRM
+- [ ] Testes integração com mocks Google Maps
 
 ---
 
@@ -163,12 +161,12 @@ Módulo backend NestJS que expõe endpoints REST para busca de POIs, geocodifica
 
 | Bolt | Type | Stories | Objective |
 |------|------|---------|-----------|
-| 011-maps-services-api | DDD | 001, 002 | Proxy OSM + categorias |
+| 011-maps-services-api | DDD | 001, 002 | Proxy Google Maps + categorias |
 | 012-maps-services-api | DDD | 003, 004 | Extensão IA chat |
 
 ---
 
 ## Notes
 
-- Tags OSM variam por região; validar queries em cidades dos testes de usuário
-- Considerar fallback "linha reta" se OSRM público falhar
+- Cobertura Google Places varia por região; validar categorias em cidades dos testes de usuário
+- `health_post` mapeia para `doctor` — cobertura de UBS pode diferir de expectativa do usuário

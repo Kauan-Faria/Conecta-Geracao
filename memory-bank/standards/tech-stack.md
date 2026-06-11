@@ -34,9 +34,19 @@ Rationale: setup rápido no MVP, login social (Google) sem implementar OAuth do 
 |------------|------------|
 | Auth | Firebase |
 | API NestJS | Render |
-| PostgreSQL | Render (managed) ou provedor externo (Neon, Supabase Postgres, etc.) |
+| PostgreSQL | Supabase (managed) |
+| Maps (backend proxy) | Google Maps Platform (`GOOGLEMAPS_API_KEY` no servidor) |
+| Push notifications | Firebase Cloud Messaging (FCM) |
 
-MVP com pouca operação: Firebase para auth, Render para API e opção de Postgres gerenciado no mesmo provedor ou externo conforme custo/escala.
+MVP com pouca operação: Firebase para auth e push, Render para API, Supabase para Postgres. Chaves de APIs pagas (Google Maps) ficam somente no backend.
+
+## External Services
+
+| Serviço | Uso | Onde configurar |
+|---------|-----|-----------------|
+| Google Maps Platform | Geocoding, Places, Directions (intent maps) | `apps/backend/.env` |
+| Firebase Admin | Validação de ID token na API | `apps/backend/.env` |
+| Provedor LLM | Respostas do assistente (Gemini) | `apps/backend/.env` |
 
 ## Package Manager
 

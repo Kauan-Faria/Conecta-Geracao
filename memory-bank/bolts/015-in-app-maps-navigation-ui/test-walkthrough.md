@@ -22,7 +22,7 @@ created: 2026-06-09T00:20:01Z
 
 - ✅ **006 — marcadores + polyline**: `MapsRoutePage` renderiza `MarkerLayer` + `PolylineLayer` após `POST /maps/route` (validado por implementação + decode polyline testado)
 - ✅ **006 — distância/tempo simples**: `formatRouteDistance` / `formatRouteDuration` com testes unitários
-- ✅ **006 — falha OSRM + retry**: `MapsRouteController` + UI com mensagem amigável e botão "Tentar de novo"
+- ✅ **006 — falha Directions + retry**: `MapsRouteController` + UI com mensagem amigável e botão "Tentar de novo"
 - ✅ **006 — Centralizar ≥ 48dp**: FAB 48×48 em `MapsRoutePage`
 - ✅ **007 — botão "Ver no mapa"**: widget test confirma visibilidade e tap
 - ✅ **007 — categoria/raio pré-preenchidos**: `applyHandoff` + query params `/maps?category=&radiusKm=`
@@ -44,5 +44,5 @@ Nenhum bloqueador nos testes automatizados.
 
 ### Notes
 
-- E2E com Overpass/OSRM real depende de backend rodando e rede; recomendado smoke test manual no emulador.
+- E2E com Google Maps real depende de backend rodando (`GOOGLEMAPS_API_KEY`) e rede; recomendado smoke test manual no emulador.
 - Scaffolding 013/014 incluído no mesmo diff — bolts 013/014 no memory-bank permanecem `planned` até execução formal separada (ou replanejamento).

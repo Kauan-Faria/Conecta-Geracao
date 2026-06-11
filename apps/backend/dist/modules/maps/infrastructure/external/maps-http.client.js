@@ -13,7 +13,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapsHttpClient = void 0;
-exports.buildOverpassQuery = buildOverpassQuery;
 const common_1 = require("@nestjs/common");
 const domain_errors_1 = require("../../domain/errors/domain.errors");
 const maps_config_1 = require("../config/maps.config");
@@ -52,12 +51,12 @@ let MapsHttpClient = class MapsHttpClient {
         }
     }
     serviceFromUrl(url) {
-        if (url.includes('overpass'))
-            return 'Overpass';
-        if (url.includes('nominatim') || url.includes('openstreetmap.org'))
-            return 'Nominatim';
-        if (url.includes('osrm') || url.includes('router.project-osrm'))
-            return 'OSRM';
+        if (url.includes('places.googleapis.com'))
+            return 'Google Places';
+        if (url.includes('routes.googleapis.com'))
+            return 'Google Routes';
+        if (url.includes('googleapis.com/maps/api/geocode'))
+            return 'Google Maps';
         return 'maps';
     }
 };
@@ -67,18 +66,4 @@ exports.MapsHttpClient = MapsHttpClient = __decorate([
     __param(0, (0, common_1.Inject)(maps_config_1.MAPS_CONFIG)),
     __metadata("design:paramtypes", [Object])
 ], MapsHttpClient);
-function buildOverpassQuery(lat, lon, radiusMeters, tagFilters, timeoutSeconds) {
-    const conditions = tagFilters
-        .flatMap((tags) => {
-        const tagString = Object.entries(tags)
-            .map(([key, value]) => `["${key}"="${value}"]`)
-            .join('');
-        return [
-            `  node${tagString}(around:${radiusMeters},${lat},${lon});`,
-            `  way${tagString}(around:${radiusMeters},${lat},${lon});`,
-        ];
-    })
-        .join('\n');
-    return `[out:json][timeout:${timeoutSeconds}];\n(\n${conditions}\n);\nout center tags;`;
-}
 //# sourceMappingURL=maps-http.client.js.map

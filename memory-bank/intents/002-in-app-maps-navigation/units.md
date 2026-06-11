@@ -26,7 +26,7 @@ Este intent decompõe em **2 units**:
 
 ### Unit 1: `001-maps-services-api`
 
-**Description**: Módulo backend NestJS — proxy OSM (Overpass, Nominatim, OSRM), mapeamento de categorias POI e extensão do assistente IA para intenção de localização.
+**Description**: Módulo backend NestJS — proxy **Google Maps Platform** (Geocoding, Places, Directions), mapeamento de categorias POI e extensão do assistente IA para intenção de localização.
 
 **Stories**: 4 | **Complexity**: M | **Priority**: Must
 
@@ -61,5 +61,5 @@ Este intent decompõe em **2 units**:
 
 ## Execution Order
 
-1. **Bolt 011–012**: `001-maps-services-api` (proxy OSM + extensão IA)
+1. **Bolt 011–012**: `001-maps-services-api` (proxy Google Maps + extensão IA)
 2. **Bolt 013–015**: `002-in-app-maps-navigation-ui` (aba Mapas end-to-end)

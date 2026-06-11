@@ -4,6 +4,8 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
+import { ScheduleModule } from '@nestjs/schedule';
+
 import { PrismaModule } from './shared/prisma/prisma.module';
 
 import { AuthModule } from './shared/auth/auth.module';
@@ -13,6 +15,8 @@ import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.mod
 import { ConversationsModule } from './modules/conversations/conversations.module';
 
 import { MapsModule } from './modules/maps/maps.module';
+
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 import { RequestIdMiddleware } from './shared/http/request-id.middleware';
 
@@ -38,6 +42,8 @@ import { HttpExceptionFilter } from './shared/http/http-exception.filter';
 
     ]),
 
+    ScheduleModule.forRoot(),
+
     PrismaModule,
 
     AuthModule,
@@ -47,6 +53,8 @@ import { HttpExceptionFilter } from './shared/http/http-exception.filter';
     ConversationsModule,
 
     MapsModule,
+
+    NotificationsModule,
 
   ],
 

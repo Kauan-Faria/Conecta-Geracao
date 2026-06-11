@@ -2,7 +2,7 @@
 intent: 001-digital-guidance
 phase: inception
 status: inception-approved
-updated: 2026-06-02T19:30:00Z
+updated: 2026-06-11T12:00:00Z
 ---
 
 # Requirements: Orientação digital guiada
@@ -105,7 +105,8 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
   - **Alternativo**: link "Entrar de outra forma" abre tela com **Google** (Must). **E-mail/senha** fica fora do onboarding — usuário pode vincular depois em Configurações, se quiser (fase futura)
   - Conversas e preferências vinculadas ao `firebase_uid` após login completo
   - Não existe fluxo de cuidador ou conta vinculada de terceiros
-  - **Modo convidado** (explorar sem conta) permanece opcional na welcome, claramente secundário ao login por telefone (ver FR-8.2)
+  - **Entrada sem autenticação**: usuário **sempre** cai na **tela de login** (não há welcome como porta de entrada); nessa tela decide fazer login por telefone **ou** entrar sem conta (ver FR-8.2)
+  - **Modo convidado** permanece opcional na tela de login, claramente secundário ao login por telefone (ver FR-8.2)
   - OTP de login ocorre **somente** na tela de autenticação — a IA do chat **nunca** solicita código SMS (ver FR-5)
 - **Priority**: Must
 
@@ -118,13 +119,15 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 - **Priority**: Must
 
 ### FR-8.2: Modo convidado (sessão efêmera)
-- **Description**: Quem ainda não quer criar conta pode usar o app e **conversar com a IA**, mas **sem gravar histórico** na nuvem. Cada nova entrada como convidado inicia **contexto novo** — não retoma conversas de visitas anteriores.
+- **Description**: Quem ainda não quer criar conta pode usar o app e **conversar com a IA**, mas **sem gravar histórico** na nuvem. **Cada abertura do app sem login** leva à tela de login, onde a pessoa escolhe entrar com telefone ou **entrar sem conta**; nesse segundo caso o chat **reinicia do zero** — não retoma conversas de visitas anteriores.
 - **Acceptance Criteria**:
-  - Welcome oferece opção clara de experimentar sem conta (secundária ao login por telefone)
+  - **Porta de entrada**: sem sessão autenticada, abrir o app **sempre** mostra a tela de login (não restaurar modo convidado automaticamente)
+  - Tela de login oferece opção clara de **entrar sem conta** (secundária ao login por telefone), ex.: link "Sem cadastro, sem complicações"
   - Convidado acessa chat e recebe respostas da IA (mesma qualidade de orientação, dentro dos guardrails)
   - **Sem persistência remota**: conversas de convidado **não** são salvas na API / Postgres
-  - **Sem retomada**: ao sair e entrar de novo como convidado, **não** há lista de conversas anteriores nem continuação de thread antiga
-  - Durante uma única sessão convidado, o usuário pode conversar com contexto contínuo até fechar o app ou encerrar sessão; ao reentrar, nova janela de contexto
+  - **Sem retomada entre visitas**: ao fechar o app e abrir de novo sem login, o usuário volta à tela de login; se escolher convidado novamente, **chat reinicia** — sem lista de conversas anteriores nem continuação de thread antiga
+  - **Sem persistência local entre visitas**: sessão convidado **não** sobrevive a cold start do app (sem reativar guest de SharedPreferences)
+  - Durante **uma única visita** convidado (sem fechar o app), o usuário mantém contexto contínuo no chat até encerrar o app ou fazer login
   - CTA discreto no chat convidando a fazer login por telefone para **salvar** o histórico
   - Após login com telefone, histórico passa a ser o do usuário autenticado (FR-6)
 - **Priority**: Must
@@ -249,6 +252,8 @@ Permitir que **analfabetos digitais** (20–70+ anos, smartphone próprio, uso m
 | Remover modo convidado após login por telefone? | Produto | 2026-06-02 | **Resolvido**: manter convidado; IA ok, sem histórico remoto, nova sessão a cada entrada |
 | Nome obrigatório no 1º acesso? | Produto | 2026-06-02 | **Resolvido**: sim, sem "Pular" |
 | Autofill OTP SMS? | Produto | 2026-06-02 | **Resolvido**: sim, com texto orientativo na tela do código |
+| Welcome como porta de entrada vs. login direto? | Produto | 2026-06-11 | **Resolvido**: login é a porta de entrada; welcome removida do fluxo de gate; opção convidado na tela de login |
+| Convidado persiste entre aberturas do app? | Produto | 2026-06-11 | **Resolvido**: não; cada abertura sem login → tela de login → escolha explícita; chat convidado reinicia |
 
 ---
 

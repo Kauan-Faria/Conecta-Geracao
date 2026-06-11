@@ -1,4 +1,6 @@
+import 'package:conecta_geracao/core/routing/guest_session_gate.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/accessibility_controller.dart';
+import 'package:conecta_geracao/features/auth/data/guest_history_repository.dart';
 import 'package:conecta_geracao/features/auth/data/guest_session_repository.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
@@ -15,10 +17,7 @@ void main() {
 
   group('Guest chat', () {
     setUp(() async {
-      SharedPreferences.setMockInitialValues({
-        SharedPreferencesGuestSessionRepository.guestSessionStartedAtKey:
-            DateTime.now().millisecondsSinceEpoch,
-      });
+      SharedPreferences.setMockInitialValues({});
     });
 
     test('sendMessage in guest mode does not require API token', () async {
@@ -61,6 +60,28 @@ void main() {
       notifier.resetForNewConversation();
 
       expect(container.read(chatControllerProvider).messages, isEmpty);
+    });
+
+    test('guest session is inactive on fresh gate after cold start', () async {
+      final session = InMemoryGuestSessionRepository();
+      final history = InMemoryGuestHistoryRepository();
+      final gate = GuestSessionGate(
+        sessionRepository: session,
+        historyRepository: history,
+      );
+      addTearDown(gate.dispose);
+
+      await gate.enterAsGuest();
+      expect(gate.isGuestActive, isTrue);
+
+      final freshGate = GuestSessionGate(
+        sessionRepository: InMemoryGuestSessionRepository(),
+        historyRepository: InMemoryGuestHistoryRepository(),
+      );
+      addTearDown(freshGate.dispose);
+      await freshGate.refresh();
+
+      expect(freshGate.isGuestActive, isFalse);
     });
   });
 }

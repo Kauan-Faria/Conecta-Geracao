@@ -8,6 +8,8 @@ created: 2026-06-01T12:30:00Z
 
 # Technical Design - Knowledge Base
 
+> **Nota histórica (2026-06-10)**: este artefato foi escrito antes do scaffold da API. O caminho atual do backend é `apps/backend/` (pacote pnpm `@conecta-geracao/api`), não `apps/api/`.
+
 ## Architecture Pattern
 
 **Modular monolith NestJS + DDD hexagonal** (alinhado a `system-architecture.md` e `coding-standards.md`).

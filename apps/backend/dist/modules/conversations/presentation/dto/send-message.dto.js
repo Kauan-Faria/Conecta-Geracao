@@ -22,4 +22,10 @@ __decorate([
     (0, class_validator_1.MaxLength)(4000),
     __metadata("design:type", String)
 ], SendMessageDto.prototype, "content", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: ['foreground', 'background'] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['foreground', 'background']),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "appState", void 0);
 //# sourceMappingURL=send-message.dto.js.map

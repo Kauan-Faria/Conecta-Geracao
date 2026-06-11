@@ -20,7 +20,7 @@ stages_completed:
     artifact: ddd-02-technical-design.md
   - name: implement
     completed: 2026-06-01T13:00:00.000Z
-    artifact: apps/api/src/modules/knowledge-base/
+    artifact: apps/backend/src/modules/knowledge-base/
   - name: test
     completed: 2026-06-01T14:00:00.000Z
     artifact: ddd-03-test-report.md
@@ -60,7 +60,7 @@ Tópicos, passos e checkpoints persistidos e prontos para RAG.
 
 - [x] **1. model**: Complete → ddd-01-domain-model.md
 - [x] **2. design**: Complete → ddd-02-technical-design.md
-- [x] **3. implement**: Complete → apps/api/src/modules/knowledge-base/
+- [x] **3. implement**: Complete → apps/backend/src/modules/knowledge-base/
 - [x] **4. test**: Complete → ddd-03-test-report.md
 
 ## Dependencies

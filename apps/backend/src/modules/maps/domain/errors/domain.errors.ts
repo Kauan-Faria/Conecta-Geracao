@@ -7,7 +7,7 @@ export type DomainErrorCode =
   | 'PLACE_NOT_FOUND'
   | 'ROUTE_NOT_FOUND'
   | 'EXTERNAL_SERVICE_UNAVAILABLE'
-  | 'OVERPASS_TIMEOUT'
+  | 'MAPS_SEARCH_TIMEOUT'
   | 'PROVIDER_TIMEOUT';
 
 export class DomainError extends Error {
@@ -71,11 +71,14 @@ export class ExternalServiceUnavailableError extends DomainError {
   }
 }
 
-export class OverpassTimeoutError extends DomainError {
+export class MapsSearchTimeoutError extends DomainError {
   constructor() {
-    super('OVERPASS_TIMEOUT', 'Busca demorou demais; tente novamente');
+    super('MAPS_SEARCH_TIMEOUT', 'Busca demorou demais; tente novamente');
   }
 }
+
+/** @deprecated Use MapsSearchTimeoutError */
+export class OverpassTimeoutError extends MapsSearchTimeoutError {}
 
 export class ProviderTimeoutError extends DomainError {
   constructor(service: string) {

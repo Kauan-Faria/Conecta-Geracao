@@ -18,15 +18,15 @@ const result_1 = require("../../../../shared/result");
 const maps_entities_1 = require("../../domain/entities/maps.entities");
 const domain_errors_1 = require("../../domain/errors/domain.errors");
 const poi_category_mapper_service_1 = require("../../domain/services/poi-category-mapper.service");
-const osm_response_normalizer_service_1 = require("../../domain/services/osm-response-normalizer.service");
+const poi_response_normalizer_service_1 = require("../../domain/services/poi-response-normalizer.service");
 const geo_point_vo_1 = require("../../domain/value-objects/geo-point.vo");
 const poi_category_vo_1 = require("../../domain/value-objects/poi-category.vo");
 const search_radius_vo_1 = require("../../domain/value-objects/search-radius.vo");
 const maps_gateways_1 = require("../ports/maps.gateways");
 const maps_config_1 = require("../../infrastructure/config/maps.config");
 let SearchPoisUseCase = class SearchPoisUseCase {
-    constructor(overpass, categoryMapper, normalizer, config) {
-        this.overpass = overpass;
+    constructor(poiSearch, categoryMapper, normalizer, config) {
+        this.poiSearch = poiSearch;
         this.categoryMapper = categoryMapper;
         this.normalizer = normalizer;
         this.config = config;
@@ -36,8 +36,8 @@ let SearchPoisUseCase = class SearchPoisUseCase {
             const center = geo_point_vo_1.GeoPoint.create(input.lat, input.lon);
             const category = poi_category_vo_1.PoiCategory.create(input.category);
             const radius = search_radius_vo_1.SearchRadius.create(input.radiusKm, this.config.defaultRadiusKm, this.config.maxRadiusKm);
-            const tagFilters = this.categoryMapper.toOverpassFilters(category);
-            const raw = await this.overpass.searchAround(center, radius.toMeters(), tagFilters);
+            const placeType = this.categoryMapper.toGooglePlaceType(category);
+            const raw = await this.poiSearch.searchAround(center, radius.toMeters(), placeType);
             const results = this.normalizer.normalizePois(raw, center);
             return (0, result_1.ok)(maps_entities_1.PoiSearchResult.create({
                 center,
@@ -56,9 +56,9 @@ let SearchPoisUseCase = class SearchPoisUseCase {
 exports.SearchPoisUseCase = SearchPoisUseCase;
 exports.SearchPoisUseCase = SearchPoisUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(maps_gateways_1.OVERPASS_GATEWAY)),
+    __param(0, (0, common_1.Inject)(maps_gateways_1.POI_SEARCH_GATEWAY)),
     __param(3, (0, common_1.Inject)(maps_config_1.MAPS_CONFIG)),
     __metadata("design:paramtypes", [Object, poi_category_mapper_service_1.PoiCategoryMapper,
-        osm_response_normalizer_service_1.OsmResponseNormalizer, Object])
+        poi_response_normalizer_service_1.PoiResponseNormalizer, Object])
 ], SearchPoisUseCase);
 //# sourceMappingURL=search-pois.use-case.js.map

@@ -3,20 +3,20 @@ import { err, ok, Result } from '../../../../shared/result';
 import { PoiSearchResult } from '../../domain/entities/maps.entities';
 import { DomainError } from '../../domain/errors/domain.errors';
 import { PoiCategoryMapper } from '../../domain/services/poi-category-mapper.service';
-import { OsmResponseNormalizer } from '../../domain/services/osm-response-normalizer.service';
+import { PoiResponseNormalizer } from '../../domain/services/poi-response-normalizer.service';
 import { GeoPoint } from '../../domain/value-objects/geo-point.vo';
 import { PoiCategory } from '../../domain/value-objects/poi-category.vo';
 import { SearchRadius } from '../../domain/value-objects/search-radius.vo';
-import { OVERPASS_GATEWAY, OverpassGateway } from '../ports/maps.gateways';
+import { POI_SEARCH_GATEWAY, PoiSearchGateway } from '../ports/maps.gateways';
 import { MAPS_CONFIG, MapsConfig } from '../../infrastructure/config/maps.config';
 
 @Injectable()
 export class SearchPoisUseCase {
   constructor(
-    @Inject(OVERPASS_GATEWAY)
-    private readonly overpass: OverpassGateway,
+    @Inject(POI_SEARCH_GATEWAY)
+    private readonly poiSearch: PoiSearchGateway,
     private readonly categoryMapper: PoiCategoryMapper,
-    private readonly normalizer: OsmResponseNormalizer,
+    private readonly normalizer: PoiResponseNormalizer,
     @Inject(MAPS_CONFIG)
     private readonly config: MapsConfig,
   ) {}
@@ -35,9 +35,9 @@ export class SearchPoisUseCase {
         this.config.defaultRadiusKm,
         this.config.maxRadiusKm,
       );
-      const tagFilters = this.categoryMapper.toOverpassFilters(category);
+      const placeType = this.categoryMapper.toGooglePlaceType(category);
 
-      const raw = await this.overpass.searchAround(center, radius.toMeters(), tagFilters);
+      const raw = await this.poiSearch.searchAround(center, radius.toMeters(), placeType);
       const results = this.normalizer.normalizePois(raw, center);
 
       return ok(

@@ -19,13 +19,13 @@ const domain_errors_1 = require("../../domain/errors/domain.errors");
 const place_query_vo_1 = require("../../domain/value-objects/place-query.vo");
 const maps_gateways_1 = require("../ports/maps.gateways");
 let GeocodePlaceUseCase = class GeocodePlaceUseCase {
-    constructor(nominatim) {
-        this.nominatim = nominatim;
+    constructor(geocoding) {
+        this.geocoding = geocoding;
     }
     async execute(queryText) {
         try {
             const query = place_query_vo_1.PlaceQuery.create(queryText);
-            const result = await this.nominatim.geocode(query);
+            const result = await this.geocoding.geocode(query);
             if (!result) {
                 return (0, result_1.err)(new domain_errors_1.PlaceNotFoundError());
             }
@@ -41,7 +41,7 @@ let GeocodePlaceUseCase = class GeocodePlaceUseCase {
 exports.GeocodePlaceUseCase = GeocodePlaceUseCase;
 exports.GeocodePlaceUseCase = GeocodePlaceUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(maps_gateways_1.NOMINATIM_GATEWAY)),
+    __param(0, (0, common_1.Inject)(maps_gateways_1.GEOCODING_GATEWAY)),
     __metadata("design:paramtypes", [Object])
 ], GeocodePlaceUseCase);
 //# sourceMappingURL=geocode-place.use-case.js.map

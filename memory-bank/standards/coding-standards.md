@@ -48,7 +48,7 @@ apps/
     lib/
       features/           # feature-based
       core/               # shared: theme, routing, http client
-  api/                    # NestJS
+  backend/                # NestJS (pacote pnpm: @conecta-geracao/api)
     src/
       modules/            # por domínio (bounded context)
         {domain}/

@@ -8,6 +8,7 @@ import {
   Post,
   Body,
   Query,
+  Headers,
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
@@ -29,6 +30,19 @@ import {
   toConversationSummary,
   toMessageDto,
 } from './mappers/conversation.mapper';
+
+function resolveAppInBackground(
+  appStateHeader?: string,
+  appStateBody?: 'foreground' | 'background',
+): boolean {
+  if (appStateHeader) {
+    return appStateHeader.toLowerCase() === 'background';
+  }
+  if (appStateBody) {
+    return appStateBody === 'background';
+  }
+  return false;
+}
 
 @ApiTags('conversations')
 @ApiBearerAuth()
@@ -82,8 +96,12 @@ export class ConversationsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() dto: SendMessageDto,
+    @Headers('x-app-state') appStateHeader?: string,
   ) {
-    const result = await this.sendMessage.execute(user.uid, id, dto.content);
+    const appInBackground = resolveAppInBackground(appStateHeader, dto.appState);
+    const result = await this.sendMessage.execute(user.uid, id, dto.content, {
+      appInBackground,
+    });
     if (!result.ok) throw this.mapDomainError(result.error);
     return toMessageDto(result.value);
   }

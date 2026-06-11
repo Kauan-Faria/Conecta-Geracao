@@ -9,6 +9,10 @@ import {
   AssistantReplyGenerator,
 } from '../ports/assistant-reply.generator';
 import {
+  ASSISTANT_REPLY_NOTIFICATION_TRIGGER,
+  AssistantReplyNotificationTrigger,
+} from '../../../notifications/application/ports/assistant-reply-notification.trigger';
+import {
   CONVERSATION_MESSAGE_UOW,
   ConversationMessageUnitOfWork,
   MESSAGE_REPOSITORY,
@@ -19,6 +23,10 @@ import {
   ConversationRepository,
 } from '../ports/conversation.repository';
 import { ConversationOwnershipPolicy } from '../../domain/services/conversation-ownership.policy';
+
+export interface SendMessageOptions {
+  appInBackground?: boolean;
+}
 
 @Injectable()
 export class SendMessageUseCase {
@@ -32,12 +40,15 @@ export class SendMessageUseCase {
     @Inject(MESSAGE_REPOSITORY)
     private readonly messages: MessageRepository,
     private readonly ownership: ConversationOwnershipPolicy,
+    @Inject(ASSISTANT_REPLY_NOTIFICATION_TRIGGER)
+    private readonly assistantReplyTrigger: AssistantReplyNotificationTrigger,
   ) {}
 
   async execute(
     firebaseUid: string,
     conversationId: string,
     rawContent: string,
+    options?: SendMessageOptions,
   ): Promise<Result<Message, DomainError>> {
     try {
       const conversation = await this.conversations.findByIdForUser(conversationId, firebaseUid);
@@ -71,6 +82,12 @@ export class SendMessageUseCase {
         nextCurrentStep: assistantReply.nextCurrentStep,
         topicSlug: assistantReply.resolvedTopicSlug ?? owned.topicSlug,
         assistantMetadata,
+      });
+
+      void this.assistantReplyTrigger.onAssistantReplyReady({
+        conversationId,
+        firebaseUid,
+        appInBackground: options?.appInBackground ?? false,
       });
 
       return ok(result.assistantMessage);

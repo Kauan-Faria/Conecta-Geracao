@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:conecta_geracao/features/auth/data/auth_repository.dart';
+import 'package:conecta_geracao/features/auth/data/email_auth_error_messages.dart';
 import 'package:conecta_geracao/features/auth/domain/app_user.dart';
 import 'package:conecta_geracao/features/auth/domain/phone_verification_session.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -200,6 +201,116 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUser> signUpWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      final firebaseUser = credential.user;
+      if (firebaseUser == null) {
+        throw const AuthException('Não foi possível criar conta. Tente novamente.');
+      }
+      if (!firebaseUser.emailVerified) {
+        await firebaseUser.sendEmailVerification();
+      }
+      await firebaseUser.reload();
+      final user = _mapUser(_firebaseAuth.currentUser);
+      if (user == null) {
+        throw const AuthException('Não foi possível criar conta. Tente novamente.');
+      }
+      return user;
+    } on AuthException {
+      rethrow;
+    } on FirebaseAuthException catch (error) {
+      throw AuthException(mapEmailPasswordAuthError(error.code));
+    } catch (_) {
+      throw const AuthException('Não foi possível criar conta. Tente novamente.');
+    }
+  }
+
+  @override
+  Future<AppUser> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      final credential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      final user = _mapUser(credential.user);
+      if (user == null) {
+        throw const AuthException('Não foi possível entrar. Tente novamente.');
+      }
+      return user;
+    } on AuthException {
+      rethrow;
+    } on FirebaseAuthException catch (error) {
+      throw AuthException(mapEmailPasswordAuthError(error.code));
+    } catch (_) {
+      throw const AuthException('Não foi possível entrar. Tente novamente.');
+    }
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    final firebaseUser = _firebaseAuth.currentUser;
+    if (firebaseUser == null) {
+      throw const AuthException('Sessão expirada. Entre novamente.');
+    }
+
+    try {
+      await firebaseUser.sendEmailVerification();
+    } on FirebaseAuthException catch (error) {
+      throw AuthException(mapEmailPasswordAuthError(error.code));
+    } catch (_) {
+      throw const AuthException(
+        'Não foi possível enviar o e-mail. Tente novamente.',
+      );
+    }
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (error) {
+      throw AuthException(mapPasswordResetError(error.code));
+    } catch (_) {
+      throw const AuthException(
+        'Não foi possível enviar o e-mail. Tente novamente.',
+      );
+    }
+  }
+
+  @override
+  Future<AppUser?> reloadCurrentUser() async {
+    final firebaseUser = _firebaseAuth.currentUser;
+    if (firebaseUser == null) {
+      return null;
+    }
+
+    try {
+      await firebaseUser.reload();
+      return _mapUser(_firebaseAuth.currentUser);
+    } on FirebaseAuthException catch (error) {
+      throw AuthException(mapEmailPasswordAuthError(error.code));
+    } catch (_) {
+      throw const AuthException('Não foi possível atualizar sua conta.');
+    }
+  }
+
+  @override
+  Future<bool> isEmailVerified() async {
+    final user = await reloadCurrentUser();
+    return user?.emailVerified ?? false;
+  }
+
+  @override
   Future<void> signOut() async {
     await Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
   }
@@ -217,6 +328,7 @@ class FirebaseAuthRepository implements AuthRepository {
       uid: user.uid,
       displayName: user.displayName,
       email: user.email,
+      emailVerified: user.emailVerified,
     );
   }
 

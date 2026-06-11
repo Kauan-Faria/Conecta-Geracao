@@ -137,3 +137,4 @@ Flutter, Riverpod, Firebase Auth SDK, SharedPreferences/Hive para prefs.
 |------|------|---------|-----------|
 | 001-mobile-auth-shell | simple | 001, 002, 003 | Auth Google + shell + acessibilidade (entregue) |
 | 010-mobile-auth-phone | simple | 004, 005, 006, 007 | Login telefone, nome, Google, convidado efêmero |
+| 021-mobile-auth-login-gate-refactor | simple | 002, 004, 007 | Refatoração: login como gate, convidado na login, sessão efêmera |

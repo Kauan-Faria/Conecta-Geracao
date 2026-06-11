@@ -2,7 +2,6 @@ import 'package:conecta_geracao/app.dart';
 import 'package:conecta_geracao/core/network/connectivity_service.dart';
 import 'package:conecta_geracao/core/routing/app_router.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/accessibility_controller.dart';
-import 'package:conecta_geracao/features/auth/data/guest_session_repository.dart';
 import 'package:conecta_geracao/features/auth/domain/app_user.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/chat/data/chat_repository.dart';
@@ -10,6 +9,8 @@ import 'package:conecta_geracao/features/chat/data/conversation_cache_repository
 import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
 import 'package:conecta_geracao/features/maps/domain/geo_point.dart';
 import 'package:conecta_geracao/features/maps/presentation/location_controller.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_bootstrap.dart';
+import 'package:conecta_geracao/features/notifications/presentation/notifications_providers.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +19,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_chat_repository.dart';
+import 'fake_notifications_remote_port.dart';
+import 'fake_push_messaging_client.dart';
 
 class OnlineConnectivityService extends ConnectivityService {
   OnlineConnectivityService() : super(Connectivity());
@@ -49,13 +52,7 @@ Future<ProviderContainer> pumpShellApp(
 
   final fakeAuth = FakeAuthRepository(initialUser: user);
   final fakeChat = FakeChatRepository();
-  final initialValues = <String, Object>{};
-  if (guestSession) {
-    initialValues[SharedPreferencesGuestSessionRepository
-            .guestSessionStartedAtKey] =
-        DateTime.now().millisecondsSinceEpoch;
-  }
-  SharedPreferences.setMockInitialValues(initialValues);
+  SharedPreferences.setMockInitialValues({});
   final sharedPreferences = await SharedPreferences.getInstance();
 
   late ProviderContainer container;
@@ -77,6 +74,13 @@ Future<ProviderContainer> pumpShellApp(
         ),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
         locationControllerProvider.overrideWith(TestLocationController.new),
+        pushMessagingClientProvider.overrideWithValue(
+          FakePushMessagingClient(),
+        ),
+        notificationsApiProvider.overrideWithValue(
+          FakeNotificationsRemotePort(),
+        ),
+        notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
       ],
       child: const ConectaGeracaoApp(),
     ),
@@ -86,6 +90,12 @@ Future<ProviderContainer> pumpShellApp(
   container = ProviderScope.containerOf(
     tester.element(find.byType(ConectaGeracaoApp)),
   );
+
+  if (guestSession) {
+    await tester.tap(find.text('Continua sem Cadastro'));
+    await tester.pumpAndSettle();
+  }
+
   return container;
 }
 

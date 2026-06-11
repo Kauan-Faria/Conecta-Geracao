@@ -5,7 +5,7 @@ intent: 001-digital-guidance
 status: complete
 priority: must
 created: 2026-05-28T01:00:00.000Z
-assigned_bolt: 001-mobile-auth-shell
+assigned_bolt: 021-mobile-auth-login-gate-refactor
 implemented: true
 ---
 
@@ -21,11 +21,14 @@ implemented: true
 
 - [ ] **Given** estou logado, **When** abro o app, **Then** vejo navegação para Início/Chat e Configurações
 - [ ] **Given** estou em qualquer tela, **When** uso o menu, **Then** alvos de toque ≥ 48dp com rótulo textual
-- [ ] **Given** não estou logado, **When** abro o app, **Then** sou direcionado ao login
+- [ ] **Given** não estou logado, **When** abro o app, **Then** sou direcionado à **tela de login** (não à welcome)
+- [ ] **Given** estou na tela de login, **When** escolho entrar sem conta, **Then** entro como convidado e vou para a home com chat reiniciado
 
 ## Technical Notes
 
 - Riverpod para estado de auth; GoRouter ou Navigator 2.0
+- `initialLocation` e redirect: `/login` quando `!hasAccess`; **não** restaurar guest de cold start
+- Rota `/welcome` removida do gate de auth (pode ser eliminada ou mantida só para deep links futuros)
 - Portrait only (MVP)
 
 ## Dependencies

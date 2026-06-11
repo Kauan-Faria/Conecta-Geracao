@@ -9,15 +9,11 @@ function parsePositiveInt(raw, fallback) {
 }
 function createMapsConfigFromEnv() {
     return {
-        nominatimBaseUrl: process.env.NOMINATIM_BASE_URL?.trim() || 'https://nominatim.openstreetmap.org',
-        overpassBaseUrl: process.env.OVERPASS_BASE_URL?.trim() ||
-            'https://overpass-api.de/api/interpreter',
-        osrmBaseUrl: process.env.OSRM_BASE_URL?.trim() || 'https://router.project-osrm.org',
+        googleMapsApiKey: process.env.GOOGLEMAPS_API_KEY?.trim() ?? '',
         httpTimeoutMs: parsePositiveInt(process.env.MAPS_HTTP_TIMEOUT_MS, 25_000),
         defaultRadiusKm: parsePositiveInt(process.env.MAPS_DEFAULT_RADIUS_KM, 5),
         maxRadiusKm: parsePositiveInt(process.env.MAPS_MAX_RADIUS_KM, 10),
         geocodeCacheTtlMs: 600_000,
-        nominatimMinIntervalMs: 1_000,
         userAgent: process.env.MAPS_USER_AGENT?.trim() ||
             'ConectaGeracao/1.0 (contact@conectageracao.app)',
     };

@@ -7,6 +7,7 @@ priority: must
 created: 2026-06-08T20:00:00Z
 assigned_bolt: 015-in-app-maps-navigation-ui
 implemented: true
+updated: 2026-06-10T14:00:00Z
 ---
 
 # Story: 006-static-route-display
@@ -20,15 +21,15 @@ implemented: true
 ## Acceptance Criteria
 
 - [ ] **Given** POI selecionado, **When** rota carrega, **Then** mapa exibe marcador origem (eu) e destino (lugar)
-- [ ] **Given** rota disponível, **When** OSRM responde, **Then** linha (polyline) conecta origem e destino
+- [ ] **Given** rota disponível, **When** Directions API responde, **Then** linha (polyline) conecta origem e destino
 - [ ] **Given** rota exibida, **When** leio texto abaixo, **Then** vejo distância e tempo em linguagem simples (ex.: "cerca de 1,2 km — 15 min a pé")
-- [ ] **Given** OSRM falha, **When** erro, **Then** mensagem amigável + opção "Tentar de novo" (sem crash)
+- [ ] **Given** Directions falha, **When** erro, **Then** mensagem amigável + opção "Tentar de novo" (sem crash)
 - [ ] **Given** rota visível, **When** toco "Centralizar", **Then** mapa enquadra origem e destino (botão ≥ 48dp)
 
 ## Technical Notes
 
-- Decodificar polyline OSRM; layer `PolylineLayer` no flutter_map
-- Chama `POST /maps/route`
+- Decodificar polyline encoded (Google Directions); layer `PolylineLayer` no flutter_map
+- Chama `POST /maps/route` (proxy backend → Google Directions API)
 - Sem turn-by-turn no MVP
 
 ## Dependencies
@@ -43,4 +44,4 @@ implemented: true
 ## Out of Scope
 
 - Navegação passo a passo
-- Modo carro vs a pé (OSRM default foot/car — definir na Construction)
+- Modo carro vs a pé (Directions usa `travelMode: DRIVE` no backend)
