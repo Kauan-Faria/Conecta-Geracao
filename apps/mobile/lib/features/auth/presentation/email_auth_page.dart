@@ -4,7 +4,6 @@ import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/features/auth/data/auth_repository.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/email_auth_controller.dart';
-import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/widgets/auth_cta_button.dart';
 import 'package:conecta_geracao/features/auth/presentation/widgets/auth_screen_scaffold.dart';
 import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
@@ -115,7 +114,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            isSignUp ? 'Vamos fazer seu cadastro' : 'Entrar com email e senha',
+            'Vamos fazer seu cadastro',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -123,9 +122,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
-            isSignUp
-                ? 'Faça seu cadastro com email e senha, ou entre com sua conta google'
-                : 'Selecione seu email e senha para entrar',
+            'Faça seu cadastro com email e senha, ou entre com sua conta google',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -289,7 +286,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
               AuthCtaButton(
                 label: 'Não possuo Cadastro',
                 semanticLabel: 'Não possuo cadastro, criar conta com e-mail',
-                variant: AuthCtaVariant.secondary,
+                variant: AuthCtaVariant.accent,
                 onPressed: isBusy ? null : _goToSignUp,
               ),
             if (!isSignUp) SizedBox(height: AppSpacing.md),
@@ -305,7 +302,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
               AuthCtaButton(
                 label: 'Entrar sem Cadastro',
                 semanticLabel: 'Entrar sem cadastro, como convidado',
-                variant: AuthCtaVariant.secondary,
+                variant: AuthCtaVariant.indigo,
                 onPressed: isBusy ? null : _enterAsGuest,
               ),
             ],

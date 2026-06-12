@@ -6,10 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NotificationsBootstrap {
   NotificationsBootstrap({
-    required NotificationsRepository repository,
-    required NotificationNavigationCoordinator navigationCoordinator,
-  }) : _repository = repository,
-       _navigationCoordinator = navigationCoordinator;
+    required this._repository,
+    required this._navigationCoordinator,
+  });
 
   final NotificationsRepository _repository;
   final NotificationNavigationCoordinator _navigationCoordinator;

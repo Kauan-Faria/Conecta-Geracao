@@ -13,20 +13,14 @@ typedef NotificationMessageHandler = void Function(RemoteMessagePayload message)
 
 class NotificationsRepository {
   NotificationsRepository({
-    required NotificationsRemotePort api,
-    required PushMessagingClient pushClient,
-    required NotificationPrefsRepository prefs,
-    required NotificationAnalytics analytics,
-    required AuthenticatedUserChecker isAuthenticatedUser,
-    required ConnectionChecker hasConnection,
+    required this._api,
+    required this._pushClient,
+    required this._prefs,
+    required this._analytics,
+    required this._isAuthenticatedUser,
+    required this._hasConnection,
     DevicePlatform Function()? currentPlatform,
-  }) : _api = api,
-       _pushClient = pushClient,
-       _prefs = prefs,
-       _analytics = analytics,
-       _isAuthenticatedUser = isAuthenticatedUser,
-       _hasConnection = hasConnection,
-       _currentPlatform = currentPlatform ?? currentDevicePlatform;
+  }) : _currentPlatform = currentPlatform ?? currentDevicePlatform;
 
   final NotificationsRemotePort _api;
   final PushMessagingClient _pushClient;

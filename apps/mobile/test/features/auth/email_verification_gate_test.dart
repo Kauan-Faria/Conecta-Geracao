@@ -1,4 +1,3 @@
-import 'package:conecta_geracao/core/routing/routing_providers.dart';
 import 'package:conecta_geracao/features/accessibility/presentation/accessibility_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/auth/domain/app_user.dart';

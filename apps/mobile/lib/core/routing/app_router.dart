@@ -22,7 +22,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final guestGate = ref.watch(guestSessionGateProvider);
+  ref.watch(guestSessionGateProvider);
   final routerRefresh = ref.watch(routerRefreshProvider);
 
   return GoRouter(
@@ -61,7 +61,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/home';
       }
 
-      if (hasAccess &&
+      if (isAuthenticated &&
           isLoginFlow &&
           !needsDisplayName &&
           !needsEmailVerification) {

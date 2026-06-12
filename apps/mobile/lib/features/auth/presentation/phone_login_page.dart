@@ -148,7 +148,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
             AuthCtaButton(
               label: 'Entra com Email e senha',
               semanticLabel: 'Entrar com e-mail e senha',
-              variant: AuthCtaVariant.secondary,
+              variant: AuthCtaVariant.accent,
               onPressed: isBusy
                   ? null
                   : () => context.push('/login/email?mode=signin'),
@@ -165,7 +165,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
             AuthCtaButton(
               label: 'Entrar sem Cadastro',
               semanticLabel: 'Entrar sem cadastro, como convidado',
-              variant: AuthCtaVariant.secondary,
+              variant: AuthCtaVariant.indigo,
               onPressed: isBusy ? null : _enterAsGuest,
             ),
           ],

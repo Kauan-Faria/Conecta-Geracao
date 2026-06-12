@@ -70,14 +70,11 @@ final foregroundNotificationControllerProvider =
 
 class NotificationNavigationCoordinator {
   NotificationNavigationCoordinator({
-    required Ref ref,
-    required NotificationsRepository repository,
-    required NotificationDeepLinkHandler deepLinkHandler,
-    required GoRouter router,
-  }) : _ref = ref,
-       _repository = repository,
-       _deepLinkHandler = deepLinkHandler,
-       _router = router;
+    required this._ref,
+    required this._repository,
+    required this._deepLinkHandler,
+    required this._router,
+  });
 
   final Ref _ref;
   final NotificationsRepository _repository;

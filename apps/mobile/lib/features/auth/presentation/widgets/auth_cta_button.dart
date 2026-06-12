@@ -2,7 +2,7 @@ import 'package:conecta_geracao/core/theme/app_colors.dart';
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
-enum AuthCtaVariant { primary, secondary }
+enum AuthCtaVariant { primary, secondary, accent, indigo }
 
 enum AuthCtaIcon { forward, back }
 
@@ -28,6 +28,8 @@ class AuthCtaButton extends StatelessWidget {
   Color get _backgroundColor => switch (variant) {
     AuthCtaVariant.primary => AppColors.primary,
     AuthCtaVariant.secondary => AppColors.secondaryCta,
+    AuthCtaVariant.accent => AppColors.secondaryCtaTeal,
+    AuthCtaVariant.indigo => AppColors.secondaryCtaIndigo,
   };
 
   IconData get _iconData => switch (icon) {
@@ -70,6 +72,10 @@ class AuthCtaButton extends StatelessWidget {
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    if (icon == AuthCtaIcon.back) ...[
+                      Icon(_iconData, size: 16),
+                      SizedBox(width: AppSpacing.xs),
+                    ],
                     Flexible(
                       child: Text(
                         label,
@@ -83,8 +89,10 @@ class AuthCtaButton extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: AppSpacing.xs),
-                    Icon(_iconData, size: 16),
+                    if (icon == AuthCtaIcon.forward) ...[
+                      SizedBox(width: AppSpacing.xs),
+                      Icon(_iconData, size: 16),
+                    ],
                   ],
                 ),
         ),

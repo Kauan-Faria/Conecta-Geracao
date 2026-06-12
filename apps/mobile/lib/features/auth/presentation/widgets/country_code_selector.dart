@@ -181,7 +181,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                       )
                     : ListView.separated(
                         itemCount: _filtered.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (_, _) => const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final country = _filtered[index];
                           final isSelected =

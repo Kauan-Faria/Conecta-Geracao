@@ -8,7 +8,7 @@ class AuthScreenScaffold extends StatelessWidget {
   const AuthScreenScaffold({
     required this.body,
     this.bottom,
-    this.showBrandDivider = false,
+    this.showBrandDivider = true,
     super.key,
   });
 
@@ -29,7 +29,7 @@ class AuthScreenScaffold extends StatelessWidget {
               AuthBrandHeader(showDivider: showBrandDivider),
               SizedBox(height: AppSpacing.xl),
               Expanded(child: SingleChildScrollView(child: body)),
-              if (bottom != null) bottom!,
+              ?bottom,
             ],
           ),
         ),

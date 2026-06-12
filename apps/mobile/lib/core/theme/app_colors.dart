@@ -63,6 +63,12 @@ abstract final class AppColors {
   /// Alias legado — preferir [primary].
   static const Color secondary = primary;
 
-  /// CTA secundário (ex.: "Continua sem Cadastro" na tela de login).
+  /// CTA secundário azul (ex.: "Continua sem Cadastro", "Se cadastrar com o Google").
   static const Color secondaryCta = Color(0xFF0077FF);
+
+  /// CTA verde-água (ações alternativas: "Entra com Email e senha", "Não possuo Cadastro").
+  static const Color secondaryCtaTeal = Color(0xFF40A696);
+
+  /// CTA azul escuro ("Entrar sem Cadastro").
+  static const Color secondaryCtaIndigo = Color(0xFF1D4ED8);
 }
