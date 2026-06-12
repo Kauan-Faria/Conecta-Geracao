@@ -39,6 +39,16 @@ cd apps/mobile
 flutter run
 ```
 
+**API local (Docker na porta 3000):**
+
+| Onde roda o app | URL da API |
+|-----------------|------------|
+| Emulador Android | automático: `http://10.0.2.2:3000` |
+| Simulador iOS / desktop | automático: `http://localhost:3000` |
+| Celular físico (mesma Wi‑Fi) | `flutter run --dart-define=API_BASE_URL=http://SEU_IP:3000` |
+
+Descubra o IP do PC: `ipconfig` (Windows) → IPv4 da rede Wi‑Fi/Ethernet.
+
 Atalhos no `flutter run`:
 
 | Tecla | Ação |

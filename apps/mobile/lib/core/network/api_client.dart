@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:conecta_geracao/core/network/api_base_url.dart';
 import 'package:conecta_geracao/core/network/api_exception.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -9,13 +10,11 @@ typedef IdTokenProvider = Future<String?> Function();
 class ApiClient {
   ApiClient({
     required this.getIdToken,
-    this.baseUrl = const String.fromEnvironment(
-      'API_BASE_URL',
-      defaultValue: 'http://localhost:3000',
-    ),
+    String? baseUrl,
     http.Client? httpClient,
     Uuid? uuid,
-  }) : _http = httpClient ?? http.Client(),
+  }) : baseUrl = baseUrl ?? resolveApiBaseUrl(),
+       _http = httpClient ?? http.Client(),
        _uuid = uuid ?? const Uuid();
 
   final IdTokenProvider getIdToken;

@@ -16,7 +16,7 @@ import {
 import { KNOWLEDGE_RETRIEVER } from './application/ports/knowledge-retriever';
 import { LLM_PROVIDER } from './application/ports/llm-provider';
 import { GeminiAssistantReplyGenerator } from './infrastructure/assistant/gemini-assistant-reply.generator';
-import { GeminiLlmProvider } from './infrastructure/assistant/gemini-llm.provider';
+import { GeminiService } from './infrastructure/assistant/gemini.service';
 import { PrismaKnowledgeRetriever } from './infrastructure/knowledge/prisma-knowledge-retriever';
 import { SensitiveContentPolicy } from './domain/services/sensitive-content.policy';
 import { CheckpointResponsePolicy } from './domain/services/checkpoint-response.policy';
@@ -24,11 +24,13 @@ import { CreateConversationUseCase } from './application/use-cases/create-conver
 import { ListConversationsUseCase } from './application/use-cases/list-conversations.use-case';
 import { GetConversationUseCase } from './application/use-cases/get-conversation.use-case';
 import { SendMessageUseCase } from './application/use-cases/send-message.use-case';
+import { ReplyGuestMessageUseCase } from './application/use-cases/reply-guest-message.use-case';
 import { ConversationsController } from './presentation/conversations.controller';
+import { GuestChatController } from './presentation/guest-chat.controller';
 
 @Module({
   imports: [KnowledgeBaseModule, NotificationsModule],
-  controllers: [ConversationsController],
+  controllers: [ConversationsController, GuestChatController],
   providers: [
     ConversationOwnershipPolicy,
     SensitiveContentPolicy,
@@ -51,7 +53,7 @@ import { ConversationsController } from './presentation/conversations.controller
     },
     {
       provide: LLM_PROVIDER,
-      useClass: GeminiLlmProvider,
+      useClass: GeminiService,
     },
     {
       provide: ASSISTANT_REPLY_GENERATOR,
@@ -61,6 +63,7 @@ import { ConversationsController } from './presentation/conversations.controller
     ListConversationsUseCase,
     GetConversationUseCase,
     SendMessageUseCase,
+    ReplyGuestMessageUseCase,
   ],
 })
 export class ConversationsModule {}

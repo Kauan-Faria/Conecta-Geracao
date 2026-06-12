@@ -39,6 +39,8 @@ class ChatState {
   const ChatState({
     this.conversationId,
     this.conversationStatus = 'in_progress',
+    this.topicSlug,
+    this.currentStep = 0,
     this.messages = const [],
     this.isSending = false,
     this.isLoadingConversation = false,
@@ -50,6 +52,8 @@ class ChatState {
 
   final String? conversationId;
   final String conversationStatus;
+  final String? topicSlug;
+  final int currentStep;
   final List<ChatMessage> messages;
   final bool isSending;
   final bool isLoadingConversation;
@@ -71,6 +75,8 @@ class ChatState {
   ChatState copyWith({
     String? conversationId,
     String? conversationStatus,
+    String? topicSlug,
+    int? currentStep,
     List<ChatMessage>? messages,
     bool? isSending,
     bool? isLoadingConversation,
@@ -83,6 +89,8 @@ class ChatState {
     return ChatState(
       conversationId: conversationId ?? this.conversationId,
       conversationStatus: conversationStatus ?? this.conversationStatus,
+      topicSlug: topicSlug ?? this.topicSlug,
+      currentStep: currentStep ?? this.currentStep,
       messages: messages ?? this.messages,
       isSending: isSending ?? this.isSending,
       isLoadingConversation:
@@ -103,6 +111,8 @@ class ChatController extends Notifier<ChatState> {
 
   CachedChatRepository get _repository =>
       ref.read(cachedChatRepositoryProvider);
+
+  ConversationsApi get _conversationsApi => ref.read(conversationsApiProvider);
 
   ConnectivityService get _connectivity =>
       ref.read(connectivityServiceProvider);
@@ -133,17 +143,27 @@ class ChatController extends Notifier<ChatState> {
     return true;
   }
 
-  Future<String> _guestAssistantReply(
-    String userMessage, {
-    String? topicSlug,
-  }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-    final topicHint = topicSlug != null ? ' (tópico: $topicSlug)' : '';
-    return 'Recebi sua mensagem: $userMessage$topicHint. '
-        '(Modo sem cadastro — entre com seu celular para salvar o histórico.)';
+  List<GuestMessageTurn> _guestMessageHistory() {
+    return state.messages
+        .map(
+          (message) => GuestMessageTurn(
+            role: message.role.name,
+            content: message.content,
+          ),
+        )
+        .toList();
   }
 
-  Future<void> _sendGuestMessage(String content) async {
+  Future<void> _sendGuestMessage(
+    String content, {
+    String? topicSlug,
+  }) async {
+    if (state.isOffline || !await _connectivity.hasConnection()) {
+      state = state.copyWith(isOffline: true, errorMessage: offlineSendMessage);
+      return;
+    }
+
+    final activeTopicSlug = topicSlug ?? state.topicSlug;
     final pendingUserMessage = ChatMessage(
       id: 'guest-${DateTime.now().millisecondsSinceEpoch}',
       role: MessageRole.user,
@@ -151,30 +171,51 @@ class ChatController extends Notifier<ChatState> {
       createdAt: DateTime.now(),
     );
 
+    final historyBeforeSend = _guestMessageHistory();
+
     state = state.copyWith(
       messages: [...state.messages, pendingUserMessage],
       isSending: true,
       clearError: true,
+      topicSlug: activeTopicSlug,
     );
 
     try {
-      final reply = await _guestAssistantReply(content);
-      state = state.copyWith(
-        messages: [
-          ...state.messages,
+      final reply = await _conversationsApi.sendGuestMessage(
+        content: content,
+        topicSlug: activeTopicSlug,
+        currentStep: state.currentStep,
+        messageHistory: historyBeforeSend,
+      );
+
+      final assistantMessage =
+          reply.message ??
           ChatMessage(
-            id: 'guest-assistant-${DateTime.now().millisecondsSinceEpoch}',
+            id: reply.id,
             role: MessageRole.assistant,
-            content: reply,
-            createdAt: DateTime.now(),
-          ),
-        ],
+            content: reply.content,
+            createdAt: reply.createdAt,
+          );
+
+      state = state.copyWith(
+        messages: [...state.messages, assistantMessage],
         isSending: false,
+        currentStep: reply.currentStep,
+        topicSlug: reply.topicSlug ?? activeTopicSlug,
+      );
+    } on ApiException catch (error) {
+      state = state.copyWith(
+        isSending: false,
+        errorMessage: error.userMessage,
+        messages: state.messages
+            .where((m) => m.id != pendingUserMessage.id)
+            .toList(),
       );
     } catch (_) {
       state = state.copyWith(
         isSending: false,
-        errorMessage: 'Não foi possível responder agora. Tente de novo.',
+        isOffline: true,
+        errorMessage: offlineSendMessage,
         messages: state.messages
             .where((m) => m.id != pendingUserMessage.id)
             .toList(),
@@ -235,6 +276,8 @@ class ChatController extends Notifier<ChatState> {
     state = ChatState(
       conversationId: detail.id,
       conversationStatus: detail.status,
+      topicSlug: detail.topicSlug,
+      currentStep: detail.currentStep,
       messages: detail.messages,
       isOffline: isOffline,
     );
@@ -267,7 +310,7 @@ class ChatController extends Notifier<ChatState> {
       final shortcut = topicShortcutForSlug(topicSlug);
       final starterContent =
           shortcut?.starterMessage ?? 'Quero ajuda com este assunto';
-      await _sendGuestMessage(starterContent);
+      await _sendGuestMessage(starterContent, topicSlug: topicSlug);
       return;
     }
 
@@ -301,6 +344,8 @@ class ChatController extends Notifier<ChatState> {
       state = state.copyWith(
         conversationId: conversation.id,
         conversationStatus: conversation.status,
+        topicSlug: conversation.topicSlug,
+        currentStep: conversation.currentStep,
       );
 
       final assistantMessage = await _repository.sendMessage(
@@ -370,6 +415,8 @@ class ChatController extends Notifier<ChatState> {
         state = state.copyWith(
           conversationId: conversationId,
           conversationStatus: conversation.status,
+          topicSlug: conversation.topicSlug,
+          currentStep: conversation.currentStep,
         );
       }
 
