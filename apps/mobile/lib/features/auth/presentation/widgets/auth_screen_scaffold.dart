@@ -28,9 +28,7 @@ class AuthScreenScaffold extends StatelessWidget {
               SizedBox(height: AppSpacing.sm),
               AuthBrandHeader(showDivider: showBrandDivider),
               SizedBox(height: AppSpacing.xl),
-              Expanded(
-                child: SingleChildScrollView(child: body),
-              ),
+              Expanded(child: SingleChildScrollView(child: body)),
               if (bottom != null) bottom!,
             ],
           ),

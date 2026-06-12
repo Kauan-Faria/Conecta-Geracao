@@ -42,7 +42,9 @@ void main() {
             notificationsApiProvider.overrideWithValue(
               FakeNotificationsRemotePort(),
             ),
-            notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
+            notificationsBootstrapProvider.overrideWith(
+              (ref) => Future.value(),
+            ),
           ],
           child: const ConectaGeracaoApp(),
         ),
@@ -67,43 +69,50 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
-      expect(find.text('Avançar'), findsOneWidget);
+      expect(find.text('Continuar'), findsOneWidget);
     });
 
-    testWidgets('alternative registration opens email auth route', (
+    testWidgets('phone screen opens email sign-in route', (tester) async {
+      await pumpApp(tester);
+
+      await tester.tap(find.text('Fazer cadastro'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Entra com Email e senha'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Entrar com email e senha'), findsOneWidget);
+      expect(find.text('Digite seu Email:'), findsOneWidget);
+      expect(find.text('Não possuo Cadastro'), findsOneWidget);
+    });
+
+    testWidgets('legacy alternative route redirects to email signup', (
       tester,
     ) async {
       await pumpApp(tester);
 
       await tester.tap(find.text('Fazer cadastro'));
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Se cadastrar de outra forma'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
-      expect(find.text('E-mail'), findsOneWidget);
-    });
-
-    testWidgets('legacy alternative route redirects to email auth', (
-      tester,
-    ) async {
-      await pumpApp(tester);
-
-      await tester.tap(find.text('Fazer cadastro'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Se cadastrar de outra forma'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
 
       final context = tester.element(find.text('Vamos fazer seu cadastro'));
       GoRouter.of(context).go('/login/alternative');
       await tester.pumpAndSettle();
 
       expect(find.text('Vamos fazer seu cadastro'), findsOneWidget);
-      expect(find.text('E-mail'), findsOneWidget);
+      expect(find.text('Digite seu Email:'), findsOneWidget);
+      expect(find.text('Confirme sua senha:'), findsOneWidget);
+    });
+
+    testWidgets('guest from phone screen reaches home', (tester) async {
+      await pumpApp(tester);
+
+      await tester.tap(find.text('Fazer cadastro'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Entrar sem Cadastro'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Antes de fazer algo importante...'), findsOneWidget);
     });
 
     testWidgets('guest user reaches home without login', (tester) async {

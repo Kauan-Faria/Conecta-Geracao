@@ -3,7 +3,7 @@ intent: 004-auth-login-experience
 phase: inception
 status: units-decomposed
 created: 2026-06-11T22:00:00Z
-updated: 2026-06-11T23:30:00Z
+updated: 2026-06-11T23:55:00Z
 ---
 
 # Auth Login Experience — Unit Decomposition
@@ -15,6 +15,7 @@ updated: 2026-06-11T23:30:00Z
 | FR-1 | Tela welcome / login gate | `001-mobile-auth-login-ui` |
 | FR-2 | Layout compartilhado auth | `001-mobile-auth-login-ui` |
 | FR-3 | Cadastro por telefone (UI) | `001-mobile-auth-login-ui` |
+| FR-11 | Seletor internacional de país (telefone) | `001-mobile-auth-login-ui` |
 | FR-4 | Confirmação SMS (UI + OTP) | `001-mobile-auth-login-ui` |
 | FR-5 | Cadastro e login e-mail/senha | `001-mobile-auth-login-ui` |
 | FR-6 | Verificação de e-mail | `001-mobile-auth-login-ui` |
@@ -31,7 +32,7 @@ Este intent decompõe em **1 unit**:
 
 **Description**: UI Flutter alinhada aos mockups `public/telas/` + Firebase Email/Password + refatoração das telas telefone/OTP + roteamento.
 
-**Stories**: 8 | **Complexity**: M | **Priority**: Must
+**Stories**: 9 | **Complexity**: M | **Priority**: Must
 
 **Deliverables**: Componentes compartilhados, 5 telas visuais, auth e-mail, router atualizado.
 
@@ -49,4 +50,5 @@ Este intent decompõe em **1 unit**:
 ## Execution Order
 
 1. **Bolt 022**: Fundação UI + telas telefone/OTP + welcome polish
-2. **Bolt 023**: E-mail/senha + verificação + esqueci senha + roteamento final
+2. **Bolt 024**: Seletor internacional de país + máscaras + alinhamento UX
+3. **Bolt 023**: E-mail/senha + verificação + esqueci senha + roteamento final

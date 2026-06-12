@@ -212,7 +212,9 @@ class FirebaseAuthRepository implements AuthRepository {
       );
       final firebaseUser = credential.user;
       if (firebaseUser == null) {
-        throw const AuthException('Não foi possível criar conta. Tente novamente.');
+        throw const AuthException(
+          'Não foi possível criar conta. Tente novamente.',
+        );
       }
       if (!firebaseUser.emailVerified) {
         await firebaseUser.sendEmailVerification();
@@ -220,7 +222,9 @@ class FirebaseAuthRepository implements AuthRepository {
       await firebaseUser.reload();
       final user = _mapUser(_firebaseAuth.currentUser);
       if (user == null) {
-        throw const AuthException('Não foi possível criar conta. Tente novamente.');
+        throw const AuthException(
+          'Não foi possível criar conta. Tente novamente.',
+        );
       }
       return user;
     } on AuthException {
@@ -228,7 +232,9 @@ class FirebaseAuthRepository implements AuthRepository {
     } on FirebaseAuthException catch (error) {
       throw AuthException(mapEmailPasswordAuthError(error.code));
     } catch (_) {
-      throw const AuthException('Não foi possível criar conta. Tente novamente.');
+      throw const AuthException(
+        'Não foi possível criar conta. Tente novamente.',
+      );
     }
   }
 

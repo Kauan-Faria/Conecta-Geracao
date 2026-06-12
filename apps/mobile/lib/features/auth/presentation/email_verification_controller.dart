@@ -81,14 +81,19 @@ class EmailVerificationController extends Notifier<EmailVerificationState> {
       return false;
     }
 
-    state = state.copyWith(isResending: true, clearError: true, clearInfo: true);
+    state = state.copyWith(
+      isResending: true,
+      clearError: true,
+      clearInfo: true,
+    );
 
     try {
       await _repository.sendEmailVerification();
       state = state.copyWith(
         isResending: false,
         resendCooldownSeconds: 60,
-        infoMessage: 'Enviamos um novo e-mail. Verifique também a caixa de spam.',
+        infoMessage:
+            'Enviamos um novo e-mail. Verifique também a caixa de spam.',
       );
       _startCooldown();
       return true;

@@ -4,6 +4,7 @@ import 'package:conecta_geracao/core/routing/guest_session_gate.dart';
 import 'package:conecta_geracao/features/auth/data/auth_repository.dart';
 import 'package:conecta_geracao/features/auth/data/firebase_auth_repository.dart';
 import 'package:conecta_geracao/features/auth/domain/brazil_phone_formatter.dart';
+import 'package:conecta_geracao/features/auth/domain/phone_country.dart';
 import 'package:conecta_geracao/features/auth/domain/phone_verification_session.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
@@ -57,8 +58,27 @@ class PhoneAuthController extends Notifier<PhoneAuthState> {
 
   GuestSessionGate get _guestGate => ref.read(guestSessionGateProvider);
 
-  Future<bool> sendCode(String rawPhone) async {
-    final e164 = BrazilPhoneFormatter.toE164(rawPhone);
+  static const nonBrazilSmsMessage =
+      'Cadastro por SMS está disponível apenas para números do Brasil. '
+      'Toque em "Entra com Email e senha" para continuar.';
+
+  void clearError() {
+    if (state.errorMessage != null) {
+      state = state.copyWith(clearError: true);
+    }
+  }
+
+  Future<bool> sendCode(
+    String rawPhone, {
+    required PhoneCountry country,
+  }) async {
+    if (!country.isBrazil) {
+      state = state.copyWith(errorMessage: nonBrazilSmsMessage);
+      return false;
+    }
+
+    final e164 =
+        country.toE164(rawPhone) ?? BrazilPhoneFormatter.toE164(rawPhone);
     if (e164 == null) {
       state = state.copyWith(errorMessage: 'Número incompleto');
       return false;
@@ -93,11 +113,14 @@ class PhoneAuthController extends Notifier<PhoneAuthState> {
     }
   }
 
-  Future<bool> resendCode(String rawPhone) async {
+  Future<bool> resendCode(
+    String rawPhone, {
+    PhoneCountry? country,
+  }) async {
     if (state.resendCooldownSeconds > 0) {
       return false;
     }
-    return sendCode(rawPhone);
+    return sendCode(rawPhone, country: country ?? PhoneCountry.defaultCountry);
   }
 
   Future<bool> confirmOtp(String smsCode) async {

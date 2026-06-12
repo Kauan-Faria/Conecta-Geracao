@@ -2,9 +2,9 @@
 
 ## Overview
 
-- **Total stories**: 54
-- **Generated**: 47
-- **Last updated**: 2026-06-11T23:30:00Z
+- **Total stories**: 56
+- **Generated**: 49
+- **Last updated**: 2026-06-12T12:00:00Z
 
 ---
 
@@ -204,12 +204,18 @@
 ### 008-forgot-password-after-failed-attempts.md ✅ GENERATED
 **Title**: Esqueci senha após 4 erros | **Priority**: Must | **Bolt**: 023-email-password-auth
 
+### 009-international-phone-country-selector.md ✅ GENERATED
+**Title**: Seletor internacional de país no telefone | **Priority**: Must | **Bolt**: 024-international-phone-country-selector
+
+### 010-auth-prototype-screen-alignment.md ✅ GENERATED
+**Title**: Alinhamento mockups auth (login e-mail + convidado) | **Priority**: Must | **Bolt**: 025-auth-prototype-corrections
+
 ---
 
 ## Stories by Status
 
 - **Planned**: 0
-- **Generated**: 47
+- **Generated**: 48
 - **In Progress**: 0
 - **Completed**: 0
 
@@ -241,4 +247,6 @@
 | 019-push-notifications-ui | 002-push-notifications-ui | 3 |
 | 020-push-notifications-ui | 002-push-notifications-ui | 4 |
 | 022-auth-ui-foundation | 001-mobile-auth-login-ui | 3 |
+| 024-international-phone-country-selector | 001-mobile-auth-login-ui | 1 |
+| 025-auth-prototype-corrections | 001-mobile-auth-login-ui | 1 |
 | 023-email-password-auth | 001-mobile-auth-login-ui | 5 |

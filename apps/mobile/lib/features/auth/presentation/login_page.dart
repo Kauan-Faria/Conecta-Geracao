@@ -225,12 +225,7 @@ class _FeatureHighlightTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            item.iconAsset,
-            width: 24,
-            height: 24,
-            semanticLabel: '',
-          ),
+          Image.asset(item.iconAsset, width: 24, height: 24, semanticLabel: ''),
           SizedBox(height: AppSpacing.xs + 2),
           Text(
             item.label,
@@ -254,10 +249,7 @@ class _LoginActions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.md,
-        bottom: AppSpacing.lg,
-      ),
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -41,8 +41,10 @@ void main() {
 
   group('mapPasswordResetError', () {
     test('does not reveal whether email exists', () {
-      expect(mapPasswordResetError('user-not-found'),
-          'Não foi possível enviar o e-mail. Tente novamente.');
+      expect(
+        mapPasswordResetError('user-not-found'),
+        'Não foi possível enviar o e-mail. Tente novamente.',
+      );
       expect(mapPasswordResetError('invalid-email'), 'E-mail inválido');
     });
   });

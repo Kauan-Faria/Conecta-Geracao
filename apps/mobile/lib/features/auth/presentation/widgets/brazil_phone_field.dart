@@ -6,12 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Campo de telefone brasileiro com seletor +55 e máscara `(00) 00000-0000`.
+@Deprecated('Use InternationalPhoneField instead.')
 class BrazilPhoneField extends StatelessWidget {
-  const BrazilPhoneField({
-    required this.controller,
-    this.onChanged,
-    super.key,
-  });
+  const BrazilPhoneField({required this.controller, this.onChanged, super.key});
 
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
@@ -103,9 +100,9 @@ class _CountryCodeBox extends StatelessWidget {
           SizedBox(width: AppSpacing.xs),
           Text(
             '+55',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),

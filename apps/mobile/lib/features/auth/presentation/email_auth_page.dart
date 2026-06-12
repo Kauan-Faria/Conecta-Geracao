@@ -4,8 +4,10 @@ import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/features/auth/data/auth_repository.dart';
 import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/email_auth_controller.dart';
+import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/widgets/auth_cta_button.dart';
 import 'package:conecta_geracao/features/auth/presentation/widgets/auth_screen_scaffold.dart';
+import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,7 +32,9 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(emailAuthControllerProvider.notifier).setMode(widget.initialMode);
+      ref
+          .read(emailAuthControllerProvider.notifier)
+          .setMode(widget.initialMode);
     });
   }
 
@@ -85,6 +89,19 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
         .sendPasswordReset(_emailController.text);
   }
 
+  Future<void> _enterAsGuest() async {
+    ref.invalidate(chatControllerProvider);
+    await ref.read(guestSessionGateProvider).enterAsGuest();
+    if (mounted) {
+      context.go('/home');
+    }
+  }
+
+  void _goToSignUp() {
+    ref.read(emailAuthControllerProvider.notifier).setMode(EmailAuthMode.signUp);
+    context.go('/login/email');
+  }
+
   @override
   Widget build(BuildContext context) {
     final emailState = ref.watch(emailAuthControllerProvider);
@@ -98,7 +115,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            isSignUp ? 'Vamos fazer seu cadastro' : 'Entrar com e-mail',
+            isSignUp ? 'Vamos fazer seu cadastro' : 'Entrar com email e senha',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -107,8 +124,8 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
           SizedBox(height: AppSpacing.sm),
           Text(
             isSignUp
-                ? 'Preencha com seu e-mail e crie uma senha para continuar'
-                : 'Digite seu e-mail e senha para entrar',
+                ? 'Faça seu cadastro com email e senha, ou entre com sua conta google'
+                : 'Selecione seu email e senha para entrar',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -121,7 +138,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
             autofillHints: const [AutofillHints.email],
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
-              labelText: 'E-mail',
+              labelText: 'Digite seu Email:',
               border: OutlineInputBorder(),
             ),
           ),
@@ -132,9 +149,11 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
             autofillHints: isSignUp
                 ? const [AutofillHints.newPassword]
                 : const [AutofillHints.password],
-            textInputAction: isSignUp ? TextInputAction.next : TextInputAction.done,
+            textInputAction: isSignUp
+                ? TextInputAction.next
+                : TextInputAction.done,
             decoration: InputDecoration(
-              labelText: 'Senha',
+              labelText: 'Digite sua senha:',
               border: const OutlineInputBorder(),
               suffixIcon: Semantics(
                 button: true,
@@ -157,7 +176,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
               autofillHints: const [AutofillHints.newPassword],
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
-                labelText: 'Confirmar senha',
+                labelText: 'Confirme sua senha:',
                 border: const OutlineInputBorder(),
                 suffixIcon: Semantics(
                   button: true,
@@ -174,6 +193,20 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
                       () => _obscureConfirmPassword = !_obscureConfirmPassword,
                     ),
                   ),
+                ),
+              ),
+            ),
+          ],
+          if (!isSignUp) ...[
+            SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Semantics(
+                button: true,
+                label: 'Esqueceu a senha',
+                child: TextButton(
+                  onPressed: isBusy ? null : _handleForgotPassword,
+                  child: const Text('Esqueceu a senha ?'),
                 ),
               ),
             ),
@@ -233,33 +266,6 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
               ),
             ),
           ],
-          if (!isSignUp) ...[
-            SizedBox(height: AppSpacing.md),
-            Align(
-              alignment: Alignment.center,
-              child: Semantics(
-                button: true,
-                label: 'Esqueci minha senha',
-                child: TextButton(
-                  onPressed: isBusy ? null : _handleForgotPassword,
-                  child: const Text('Esqueci minha senha'),
-                ),
-              ),
-            ),
-          ],
-          SizedBox(height: AppSpacing.sm),
-          Align(
-            alignment: Alignment.center,
-            child: TextButton(
-              onPressed: isBusy
-                  ? null
-                  : () =>
-                        ref.read(emailAuthControllerProvider.notifier).toggleMode(),
-              child: Text(
-                isSignUp ? 'Já tenho conta' : 'Criar conta',
-              ),
-            ),
-          ),
         ],
       ),
       bottom: Padding(
@@ -271,33 +277,38 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AuthCtaButton(
-              label: 'Avançar',
+              label: 'Continuar',
               semanticLabel: isSignUp
-                  ? 'Avançar e criar conta com e-mail'
-                  : 'Avançar e entrar com e-mail',
+                  ? 'Continuar e criar conta com e-mail'
+                  : 'Continuar e entrar com e-mail',
               isLoading: emailState.isLoading,
               onPressed: isBusy ? null : _handleAdvance,
             ),
             SizedBox(height: AppSpacing.md),
+            if (!isSignUp)
+              AuthCtaButton(
+                label: 'Não possuo Cadastro',
+                semanticLabel: 'Não possuo cadastro, criar conta com e-mail',
+                variant: AuthCtaVariant.secondary,
+                onPressed: isBusy ? null : _goToSignUp,
+              ),
+            if (!isSignUp) SizedBox(height: AppSpacing.md),
             AuthCtaButton(
-              label: isSignUp
-                  ? 'Se cadastrar com o Google'
-                  : 'Entrar com o Google',
-              semanticLabel: isSignUp
-                  ? 'Se cadastrar com o Google'
-                  : 'Entrar com o Google',
+              label: 'Se cadastrar com o Google',
+              semanticLabel: 'Se cadastrar com o Google',
               variant: AuthCtaVariant.secondary,
               isLoading: authState.isLoading,
               onPressed: isBusy ? null : _handleGoogleSignIn,
             ),
-            SizedBox(height: AppSpacing.md),
-            AuthCtaButton(
-              label: 'Voltar',
-              semanticLabel: 'Voltar para cadastro por telefone',
-              icon: AuthCtaIcon.back,
-              variant: AuthCtaVariant.secondary,
-              onPressed: isBusy ? null : () => context.pop(),
-            ),
+            if (isSignUp) ...[
+              SizedBox(height: AppSpacing.md),
+              AuthCtaButton(
+                label: 'Entrar sem Cadastro',
+                semanticLabel: 'Entrar sem cadastro, como convidado',
+                variant: AuthCtaVariant.secondary,
+                onPressed: isBusy ? null : _enterAsGuest,
+              ),
+            ],
           ],
         ),
       ),

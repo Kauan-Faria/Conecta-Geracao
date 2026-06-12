@@ -1,10 +1,14 @@
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
+import 'package:conecta_geracao/features/auth/data/auth_repository.dart';
 import 'package:conecta_geracao/features/auth/data/firebase_auth_repository.dart';
-import 'package:conecta_geracao/features/auth/domain/brazil_phone_formatter.dart';
+import 'package:conecta_geracao/features/auth/domain/phone_country.dart';
+import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart';
+import 'package:conecta_geracao/features/auth/presentation/guest_session_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/phone_auth_controller.dart';
 import 'package:conecta_geracao/features/auth/presentation/widgets/auth_cta_button.dart';
 import 'package:conecta_geracao/features/auth/presentation/widgets/auth_screen_scaffold.dart';
-import 'package:conecta_geracao/features/auth/presentation/widgets/brazil_phone_field.dart';
+import 'package:conecta_geracao/features/auth/presentation/widgets/international_phone_field.dart';
+import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +22,7 @@ class PhoneLoginPage extends ConsumerStatefulWidget {
 
 class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
   final _phoneController = TextEditingController();
+  PhoneCountry _selectedCountry = PhoneCountry.defaultCountry;
 
   @override
   void dispose() {
@@ -25,10 +30,18 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
     super.dispose();
   }
 
+  void _handleCountryChanged(PhoneCountry country) {
+    setState(() {
+      _selectedCountry = country;
+      _phoneController.clear();
+    });
+    ref.read(phoneAuthControllerProvider.notifier).clearError();
+  }
+
   Future<void> _handleAdvance() async {
     final sent = await ref
         .read(phoneAuthControllerProvider.notifier)
-        .sendCode(_phoneController.text);
+        .sendCode(_phoneController.text, country: _selectedCountry);
     if (!mounted) {
       return;
     }
@@ -44,11 +57,35 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
     }
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    await ref.read(authControllerProvider.notifier).signInWithGoogle();
+    if (!mounted) {
+      return;
+    }
+    final error = ref.read(authControllerProvider).error;
+    if (error is AuthException && !error.isCancelled) {
+      return;
+    }
+    if (ref.read(authControllerProvider).error == null) {
+      context.go('/home');
+    }
+  }
+
+  Future<void> _enterAsGuest() async {
+    ref.invalidate(chatControllerProvider);
+    await ref.read(guestSessionGateProvider).enterAsGuest();
+    if (mounted) {
+      context.go('/home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final phoneState = ref.watch(phoneAuthControllerProvider);
+    final authState = ref.watch(authControllerProvider);
     final theme = Theme.of(context);
-    final isComplete = BrazilPhoneFormatter.isComplete(_phoneController.text);
+    final isComplete = _selectedCountry.isComplete(_phoneController.text);
+    final isBusy = phoneState.isSendingCode || authState.isLoading;
 
     return AuthScreenScaffold(
       body: Column(
@@ -70,8 +107,10 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: AppSpacing.xl),
-          BrazilPhoneField(
+          InternationalPhoneField(
             controller: _phoneController,
+            selectedCountry: _selectedCountry,
+            onCountryChanged: _handleCountryChanged,
             onChanged: (_) => setState(() {}),
           ),
           if (phoneState.errorMessage != null) ...[
@@ -98,8 +137,8 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AuthCtaButton(
-              label: 'Avançar',
-              semanticLabel: 'Avançar e receber código por SMS',
+              label: 'Continuar',
+              semanticLabel: 'Continuar e receber código por SMS',
               isLoading: phoneState.isSendingCode,
               onPressed: isComplete && !phoneState.isSendingCode
                   ? _handleAdvance
@@ -107,13 +146,27 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
             ),
             SizedBox(height: AppSpacing.md),
             AuthCtaButton(
-              label: 'Se cadastrar de outra forma',
-              semanticLabel:
-                  'Se cadastrar de outra forma, por exemplo com e-mail',
+              label: 'Entra com Email e senha',
+              semanticLabel: 'Entrar com e-mail e senha',
               variant: AuthCtaVariant.secondary,
-              onPressed: phoneState.isSendingCode
+              onPressed: isBusy
                   ? null
-                  : () => context.push('/login/email'),
+                  : () => context.push('/login/email?mode=signin'),
+            ),
+            SizedBox(height: AppSpacing.md),
+            AuthCtaButton(
+              label: 'Se cadastrar com o Google',
+              semanticLabel: 'Se cadastrar com o Google',
+              variant: AuthCtaVariant.secondary,
+              isLoading: authState.isLoading,
+              onPressed: isBusy ? null : _handleGoogleSignIn,
+            ),
+            SizedBox(height: AppSpacing.md),
+            AuthCtaButton(
+              label: 'Entrar sem Cadastro',
+              semanticLabel: 'Entrar sem cadastro, como convidado',
+              variant: AuthCtaVariant.secondary,
+              onPressed: isBusy ? null : _enterAsGuest,
             ),
           ],
         ),

@@ -1,9 +1,9 @@
 ---
 intent: 004-auth-login-experience
 phase: inception
-status: construction
+status: complete
 created: 2026-06-11T22:00:00.000Z
-updated: 2026-06-11T23:30:00.000Z
+updated: 2026-06-12T12:00:00.000Z
 ---
 
 # Requirements: Experiência de login e cadastro (UI + e-mail/senha)
@@ -14,7 +14,7 @@ Alinhar **todas as telas de autenticação** do app Flutter ao esboço visual em
 
 Esta intent **complementa e refina** `001-digital-guidance` / unit `001-mobile-auth-shell`. Não substitui shell, roteamento base nem modo convidado — evolui a **camada de UI** e adiciona **e-mail/senha** como caminho alternativo de cadastro.
 
-**Referência visual**: `public/telas/` (5 telas: welcome, telefone, confirmar telefone, registro e-mail, confirmar e-mail).
+**Referência visual**: `public/telas/` (6 telas: welcome, telefone, confirmar telefone, **login e-mail**, registro e-mail, confirmar e-mail).
 
 **Problema que resolve**: a UI atual das telas internas de auth diverge do design aprovado; usuários e familiares que preferem e-mail/senha não têm esse caminho no app.
 
@@ -54,15 +54,31 @@ Esta intent **complementa e refina** `001-digital-guidance` / unit `001-mobile-a
 - **Priority**: Must
 
 ### FR-3: Cadastro por telefone (UI)
-- **Description**: Tela de telefone conforme mockup `191536.png`.
+- **Description**: Tela de telefone conforme mockup `login_telefone.png`.
 - **Acceptance Criteria**:
   - Título **"Vamos fazer seu cadastro"**
   - Instrução: preencher número de telefone
-  - Campo com seletor BR (+55) e máscara `(00) 00000-0000`
-  - Botão **"Avançar"** (teal) envia SMS via Firebase Phone Auth
-  - Botão **"Se cadastrar de outra forma"** (azul) → tela de registro por e-mail
-  - Validação: botão desabilitado até número completo
+  - Campo com seletor de país integrado ao número (detalhes em FR-11)
+  - Botão **"Continuar"** (teal) envia SMS via Firebase Phone Auth **somente para Brasil (+55)**
+  - Botão **"Entra com Email e senha"** (azul) → tela de login por e-mail (`login_emailsenha.png`)
+  - Botão **"Se cadastrar com o Google"** (azul) → fluxo Google existente
+  - Botão **"Entrar sem Cadastro"** (azul) → modo convidado
+  - Validação: botão desabilitado até número completo na máscara do país selecionado
 - **Priority**: Must
+
+### FR-11: Seletor internacional de país (telefone)
+- **Description**: Dropdown de DDI com bandeiras, máscara por país e alinhamento visual correto no campo de telefone. Escopo reduzido (não lista ISO completa); Firebase SMS internacional **fora do MVP** — preparação visual apenas.
+- **Acceptance Criteria**:
+  - Seletor de país **integrado** ao campo de número (mesma altura, sem desnível entre caixas)
+  - Dropdown com **bandeira emoji + nome do país + DDI**; busca por nome ou código
+  - **País padrão**: Brasil (+55)
+  - **Escopo de países**: todas as **Américas** + **Portugal** + países de **diáspora brasileira** (Alemanha, Itália, Espanha, França, Reino Unido, Irlanda, Países Baixos, Bélgica, Suíça, Luxemburgo, Japão, Coreia do Sul, Israel, Angola, Moçambique, Cabo Verde, Guiné-Bissau, São Tomé e Príncipe, Timor-Leste)
+  - **Máscara e placeholder** mudam conforme o país selecionado (ex.: BR `(00) 00000-0000`, US/CA `(000) 000-0000`, PT `000 000 000`)
+  - **Brasil**: fluxo SMS Firebase inalterado (E.164 +55…)
+  - **Outros países**: UI completa (seleção, máscara, validação local); ao avançar, mensagem amigável orientando cadastro por e-mail/Google — **sem** chamar Firebase Phone Auth
+  - Acessibilidade: alvos ≥ 48dp; rótulos TalkBack/VoiceOver no seletor e na lista
+- **Priority**: Must
+- **Bolt**: `024-international-phone-country-selector` (story `009-international-phone-country-selector`)
 
 ### FR-4: Confirmação por SMS (UI + OTP)
 - **Description**: Tela OTP conforme mockup `191540.png`, adaptada ao padrão Firebase (6 dígitos).
@@ -76,17 +92,32 @@ Esta intent **complementa e refina** `001-digital-guidance` / unit `001-mobile-a
   - Mensagens de erro em português simples
 - **Priority**: Must
 
-### FR-5: Cadastro e login por e-mail e senha
-- **Description**: Tela conforme mockup `191555.png` + entrada para usuários existentes.
+### FR-5: Cadastro por e-mail e senha
+- **Description**: Tela dedicada conforme mockup `cadastro_email.png`.
 - **Acceptance Criteria**:
-  - Título **"Vamos fazer seu cadastro"** (modo cadastro) ou **"Entrar com e-mail"** (modo login)
-  - Campos: e-mail, senha; no cadastro, **confirmar senha**
-  - Link **"Já tenho conta"** / **"Criar conta"** alterna entre cadastro e login
-  - Botão **"Avançar"**: `createUserWithEmailAndPassword` (cadastro) ou `signInWithEmailAndPassword` (login)
-  - Botão **"Se cadastrar com o Google"** (cadastro) ou **"Entrar com o Google"** (login)
-  - Validação: senhas coincidem (cadastro), mínimo 6 caracteres (Firebase), e-mail válido
-  - Erros Firebase mapeados para PT-BR (e-mail em uso, senha fraca, credenciais inválidas)
+  - Rota `/login/email` (modo cadastro)
+  - Título **"Vamos fazer seu cadastro"**; subtítulo conforme mockup
+  - Campos: **Digite seu Email:**, **Digite sua senha:**, **Confirme sua senha:**
+  - Botão **"Continuar"**: `createUserWithEmailAndPassword`
+  - Botão **"Se cadastrar com o Google"**
+  - Botão **"Entrar sem Cadastro"** → modo convidado
+  - Validação: senhas coincidem, mínimo 6 caracteres (Firebase), e-mail válido
+  - Erros Firebase mapeados para PT-BR
 - **Priority**: Must
+
+### FR-5b: Login por e-mail e senha (tela dedicada)
+- **Description**: Tela separada conforme mockup `login_emailsenha.png` — não compartilha formulário com cadastro.
+- **Acceptance Criteria**:
+  - Rota `/login/email?mode=signin`
+  - Título **"Entrar com email e senha"**; subtítulo conforme mockup
+  - Campos: e-mail e senha (sem confirmar senha)
+  - Link **"Esqueceu a senha ?"** visível abaixo da senha; também banner após 4 erros (FR-10)
+  - Botão **"Continuar"**: `signInWithEmailAndPassword`
+  - Botão **"Não possuo Cadastro"** → `/login/email` (cadastro)
+  - Botão **"Se cadastrar com o Google"**
+  - Navegação entre login e cadastro **somente por botões** (sem toggle inline)
+- **Priority**: Must
+- **Bolt**: `025-auth-prototype-corrections` (story `010-auth-prototype-screen-alignment`)
 
 ### FR-6: Verificação de e-mail pós-cadastro
 - **Description**: Tela conforme mockup `191600.png`, integrada ao fluxo Firebase.
@@ -165,6 +196,8 @@ Esta intent **complementa e refina** `001-digital-guidance` / unit `001-mobile-a
 - Vinculação de métodos (link phone + email na mesma conta) — fase futura
 - OTP de e-mail com 4 dígitos customizado (requer backend próprio; Firebase usa link)
 - Alterações no backend NestJS (auth continua via Firebase ID token)
+- Firebase Phone Auth para países fora do Brasil (FR-11 é preparação visual no MVP)
+- Lista completa de países ISO 3166
 
 ---
 
@@ -181,10 +214,11 @@ Esta intent **complementa e refina** `001-digital-guidance` / unit `001-mobile-a
 
 ## Success Criteria (Intent)
 
-- [ ] 5 telas visuais alinhadas aos mockups em `public/telas/`
+- [ ] 6 telas visuais alinhadas aos mockups em `public/telas/`
 - [ ] Cadastro completo: telefone **ou** e-mail **ou** Google **ou** convidado
 - [ ] Login por e-mail para contas existentes
 - [ ] Verificação de e-mail funcional após cadastro
 - [ ] "Esqueci minha senha" após 4 erros de login + e-mail de reset Firebase
 - [ ] Senhas protegidas via Firebase Auth (sem senha no Postgres)
 - [ ] Testes widget/router cobrindo novos caminhos
+- [ ] Seletor internacional de país no telefone (FR-11): dropdown, máscaras, alinhamento; SMS só BR

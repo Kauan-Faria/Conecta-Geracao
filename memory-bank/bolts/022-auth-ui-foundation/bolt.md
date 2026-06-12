@@ -3,21 +3,21 @@ id: 022-auth-ui-foundation
 unit: 001-mobile-auth-login-ui
 intent: 004-auth-login-experience
 type: simple-construction-bolt
-status: in-progress
+status: complete
 stories:
   - 001-auth-shared-components
   - 002-phone-screens-redesign
   - 003-welcome-screen-polish
-created: 2026-06-11T22:00:00Z
-started: 2026-06-11T23:45:00Z
-completed: null
-current_stage: test
+created: 2026-06-11T22:00:00.000Z
+started: 2026-06-11T23:45:00.000Z
+completed: "2026-06-11T23:46:01Z"
+current_stage: null
 stages_completed:
   - name: plan
-    completed: 2026-06-11T23:45:00Z
+    completed: 2026-06-11T23:45:00.000Z
     artifact: implementation-plan.md
   - name: implement
-    completed: 2026-06-12T00:15:00Z
+    completed: 2026-06-12T00:15:00.000Z
     artifact: implementation-walkthrough.md
 requires_bolts:
   - 021-mobile-auth-login-gate-refactor

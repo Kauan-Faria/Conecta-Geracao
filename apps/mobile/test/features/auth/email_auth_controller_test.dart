@@ -33,16 +33,15 @@ void main() {
       notifier.setMode(EmailAuthMode.signIn);
       fakeAuth.signInShouldFail = true;
 
-      await notifier.submit(
-        email: 'user@example.com',
-        password: 'wrong',
-      );
+      await notifier.submit(email: 'user@example.com', password: 'wrong');
       expect(container.read(emailAuthControllerProvider).failedAttempts, 1);
 
       notifier.toggleMode();
       expect(container.read(emailAuthControllerProvider).failedAttempts, 0);
-      expect(container.read(emailAuthControllerProvider).mode,
-          EmailAuthMode.signUp);
+      expect(
+        container.read(emailAuthControllerProvider).mode,
+        EmailAuthMode.signUp,
+      );
     });
 
     test('increments failed attempts on invalid credentials', () async {
@@ -56,14 +55,13 @@ void main() {
           password: 'wrong',
         );
         expect(ok, isFalse);
-        expect(
-          container.read(emailAuthControllerProvider).failedAttempts,
-          i,
-        );
+        expect(container.read(emailAuthControllerProvider).failedAttempts, i);
       }
 
       expect(
-        container.read(emailAuthControllerProvider).shouldShowForgotPasswordBanner,
+        container
+            .read(emailAuthControllerProvider)
+            .shouldShowForgotPasswordBanner,
         isTrue,
       );
     });
@@ -123,7 +121,10 @@ void main() {
 
       final ok = await notifier.sendPasswordReset('user@example.com');
       expect(ok, isTrue);
-      expect(container.read(emailAuthControllerProvider).resetEmailSent, isTrue);
+      expect(
+        container.read(emailAuthControllerProvider).resetEmailSent,
+        isTrue,
+      );
       expect(container.read(emailAuthControllerProvider).failedAttempts, 0);
     });
   });

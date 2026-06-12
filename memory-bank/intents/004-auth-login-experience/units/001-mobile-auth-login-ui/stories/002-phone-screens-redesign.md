@@ -2,11 +2,11 @@
 id: 002-phone-screens-redesign
 unit: 001-mobile-auth-login-ui
 intent: 004-auth-login-experience
-status: draft
+status: complete
 priority: must
-created: 2026-06-11T22:00:00Z
+created: 2026-06-11T22:00:00.000Z
 assigned_bolt: 022-auth-ui-foundation
-implemented: false
+implemented: true
 ---
 
 # Story: 002-phone-screens-redesign
@@ -20,7 +20,7 @@ implemented: false
 ## Acceptance Criteria
 
 - [ ] **Given** toco "Fazer cadastro" na welcome, **When** abro telefone, **Then** vejo título "Vamos fazer seu cadastro" e instrução do mockup `191536`
-- [ ] **Given** tela telefone, **When** visualizo campo, **Then** vejo seletor BR (+55) e máscara `(00) 00000-0000`
+- [ ] **Given** tela telefone, **When** visualizo campo, **Then** vejo seletor de país integrado e máscara conforme país (detalhes em story 009)
 - [ ] **Given** número completo, **When** toco "Avançar", **Then** Firebase envia SMS e navego para OTP
 - [ ] **Given** tela telefone, **When** toco "Se cadastrar de outra forma", **Then** navego para `/login/email`
 - [ ] **Given** tela OTP, **When** abro, **Then** vejo "Vamos finalizar seu cadastro" e 6 caixas de dígito (mockup `191540`, adaptado para 6 dígitos Firebase)
@@ -33,7 +33,7 @@ implemented: false
 
 - Refatorar `PhoneLoginPage` e `PhoneOtpPage` para usar componentes da story 001
 - Widget `OtpPinInput` com 6 caixas; foco automático entre campos
-- Manter `BrazilPhoneFormatter` e E.164
+- Manter `BrazilPhoneFormatter` / E.164 para BR; seletor internacional na story 009
 - Substituir textos "Entrar"/"Receber código" pelos do mockup
 
 ## Dependencies
@@ -43,6 +43,7 @@ implemented: false
 
 ### Enables
 - 007-auth-routing-integration
+- 009-international-phone-country-selector
 
 ## Edge Cases
 

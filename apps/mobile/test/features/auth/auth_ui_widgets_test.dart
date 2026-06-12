@@ -62,9 +62,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: OtpPinInput(controller: controller),
-          ),
+          home: Scaffold(body: OtpPinInput(controller: controller)),
         ),
       );
 
@@ -72,14 +70,14 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
-    testWidgets('updates visible digits when controller changes', (tester) async {
+    testWidgets('updates visible digits when controller changes', (
+      tester,
+    ) async {
       final controller = TextEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: OtpPinInput(controller: controller),
-          ),
+          home: Scaffold(body: OtpPinInput(controller: controller)),
         ),
       );
 

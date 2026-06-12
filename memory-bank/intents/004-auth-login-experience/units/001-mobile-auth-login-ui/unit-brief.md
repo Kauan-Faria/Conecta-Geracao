@@ -4,9 +4,9 @@ intent: 004-auth-login-experience
 unit_type: frontend
 default_bolt_type: simple-construction-bolt
 phase: inception
-status: in-progress
+status: complete
 created: 2026-06-11T22:00:00.000Z
-updated: 2026-06-11T23:30:00.000Z
+updated: 2026-06-11T23:55:00.000Z
 ---
 
 # Unit Brief: Mobile Auth Login UI
@@ -21,6 +21,7 @@ Implementar a experiência visual completa de login/cadastro conforme `public/te
 - Componentes compartilhados de auth (header de marca, botões CTA teal/azul)
 - Tela welcome (polish final vs mockup)
 - Tela cadastro telefone + OTP em caixas (6 dígitos)
+- Seletor internacional de país no telefone (FR-11): dropdown, máscaras, busca, alinhamento UX
 - Tela cadastro/login e-mail + senha + Google
 - Tela verificação de e-mail pós-cadastro
 - Extensão `AuthRepository` com e-mail/senha e reset de senha
@@ -43,6 +44,7 @@ Implementar a experiência visual completa de login/cadastro conforme `public/te
 | FR-1 | Tela welcome | Must |
 | FR-2 | Layout compartilhado | Must |
 | FR-3 | Telefone UI | Must |
+| FR-11 | Seletor internacional telefone | Must |
 | FR-4 | OTP UI | Must |
 | FR-5 | E-mail/senha | Must |
 | FR-6 | Verificação e-mail | Must |
@@ -71,8 +73,8 @@ Implementar a experiência visual completa de login/cadastro conforme `public/te
 
 | Metric | Count |
 |--------|-------|
-| Total Stories | 8 |
-| Must Have | 8 |
+| Total Stories | 9 |
+| Must Have | 9 |
 
 ### Stories
 
@@ -86,6 +88,7 @@ Implementar a experiência visual completa de login/cadastro conforme `public/te
 | 006-email-verification-screen | Tela verificação de e-mail | Must | Draft |
 | 007-auth-routing-integration | Rotas e fluxos integrados | Must | Draft |
 | 008-forgot-password-after-failed-attempts | Esqueci senha após 4 erros | Must | Draft |
+| 009-international-phone-country-selector | Seletor internacional de país no telefone | Must | Draft |
 
 ---
 
@@ -131,4 +134,5 @@ Implementar a experiência visual completa de login/cadastro conforme `public/te
 | Bolt | Type | Stories | Objective |
 |------|------|---------|-----------|
 | 022-auth-ui-foundation | simple | 001, 002, 003 | Componentes + telefone/OTP + welcome |
+| 024-international-phone-country-selector | simple | 009 | Dropdown DDI, máscaras, alinhamento UX |
 | 023-email-password-auth | simple | 004, 005, 006, 007, 008 | E-mail/senha + verificação + esqueci senha + router |
