@@ -18,6 +18,7 @@ import 'package:conecta_geracao/features/maps/presentation/maps_route_page.dart'
 import 'package:conecta_geracao/features/maps/presentation/maps_search_page.dart';
 import 'package:conecta_geracao/features/shell/presentation/app_shell.dart';
 import 'package:conecta_geracao/features/shell/presentation/shell_pages.dart';
+import 'package:conecta_geracao/features/tutorials/presentation/tutorials_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -183,6 +184,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/conversations',
                 builder: (context, state) => const ConversationListPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tutorials',
+                builder: (context, state) => const TutorialsPage(),
               ),
             ],
           ),

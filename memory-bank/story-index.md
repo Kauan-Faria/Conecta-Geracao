@@ -2,9 +2,9 @@
 
 ## Overview
 
-- **Total stories**: 56
-- **Generated**: 49
-- **Last updated**: 2026-06-12T12:00:00Z
+- **Total stories**: 59
+- **Generated**: 52
+- **Last updated**: 2026-07-20T20:57:00Z
 
 ---
 
@@ -212,10 +212,25 @@
 
 ---
 
+### 005-tutorials-tab
+
+#### Unit: 001-tutorials-ui
+
+### 001-add-tutorials-tab.md ✅ GENERATED
+**Title**: Nova aba e rota "Tutoriais" no shell | **Priority**: Must | **Bolt**: 026-tutorials-ui
+
+### 002-youtube-inline-player.md ✅ GENERATED
+**Title**: Player inline do YouTube | **Priority**: Must | **Bolt**: 026-tutorials-ui
+
+### 003-tutorials-catalog-list.md ✅ GENERATED
+**Title**: Catálogo estático + lista rolável | **Priority**: Must | **Bolt**: 026-tutorials-ui
+
+---
+
 ## Stories by Status
 
 - **Planned**: 0
-- **Generated**: 48
+- **Generated**: 51
 - **In Progress**: 0
 - **Completed**: 0
 
@@ -250,3 +265,4 @@
 | 024-international-phone-country-selector | 001-mobile-auth-login-ui | 1 |
 | 025-auth-prototype-corrections | 001-mobile-auth-login-ui | 1 |
 | 023-email-password-auth | 001-mobile-auth-login-ui | 5 |
+| 026-tutorials-ui | 001-tutorials-ui | 3 |

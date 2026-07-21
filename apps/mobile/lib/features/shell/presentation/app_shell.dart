@@ -37,6 +37,11 @@ class AppShell extends StatelessWidget {
             label: 'Chat',
           ),
           NavigationDestination(
+            icon: Icon(Icons.ondemand_video_outlined),
+            selectedIcon: Icon(Icons.ondemand_video),
+            label: 'Tutoriais',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.settings_outlined),
             selectedIcon: Icon(Icons.settings),
             label: 'Configurações',
