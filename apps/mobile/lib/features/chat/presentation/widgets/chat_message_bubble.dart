@@ -2,14 +2,25 @@ import 'package:conecta_geracao/core/theme/app_colors.dart';
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/core/theme/brand_theme_extension.dart';
 import 'package:conecta_geracao/features/chat/domain/chat_message.dart';
+import 'package:conecta_geracao/features/chat/domain/tts_playback_state.dart';
 import 'package:conecta_geracao/features/maps/presentation/widgets/map_action_button.dart';
 import 'package:flutter/material.dart';
 
 class ChatMessageBubble extends StatelessWidget {
-  const ChatMessageBubble({required this.message, this.onOpenMap, super.key});
+  const ChatMessageBubble({
+    required this.message,
+    this.onOpenMap,
+    this.showTtsControls = false,
+    this.isSpeaking = false,
+    this.onTtsAction,
+    super.key,
+  });
 
   final ChatMessage message;
   final VoidCallback? onOpenMap;
+  final bool showTtsControls;
+  final bool isSpeaking;
+  final VoidCallback? onTtsAction;
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +61,30 @@ class ChatMessageBubble extends StatelessWidget {
                 SizedBox(width: AppSpacing.sm),
               ],
               Flexible(
-                child: Container(
+                child: AnimatedContainer(
+                  key: isSpeaking
+                      ? const ValueKey('tts-speaking-bubble')
+                      : const ValueKey('tts-idle-bubble'),
+                  duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm + 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isUser ? AppColors.surface : AppColors.background,
+                    color: isUser
+                        ? AppColors.surface
+                        : (isSpeaking
+                            ? AppColors.primaryLight
+                            : AppColors.background),
                     borderRadius: BorderRadius.circular(brand.borderRadius + 4),
-                    border: isUser ? null : Border.all(color: AppColors.border),
+                    border: isUser
+                        ? null
+                        : Border.all(
+                            color: isSpeaking
+                                ? AppColors.primary
+                                : AppColors.border,
+                            width: isSpeaking ? 2 : 1,
+                          ),
                   ),
                   child: Text(
                     message.content,
@@ -75,6 +101,45 @@ class ChatMessageBubble extends StatelessWidget {
             MapActionButton(
               mapAction: message.mapAction!,
               onPressed: onOpenMap!,
+            ),
+          if (!isUser && showTtsControls && onTtsAction != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 52, top: AppSpacing.xs),
+              child: Semantics(
+                button: true,
+                label: ttsActionSemanticLabel(
+                  isSpeaking
+                      ? TtsPlaybackStatus.speaking
+                      : TtsPlaybackStatus.idle,
+                  isActiveMessage: isSpeaking,
+                ),
+                child: TextButton.icon(
+                  onPressed: onTtsAction,
+                  icon: Icon(
+                    isSpeaking ? Icons.stop_circle_outlined : Icons.volume_up,
+                    size: 20,
+                  ),
+                  label: Text(
+                    ttsActionButtonLabel(
+                      isSpeaking
+                          ? TtsPlaybackStatus.speaking
+                          : TtsPlaybackStatus.idle,
+                      isActiveMessage: isSpeaking,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    minimumSize: const Size(
+                      AppSpacing.minTouchTarget,
+                      AppSpacing.minTouchTarget,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ),
             ),
           SizedBox(height: AppSpacing.xs),
           Padding(

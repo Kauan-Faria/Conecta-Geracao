@@ -1,17 +1,26 @@
 import 'package:conecta_geracao/core/theme/app_colors.dart';
 import 'package:conecta_geracao/core/theme/app_spacing.dart';
 import 'package:conecta_geracao/core/theme/brand_theme_extension.dart';
+import 'package:conecta_geracao/features/chat/domain/tts_playback_state.dart';
 import 'package:flutter/material.dart';
 
 class ChatHeroHeader extends StatelessWidget {
-  const ChatHeroHeader({this.onOpenHistory, super.key});
+  const ChatHeroHeader({
+    this.onOpenHistory,
+    this.autoTtsEnabled,
+    this.onToggleAutoTts,
+    super.key,
+  });
 
   final VoidCallback? onOpenHistory;
+  final bool? autoTtsEnabled;
+  final VoidCallback? onToggleAutoTts;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final brand = context.brand;
+    final showAutoTts = autoTtsEnabled != null && onToggleAutoTts != null;
 
     return Container(
       width: double.infinity,
@@ -77,6 +86,32 @@ class ChatHeroHeader extends StatelessWidget {
                   ],
                 ),
               ),
+              if (showAutoTts) ...[
+                SizedBox(width: AppSpacing.xs),
+                Semantics(
+                  button: true,
+                  toggled: autoTtsEnabled!,
+                  label: autoTtsSemanticLabel(autoTtsEnabled!),
+                  child: IconButton(
+                    onPressed: onToggleAutoTts,
+                    tooltip: autoTtsEnabled!
+                        ? TtsPlaybackMessages.autoTtsToggleTooltipOn
+                        : TtsPlaybackMessages.autoTtsToggleTooltipOff,
+                    icon: Icon(
+                      autoTtsEnabled!
+                          ? Icons.record_voice_over
+                          : Icons.voice_over_off,
+                      color: AppColors.onPrimary,
+                    ),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(
+                        AppSpacing.minTouchTarget,
+                        AppSpacing.minTouchTarget,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               SizedBox(width: AppSpacing.sm),
               Semantics(
                 label: 'Assistente Conecta',

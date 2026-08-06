@@ -5,6 +5,8 @@ import 'package:conecta_geracao/core/widgets/app_button.dart';
 import 'package:conecta_geracao/features/chat/domain/chat_message.dart';
 import 'package:conecta_geracao/features/chat/domain/checkpoint_detector.dart';
 import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
+import 'package:conecta_geracao/features/chat/presentation/tts_playback_controller.dart';
+import 'package:conecta_geracao/features/chat/presentation/voice_input_controller.dart';
 import 'package:conecta_geracao/features/maps/domain/map_action.dart';
 import 'package:conecta_geracao/features/maps/domain/maps_context.dart';
 import 'package:conecta_geracao/features/maps/presentation/maps_providers.dart';
@@ -105,6 +107,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   @override
   void dispose() {
+    // Para e libera o engine TTS ao sair da tela (sem await em dispose).
+    ref.read(ttsPlaybackControllerProvider.notifier).disposePlayback();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -124,6 +128,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Future<void> _sendMessage([String? overrideContent]) async {
+    await ref.read(voiceInputControllerProvider.notifier).stopIfListening();
+    await ref.read(ttsPlaybackControllerProvider.notifier).stopIfSpeaking();
+
     final content = (overrideContent ?? _textController.text).trim();
     if (content.isEmpty) {
       return;
@@ -154,16 +161,40 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatControllerProvider);
+    final ttsState = ref.watch(ttsPlaybackControllerProvider);
     final isAuthenticated = ref.watch(authGateProvider).isAuthenticated;
     final isGuest = ref.watch(guestSessionGateProvider).isGuestActive;
     final canUseChat = isAuthenticated || isGuest;
     final theme = Theme.of(context);
+
+    ref.listen(ttsPlaybackControllerProvider, (previous, next) {
+      final message = next.feedbackMessage;
+      if (message == null || message == previous?.feedbackMessage) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ref.read(ttsPlaybackControllerProvider.notifier).clearFeedback();
+    });
 
     ref.listen(chatControllerProvider, (previous, next) {
       if (next.messages.length != (previous?.messages.length ?? 0) ||
           next.isSending != (previous?.isSending ?? false) ||
           next.visibleMessageLimit != (previous?.visibleMessageLimit ?? 0)) {
         _scrollToBottom();
+      }
+
+      if (next.messages.length == (previous?.messages.length ?? 0) + 1) {
+        final lastMessage = next.messages.last;
+        if (lastMessage.role == MessageRole.assistant) {
+          ref
+              .read(ttsPlaybackControllerProvider.notifier)
+              .onNewAssistantMessage(
+                messageId: lastMessage.id,
+                content: lastMessage.content,
+                // Só fala resposta completa; enquanto envia, não há streaming.
+                isFinal: !next.isSending,
+              );
+        }
       }
 
       final mapsContext = widget.initialMapsContext;
@@ -207,6 +238,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ChatHeroHeader(
             onOpenHistory: isAuthenticated
                 ? () => context.push('/conversations')
+                : null,
+            autoTtsEnabled: ttsState.isPlatformSupported
+                ? ttsState.autoTtsEnabled
+                : null,
+            onToggleAutoTts: ttsState.isPlatformSupported
+                ? () => ref
+                      .read(ttsPlaybackControllerProvider.notifier)
+                      .toggleAutoTts()
                 : null,
           ),
           if (widget.initialMapsContext != null)
@@ -332,6 +371,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                             onOpenMap: message.mapAction == null
                                 ? null
                                 : () => _openMapFromMessage(message.mapAction!),
+                            showTtsControls:
+                                ttsState.isPlatformSupported &&
+                                message.role == MessageRole.assistant,
+                            isSpeaking: ttsState.isSpeakingMessage(message.id),
+                            onTtsAction:
+                                ttsState.isPlatformSupported &&
+                                    message.role == MessageRole.assistant
+                                ? () => ref
+                                      .read(
+                                        ttsPlaybackControllerProvider.notifier,
+                                      )
+                                      .toggleForMessage(
+                                        messageId: message.id,
+                                        content: message.content,
+                                      )
+                                : null,
                           ),
                         ),
                         if (chatState.isSending) const ChatTypingIndicator(),

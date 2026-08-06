@@ -2,9 +2,9 @@
 
 ## Overview
 
-- **Total stories**: 59
-- **Generated**: 52
-- **Last updated**: 2026-07-20T20:57:00Z
+- **Total stories**: 67
+- **Generated**: 60
+- **Last updated**: 2026-08-06T22:45:00Z
 
 ---
 
@@ -227,10 +227,40 @@
 
 ---
 
+### 006-chat-voice-assist
+
+#### Unit: 001-chat-voice-assist-ui
+
+### 001-stt-tap-to-dictate.md ✅ GENERATED
+**Title**: STT toque-iniciar/parar → preenche campo | **Priority**: Must | **Bolt**: 027-chat-voice-assist-ui
+
+### 002-microphone-permission-fallback.md ✅ GENERATED
+**Title**: Permissão de microfone e fallback | **Priority**: Must | **Bolt**: 027-chat-voice-assist-ui
+
+### 003-voice-input-accessible-states.md ✅ GENERATED
+**Title**: Estados acessíveis do botão de voz | **Priority**: Must | **Bolt**: 027-chat-voice-assist-ui
+
+### 004-tts-assistant-replies.md ✅ GENERATED
+**Title**: TTS das respostas do assistente | **Priority**: Must | **Bolt**: 028-chat-voice-assist-ui
+
+### 005-auto-tts-preference.md ✅ GENERATED
+**Title**: Preferência de auto-TTS | **Priority**: Should | **Bolt**: 028-chat-voice-assist-ui
+
+### 006-tts-speakable-text-sanitization.md ✅ GENERATED
+**Title**: Sanitização e conteúdo elegível para TTS | **Priority**: Must | **Bolt**: 029-chat-voice-assist-ui
+
+### 007-tts-playback-lifecycle-guards.md ✅ GENERATED
+**Title**: Interrupções e dispose do TTS | **Priority**: Must | **Bolt**: 030-chat-voice-assist-ui
+
+### 008-tts-controls-and-playback-states.md ✅ GENERATED
+**Title**: Estados e controles visuais de TTS | **Priority**: Must | **Bolt**: 030-chat-voice-assist-ui
+
+---
+
 ## Stories by Status
 
 - **Planned**: 0
-- **Generated**: 51
+- **Generated**: 60
 - **In Progress**: 0
 - **Completed**: 0
 
@@ -266,3 +296,7 @@
 | 025-auth-prototype-corrections | 001-mobile-auth-login-ui | 1 |
 | 023-email-password-auth | 001-mobile-auth-login-ui | 5 |
 | 026-tutorials-ui | 001-tutorials-ui | 3 |
+| 027-chat-voice-assist-ui | 001-chat-voice-assist-ui | 3 |
+| 028-chat-voice-assist-ui | 001-chat-voice-assist-ui | 2 |
+| 029-chat-voice-assist-ui | 001-chat-voice-assist-ui | 1 |
+| 030-chat-voice-assist-ui | 001-chat-voice-assist-ui | 2 |

@@ -3,6 +3,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- STT on-device (chat voice assist) — microfone; Bluetooth desabilitado via plugin -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application
         android:label="conecta_geracao"
         android:name="${applicationName}"
@@ -44,6 +46,14 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Necessário no Android 11+ para SpeechRecognizer / speech_to_text -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <!-- TTS on-device (flutter_tts) — sem permissão runtime extra além do mic do STT -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
     </queries>
 </manifest>

@@ -11,12 +11,12 @@ const List<Tutorial> tutorialsCatalog = <Tutorial>[
     id: 'tutorial-01',
     title: 'Primeiros passos: conhecendo o aplicativo',
     // TODO: trocar pela URL definitiva do vídeo-tutorial.
-    youtubeUrl: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+    youtubeUrl: 'https://youtube.com/shorts/58FxjivJh8Y',
   ),
   Tutorial(
     id: 'tutorial-02',
     title: 'Como usar o chat e tirar suas dúvidas',
     // TODO: trocar pela URL definitiva do vídeo-tutorial.
-    youtubeUrl: 'https://youtu.be/K18cpp_-gP8',
+    youtubeUrl: 'https://youtube.com/shorts/CawoO46td-E',
   ),
 ];
