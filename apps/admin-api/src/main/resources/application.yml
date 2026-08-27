@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: admin-api
+
+  datasource:
+    # Mesmo Postgres (Supabase) que o apps/backend (NestJS) ja usa.
+    # Preencha via variaveis de ambiente, nunca commite credenciais reais.
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/conecta_geracao}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      # As tabelas ja existem (criadas pelas migrations do Prisma). "validate"
+      # so confirma que o mapeamento das entidades bate com o schema real -
+      # nunca deixe em "update"/"create" para nao conflitar com o Prisma.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+    open-in-view: false
+
+  thymeleaf:
+    cache: false
+
+server:
+  port: ${SERVER_PORT:8081}
+
+admin:
+  jwt:
+    secret: ${ADMIN_JWT_SECRET:troque-este-segredo-por-uma-chave-longa-e-aleatoria-em-producao}
+    expiration-ms: ${ADMIN_JWT_EXPIRATION_MS:28800000} # 8 horas
+  cors:
+    allowed-origin: ${ADMIN_CORS_ORIGIN:http://localhost:4200}
+  # Usuario admin criado automaticamente no primeiro start, se a tabela
+  # admin_users estiver vazia. TROQUE A SENHA no .env antes de usar em producao.
+  seed:
+    username: ${ADMIN_SEED_USERNAME:admin}
+    password: ${ADMIN_SEED_PASSWORD:admin123}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:info}
