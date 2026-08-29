@@ -1,0 +1,103 @@
+
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Conteúdos</h1>
+      <p>Gerencie os conteúdos educativos do sistema.</p>
+    </div>
+
+    <button
+      class="new-button"
+      [disabled]="!podeCriarConteudo"
+    >
+      <span>+</span>
+      Novo conteúdo
+    </button>
+  </div>
+
+  <div
+    *ngIf="mensagem"
+    class="feedback"
+  >
+    {{ mensagem }}
+  </div>
+
+  <div class="filters">
+    <input
+      type="text"
+      placeholder="Buscar conteúdo..."
+      [(ngModel)]="busca"
+    />
+  </div>
+
+  <div class="table-container">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Descrição</th>
+          <th>Palavras-chave</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let conteudo of conteudosFiltrados">
+
+          <td>
+            <strong>
+              {{ conteudo.title }}
+            </strong>
+          </td>
+
+          <td>
+            {{ conteudo.summary }}
+          </td>
+
+          <td>
+            {{ conteudo.keywords.join(', ') }}
+          </td>
+
+          <td>
+            <span
+              class="status"
+              [class.status-active]="conteudo.isActive"
+              [class.status-inactive]="!conteudo.isActive"
+            >
+              {{ conteudo.isActive ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+
+          <td class="actions">
+
+            <button
+              class="delete-button"
+              (click)="excluir(conteudo.id)"
+            >
+              Excluir
+            </button>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <div
+      *ngIf="conteudosFiltrados.length === 0"
+      class="empty-state"
+    >
+      Nenhum conteúdo encontrado.
+    </div>
+
+  </div>
+
+</div>
+

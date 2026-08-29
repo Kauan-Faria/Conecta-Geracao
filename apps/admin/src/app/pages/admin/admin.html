@@ -1,0 +1,244 @@
+<div class="admin-page">
+
+  <!-- HEADER -->
+
+  <header class="page-header">
+
+    <div>
+      <span class="breadcrumb">ADMINISTRAÇÃO</span>
+
+      <h1>Área Administrativa</h1>
+
+      <p>
+        Gerencie as configurações e recursos da plataforma
+        ConectaGeração.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- STATUS DO SISTEMA -->
+
+  <section class="system-status">
+
+    <div class="status-info">
+
+      <div class="status-icon">
+        ✓
+      </div>
+
+      <div>
+        <span class="status-label">STATUS DO SISTEMA</span>
+
+        <h2>{{ sistema.status }}</h2>
+
+        <p>
+          Todos os serviços estão funcionando normalmente.
+        </p>
+      </div>
+
+    </div>
+
+    <span class="online">
+      ● Online
+    </span>
+
+  </section>
+
+
+  <!-- OPÇÕES -->
+
+  <section class="section">
+
+    <div class="section-header">
+
+      <div>
+        <span>GERENCIAMENTO</span>
+
+        <h2>Recursos da plataforma</h2>
+      </div>
+
+    </div>
+
+
+    <div class="admin-grid">
+
+
+      <!-- CONTEÚDOS -->
+
+      <a
+        routerLink="/admin/conteudos"
+        class="admin-card"
+      >
+
+        <div class="card-top">
+
+          <div class="card-icon blue">
+            📚
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </div>
+
+        <h3>Conteúdos</h3>
+
+        <p>
+          Gerencie os conteúdos educativos
+          disponíveis para os usuários.
+        </p>
+
+        <span class="card-link">
+          Gerenciar conteúdos
+        </span>
+
+      </a>
+
+
+      <!-- USUÁRIOS -->
+
+      <div class="admin-card disabled">
+
+        <div class="card-top">
+
+          <div class="card-icon purple">
+            👥
+          </div>
+
+          <span class="coming">
+            Em breve
+          </span>
+
+        </div>
+
+        <h3>Usuários</h3>
+
+        <p>
+          Consulte e gerencie os usuários
+          cadastrados na plataforma.
+        </p>
+
+        <span class="card-link">
+          Funcionalidade futura
+        </span>
+
+      </div>
+
+
+      <!-- IA -->
+
+      <div class="admin-card disabled">
+
+        <div class="card-top">
+
+          <div class="card-icon orange">
+            🤖
+          </div>
+
+          <span class="coming">
+            Em breve
+          </span>
+
+        </div>
+
+        <h3>Assistente IA</h3>
+
+        <p>
+          Acompanhe informações sobre o
+          assistente inteligente da plataforma.
+        </p>
+
+        <span class="card-link">
+          Funcionalidade futura
+        </span>
+
+      </div>
+
+
+      <!-- CONFIGURAÇÕES -->
+
+      <div class="admin-card disabled">
+
+        <div class="card-top">
+
+          <div class="card-icon gray">
+            ⚙️
+          </div>
+
+          <span class="coming">
+            Em breve
+          </span>
+
+        </div>
+
+        <h3>Configurações</h3>
+
+        <p>
+          Configure parâmetros gerais
+          do sistema.
+        </p>
+
+        <span class="card-link">
+          Funcionalidade futura
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- INFORMAÇÕES DO SISTEMA -->
+
+  <section class="section">
+
+    <div class="section-header">
+
+      <div>
+        <span>SISTEMA</span>
+
+        <h2>Informações</h2>
+      </div>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="info-item">
+
+        <span>Nome da plataforma</span>
+
+        <strong>{{ sistema.nome }}</strong>
+
+      </div>
+
+
+      <div class="info-item">
+
+        <span>Versão</span>
+
+        <strong>{{ sistema.versao }}</strong>
+
+      </div>
+
+
+      <div class="info-item">
+
+        <span>Status</span>
+
+        <strong class="status-text">
+          ● {{ sistema.status }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,178 @@
+<div class="dashboard">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <span class="logo-icon">CG</span>
+
+      <div>
+        <strong>Conecta</strong>
+        <span>Geração</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+
+      <a routerLink="/home" class="menu-item active">
+        <span>🏠</span>
+        Dashboard
+      </a>
+
+      <a routerLink="/admin/conteudos" class="menu-item">
+        <span>📚</span>
+        Conteúdos
+      </a>
+
+      <a routerLink="/admin" class="menu-item">
+        <span>⚙️</span>
+        Administração
+      </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>ConectaGeração</span>
+      <small>Sociedade 5.0</small>
+    </div>
+
+  </aside>
+
+
+  <main class="main-content">
+
+    <header class="header">
+
+      <div>
+        <span class="greeting">Painel Administrativo</span>
+        <h1>{{ titulo }}</h1>
+      </div>
+
+      <div class="user">
+        <div class="avatar">A</div>
+
+        <div>
+          <strong>Administrador</strong>
+          <small>Gestor do sistema</small>
+        </div>
+      </div>
+
+    </header>
+
+
+    <section class="welcome">
+
+      <div>
+        <span class="welcome-label">VISÃO GERAL</span>
+
+        <h2>
+          Bem-vindo ao ConectaGeração 👋
+        </h2>
+
+        <p>
+          Acompanhe e gerencie os recursos da plataforma
+          de inclusão digital.
+        </p>
+      </div>
+
+    </section>
+
+
+    <section class="cards">
+
+      <div class="card">
+
+        <div class="card-icon">
+          👥
+        </div>
+
+        <div class="card-info">
+          <span>Usuários</span>
+          <strong>{{ usuarios }}</strong>
+          <small>Usuários cadastrados</small>
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="card-icon">
+          📚
+        </div>
+
+        <div class="card-info">
+          <span>Conteúdos</span>
+          <strong>{{ conteudos }}</strong>
+          <small>Conteúdos disponíveis</small>
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="card-icon">
+          🤖
+        </div>
+
+        <div class="card-info">
+          <span>Assistente IA</span>
+          <strong>{{ perguntasIA }}</strong>
+          <small>Perguntas realizadas</small>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="quick-actions">
+
+      <div class="section-title">
+        <div>
+          <span>GERENCIAMENTO</span>
+          <h2>Ações rápidas</h2>
+        </div>
+      </div>
+
+
+      <div class="actions">
+
+        <a routerLink="/admin/conteudos" class="action">
+
+          <div class="action-icon">
+            📚
+          </div>
+
+          <div>
+            <strong>Gerenciar conteúdos</strong>
+            <p>Adicionar, editar e remover conteúdos</p>
+          </div>
+
+          <span class="arrow">→</span>
+
+        </a>
+
+
+        <a routerLink="/admin" class="action">
+
+          <div class="action-icon">
+            ⚙️
+          </div>
+
+          <div>
+            <strong>Área administrativa</strong>
+            <p>Acessar configurações do sistema</p>
+          </div>
+
+          <span class="arrow">→</span>
+
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
