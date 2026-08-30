@@ -189,3 +189,16 @@ model Campaign {
   @@index([idempotencyKey, requestedAt])
   @@map("campaigns")
 }
+/// Operadores do backoffice administrativo (admin-api em Spring Boot).
+/// Gerenciado pelo admin-api; incluido aqui so para o Prisma manter o
+/// schema do banco compartilhado como fonte unica da verdade.
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique @db.VarChar(60)
+  passwordHash String   @map("password_hash")
+  role         String   @default("ADMIN") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
+
