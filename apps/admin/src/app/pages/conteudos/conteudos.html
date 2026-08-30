@@ -1,0 +1,194 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <a routerLink="/home" class="back-link">← Dashboard</a>
+      <h1>Conteúdos</h1>
+      <p>
+        Gerencie os tópicos da base de conhecimento (mesmas tabelas do NestJS / assistente).
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="new-button"
+      (click)="abrirFormulario()"
+      [disabled]="mostrandoFormulario || loading"
+    >
+      <span>+</span>
+      Novo conteúdo
+    </button>
+  </div>
+
+  <div *ngIf="mensagem" class="feedback">
+    {{ mensagem }}
+  </div>
+
+  <div *ngIf="erro" class="error-banner">
+    {{ erro }}
+  </div>
+
+  <div *ngIf="mostrandoFormulario" class="create-form">
+    <h2>Novo tópico</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="slug">Slug (kebab-case)</label>
+        <input
+          id="slug"
+          type="text"
+          name="slug"
+          [(ngModel)]="novoSlug"
+          placeholder="ex.: como-usar-pix"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="titulo">Título</label>
+        <input
+          id="titulo"
+          type="text"
+          name="titulo"
+          [(ngModel)]="novoTitulo"
+          placeholder="Título do tópico"
+        />
+      </div>
+
+      <div class="form-group full">
+        <label for="resumo">Resumo</label>
+        <textarea
+          id="resumo"
+          name="resumo"
+          rows="3"
+          [(ngModel)]="novoResumo"
+          placeholder="Resumo curto para o operador e para o RAG"
+        ></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label for="keywords">Palavras-chave (separadas por vírgula)</label>
+        <input
+          id="keywords"
+          type="text"
+          name="keywords"
+          [(ngModel)]="novasKeywords"
+          placeholder="PIX, banco, pagamento"
+        />
+      </div>
+
+      <div class="form-group full">
+        <label for="instrucao">Passo 1 — instrução</label>
+        <input
+          id="instrucao"
+          type="text"
+          name="instrucao"
+          [(ngModel)]="novaInstrucao"
+          placeholder="Primeira orientação passo a passo"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="ativo" [(ngModel)]="novoAtivo" />
+          Tópico ativo
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="secondary-button" (click)="fecharFormulario()" [disabled]="salvando">
+        Cancelar
+      </button>
+      <button type="button" class="new-button" (click)="criar()" [disabled]="salvando">
+        {{ salvando ? 'Salvando...' : 'Salvar tópico' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input
+      type="text"
+      placeholder="Buscar conteúdo..."
+      [(ngModel)]="busca"
+    />
+  </div>
+
+  <div *ngIf="loading" class="empty-state">
+    Carregando tópicos...
+  </div>
+
+  <div class="table-container" *ngIf="!loading">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Slug</th>
+          <th>Descrição</th>
+          <th>Palavras-chave</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let conteudo of conteudosFiltrados">
+
+          <td>
+            <strong>
+              {{ conteudo.title }}
+            </strong>
+          </td>
+
+          <td>
+            <code>{{ conteudo.slug }}</code>
+          </td>
+
+          <td>
+            {{ conteudo.summary }}
+          </td>
+
+          <td>
+            {{ (conteudo.keywords || []).join(', ') }}
+          </td>
+
+          <td>
+            <span
+              class="status"
+              [class.status-active]="conteudo.isActive"
+              [class.status-inactive]="!conteudo.isActive"
+            >
+              {{ conteudo.isActive ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+
+          <td class="actions">
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="excluir(conteudo.id, conteudo.title)"
+            >
+              Excluir
+            </button>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <div
+      *ngIf="conteudosFiltrados.length === 0"
+      class="empty-state"
+    >
+      Nenhum conteúdo encontrado.
+    </div>
+
+  </div>
+
+</div>

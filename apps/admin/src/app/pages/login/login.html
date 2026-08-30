@@ -1,0 +1,122 @@
+<div class="login-page">
+
+  <div class="login-container">
+
+    <!-- LADO ESQUERDO -->
+
+    <div class="login-info">
+
+      <div class="brand">
+        <div class="brand-icon">C</div>
+
+        <span>ConectaGeração</span>
+      </div>
+
+      <div class="welcome">
+
+        <span class="label">
+          PAINEL ADMINISTRATIVO
+        </span>
+
+        <h1>
+          Gestão simples<br>
+          e inteligente.
+        </h1>
+
+        <p>
+          Acesse o painel administrativo para
+          gerenciar os conteúdos da plataforma
+          ConectaGeração.
+        </p>
+
+      </div>
+
+      <div class="footer-text">
+        Inclusão digital • Segurança • Tecnologia
+      </div>
+
+    </div>
+
+
+    <!-- LOGIN -->
+
+    <div class="login-card">
+
+      <div class="login-header">
+
+        <h2>Bem-vindo!</h2>
+
+        <p>
+          Entre com suas credenciais para continuar.
+        </p>
+
+      </div>
+
+
+      <form (ngSubmit)="login()">
+
+        <!-- EMAIL -->
+
+        <div class="form-group">
+
+          <label for="username">
+            Usuário
+          </label>
+
+          <input id="username" type="text" name="username" [(ngModel)]="username" placeholder="Digite seu usuário"
+            autocomplete="username" />
+
+        </div>
+
+        
+
+        <!-- SENHA -->
+
+        <div class="form-group">
+
+          <label for="password">
+            Senha
+          </label>
+
+          <input id="password" type="password" name="password" [(ngModel)]="password" placeholder="Digite sua senha"
+            autocomplete="current-password" />
+
+        </div>
+
+
+        <!-- ERRO -->
+
+        @if (errorMessage) {
+
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        }
+
+
+        <!-- BOTÃO -->
+
+        <button type="submit" [disabled]="loading">
+
+          @if (loading) {
+          Entrando...
+          } @else {
+          Entrar
+          }
+
+        </button>
+
+      </form>
+
+
+      <p class="security-message">
+        Acesso protegido por JWT do admin-api (Spring Boot).
+        O app mobile continua autenticando com Firebase.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
