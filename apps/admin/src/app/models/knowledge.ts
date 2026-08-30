@@ -18,3 +18,19 @@ export interface KnowledgeTopic {
   updatedAt: string;
   steps: KnowledgeStep[];
 }
+
+/** Payload alinhado a KnowledgeTopicRequest do admin-api. */
+export interface KnowledgeTopicPayload {
+  slug: string;
+  title: string;
+  summary: string;
+  keywords: string[];
+  displayOrder: number;
+  isActive: boolean;
+  steps: Array<{
+    order: number;
+    instruction: string;
+    checkpointQuestion?: string | null;
+    checkpointHints?: string[];
+  }>;
+}

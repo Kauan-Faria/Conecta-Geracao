@@ -1,59 +1,44 @@
-# Admin
+# Admin (Angular) — Backoffice Conecta Geração
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.6.
+Painel web administrativo que consome a **mesma API de backoffice** (`apps/admin-api`, Spring Boot)
+usada para gerenciar a base de conhecimento compartilhada com o NestJS / app Flutter.
 
-## Development server
+Não substitui o app mobile. Autenticação do operador é **JWT próprio do admin-api**
+(Firebase continua só no app do usuário final).
 
-To start a local development server, run:
+## Pré-requisitos
 
-```bash
-ng serve
-```
+1. `admin-api` rodando em `http://localhost:8081`
+2. Migration `admin_users` aplicada (via Prisma em `apps/backend`)
+3. Node 20+ e pnpm
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Rodar
 
 ```bash
-ng generate component component-name
+cd apps/admin
+pnpm install
+pnpm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Abra http://localhost:4200
 
-```bash
-ng generate --help
-```
+Login: usuário/senha seed do `admin-api` (`ADMIN_SEED_USERNAME` / `ADMIN_SEED_PASSWORD`).
 
-## Building
+## Rotas
 
-To build the project run:
+| Rota | Função |
+|------|--------|
+| `/login` | Login JWT (`POST /api/auth/login`) |
+| `/home` | Dashboard (contagem de tópicos via API) |
+| `/admin` | Área administrativa |
+| `/admin/conteudos` | CRUD de tópicos (`/api/knowledge-topics`) |
 
-```bash
-ng build
-```
+Rotas autenticadas usam `authGuard`. O interceptor envia `Authorization: Bearer <token>`.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Stack da disciplina
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- HttpClient + interceptor
+- Data binding (`{{ }}`, `[ ]`, `( )`, `[(ngModel)]`)
+- Diretivas `*ngIf` / `*ngFor`
+- Formulários com `[(ngModel)]`
+- Router (`/home`, `/admin`, …)

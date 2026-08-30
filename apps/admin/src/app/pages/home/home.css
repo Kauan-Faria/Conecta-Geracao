@@ -160,6 +160,22 @@
   gap: 10px;
 }
 
+.logout-button {
+  margin-left: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #f9fafb;
+}
+
 
 .avatar {
   width: 42px;

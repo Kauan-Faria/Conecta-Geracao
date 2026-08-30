@@ -1,12 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { Knowledge } from './knowledge';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-describe('Knowledge', () => {
-  let service: Knowledge;
+import { KnowledgeService } from './knowledge';
+
+describe('KnowledgeService', () => {
+  let service: KnowledgeService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Knowledge);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(KnowledgeService);
   });
 
   it('should be created', () => {

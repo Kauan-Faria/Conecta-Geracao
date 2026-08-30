@@ -48,12 +48,16 @@
       </div>
 
       <div class="user">
-        <div class="avatar">A</div>
+        <div class="avatar">{{ operador.charAt(0).toUpperCase() }}</div>
 
         <div>
-          <strong>Administrador</strong>
-          <small>Gestor do sistema</small>
+          <strong>{{ operador }}</strong>
+          <small>Operador do backoffice</small>
         </div>
+
+        <button type="button" class="logout-button" (click)="logout()">
+          Sair
+        </button>
       </div>
 
     </header>
@@ -82,45 +86,30 @@
       <div class="card">
 
         <div class="card-icon">
-          👥
-        </div>
-
-        <div class="card-info">
-          <span>Usuários</span>
-          <strong>{{ usuarios }}</strong>
-          <small>Usuários cadastrados</small>
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-icon">
           📚
         </div>
 
         <div class="card-info">
-          <span>Conteúdos</span>
-          <strong>{{ conteudos }}</strong>
-          <small>Conteúdos disponíveis</small>
+          <span>Tópicos (base)</span>
+          <strong>
+            {{ carregandoConteudos ? '…' : conteudos }}
+          </strong>
+          <small>Via admin-api / knowledge-topics</small>
         </div>
 
       </div>
 
-
       <div class="card">
-
         <div class="card-icon">
-          🤖
+          {{ apiOk ? '✓' : '!' }}
         </div>
-
         <div class="card-info">
-          <span>Assistente IA</span>
-          <strong>{{ perguntasIA }}</strong>
-          <small>Perguntas realizadas</small>
+          <span>Status da API</span>
+          <strong>{{ apiOk ? 'Conectado' : (carregandoConteudos ? '…' : 'Indisponível') }}</strong>
+          <small>
+            {{ apiOk ? 'Spring Boot em localhost:8081' : (erroConteudos || 'Aguardando admin-api') }}
+          </small>
         </div>
-
       </div>
 
     </section>
