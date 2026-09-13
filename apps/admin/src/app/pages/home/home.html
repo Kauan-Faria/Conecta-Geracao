@@ -92,7 +92,7 @@
         <div class="card-info">
           <span>Tópicos (base)</span>
           <strong>
-            {{ carregandoConteudos ? '…' : conteudos }}
+            {{ carregando ? '…' : conteudos }}
           </strong>
           <small>Via admin-api / knowledge-topics</small>
         </div>
@@ -105,9 +105,9 @@
         </div>
         <div class="card-info">
           <span>Status da API</span>
-          <strong>{{ apiOk ? 'Conectado' : (carregandoConteudos ? '…' : 'Indisponível') }}</strong>
+          <strong>{{ apiOk ? 'Conectado' : (carregando ? '…' : 'Indisponível') }}</strong>
           <small>
-            {{ apiOk ? 'Spring Boot em localhost:8081' : (erroConteudos || 'Aguardando admin-api') }}
+            {{ apiOk ? 'Backend em localhost:8081' : (erro || 'Aguardando admin-api...') }}
           </small>
         </div>
       </div>

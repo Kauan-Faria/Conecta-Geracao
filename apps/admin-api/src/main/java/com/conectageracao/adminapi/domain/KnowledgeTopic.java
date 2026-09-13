@@ -38,7 +38,7 @@ public class KnowledgeTopic {
     private String summary;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(columnDefinition = "text[]")
+    @Column(columnDefinition = "text array")
     @Builder.Default
     private List<String> keywords = new ArrayList<>();
 

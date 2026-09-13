@@ -38,7 +38,7 @@ public class KnowledgeStep {
     private String checkpointQuestion;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "checkpoint_hints", columnDefinition = "text[]")
+    @Column(name = "checkpoint_hints", columnDefinition = "text array")
     @Builder.Default
     private List<String> checkpointHints = new ArrayList<>();
 
