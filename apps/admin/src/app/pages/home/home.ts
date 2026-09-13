@@ -1,6 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { AuthService } from '../../services/auth';
@@ -11,7 +20,11 @@ import { CampaignService } from '../../services/campaign';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+  ],  
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -21,6 +34,7 @@ export class HomeComponent implements OnInit {
   private readonly educationalTipService = inject(EducationalTipService);
   private readonly campaignService = inject(CampaignService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   titulo = 'Dashboard';
 
@@ -31,6 +45,9 @@ export class HomeComponent implements OnInit {
   dicas = 0;
   campanhas = 0;
 
+  usuarios = 14;
+ perguntasIa = 87;
+
   carregando = true;
   apiOk = false;
   erro = '';
@@ -39,38 +56,48 @@ export class HomeComponent implements OnInit {
     this.carregarDashboard();
   }
 
-  carregarDashboard(): void {
-    this.carregando = true;
-    this.erro = '';
+carregarDashboard(): void {
+  this.carregando = true;
+  this.erro = '';
 
-    forkJoin({
-      conteudos: this.knowledgeService.getTopics(),
-      dicas: this.educationalTipService.getTips(),
-      campanhas: this.campaignService.getCampaigns(),
-    }).subscribe({
-      next: ({ conteudos, dicas, campanhas }) => {
-        this.conteudos = conteudos?.length ?? 0;
-        this.dicas = dicas?.length ?? 0;
-        this.campanhas = campanhas?.length ?? 0;
+  forkJoin({
+    conteudos: this.knowledgeService.getTopics(),
+    dicas: this.educationalTipService.getTips(),
+    campanhas: this.campaignService.getCampaigns(),
+  }).subscribe({
+    next: ({ conteudos, dicas, campanhas }) => {
+      this.conteudos = conteudos?.length ?? 0;
+      this.dicas = dicas?.length ?? 0;
+      this.campanhas = campanhas?.length ?? 0;
 
-        this.apiOk = true;
-        this.carregando = false;
-      },
+      this.apiOk = true;
+      this.carregando = false;
 
-      error: (error) => {
-        console.error(
-          'Erro ao carregar dados do dashboard:',
-          error,
-        );
+      console.log('Dashboard carregado:', {
+        conteudos: this.conteudos,
+        dicas: this.dicas,
+        campanhas: this.campanhas,
+      });
 
-        this.apiOk = false;
-        this.carregando = false;
+      this.cdr.detectChanges();
+    },
 
-        this.erro =
-          'Não foi possível carregar todos os dados do dashboard.';
-      },
-    });
-  }
+    error: (error) => {
+      console.error(
+        'Erro ao carregar dados do dashboard:',
+        error,
+      );
+
+      this.apiOk = false;
+      this.carregando = false;
+
+      this.erro =
+        'Não foi possível carregar todos os dados do dashboard.';
+
+      this.cdr.detectChanges();
+    },
+  });
+}
 
   logout(): void {
     this.authService.logout();

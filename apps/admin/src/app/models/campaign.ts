@@ -1,5 +1,12 @@
-export type CampaignSegmentType = string;
-export type CampaignStatus = string;
+export type CampaignSegmentType =
+  | 'all_active'
+  | 'uid_list';
+
+export type CampaignStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
 
 export interface Campaign {
   id: string;

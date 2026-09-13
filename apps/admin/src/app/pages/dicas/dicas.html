@@ -1,0 +1,265 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">CONTEÚDO EDUCATIVO</span>
+      <h1>Dicas Educativas</h1>
+      <p>
+        Gerencie orientações rápidas exibidas aos usuários da plataforma.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="abrirFormulario()"
+    >
+      + Nova dica
+    </button>
+  </div>
+
+  <div
+    *ngIf="mensagem"
+    class="message success"
+  >
+    {{ mensagem }}
+  </div>
+
+  <div
+    *ngIf="erro"
+    class="message error"
+  >
+    {{ erro }}
+  </div>
+
+  <section
+    *ngIf="mostrandoFormulario"
+    class="form-card"
+  >
+
+    <div class="form-header">
+      <div>
+        <span class="eyebrow">
+          {{ editandoId ? 'EDIÇÃO' : 'NOVO CADASTRO' }}
+        </span>
+
+        <h2>
+          {{ editandoId ? 'Editar dica' : 'Cadastrar dica' }}
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="cancelar()"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="field field-full">
+        <label for="titulo">Título</label>
+
+        <input
+          id="titulo"
+          type="text"
+          maxlength="120"
+          [(ngModel)]="titulo"
+          placeholder="Ex.: Como identificar uma mensagem suspeita"
+        >
+      </div>
+
+      <div class="field field-full">
+        <label for="corpo">Conteúdo da dica</label>
+
+        <textarea
+          id="corpo"
+          rows="5"
+          [(ngModel)]="corpo"
+          placeholder="Digite a orientação que será exibida ao usuário"
+        ></textarea>
+      </div>
+
+      <div class="field">
+        <label for="deepLink">Deep link</label>
+
+        <input
+          id="deepLink"
+          type="text"
+          maxlength="256"
+          [(ngModel)]="deepLink"
+          placeholder="/tutorial/seguranca"
+        >
+      </div>
+
+      <div class="field">
+        <label for="topicTag">Tag</label>
+
+        <input
+          id="topicTag"
+          type="text"
+          maxlength="64"
+          [(ngModel)]="topicTag"
+          placeholder="seguranca"
+        >
+      </div>
+
+      <div class="field">
+        <label for="ordem">Ordem de exibição</label>
+
+        <input
+          id="ordem"
+          type="number"
+          [(ngModel)]="ordem"
+        >
+      </div>
+
+      <div class="field checkbox-field">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="ativo"
+          >
+          Dica ativa
+        </label>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="cancelar()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="salvando"
+        (click)="salvar()"
+      >
+        {{ salvando ? 'Salvando...' : 'Salvar dica' }}
+      </button>
+
+    </div>
+
+  </section>
+
+  <section class="content-card">
+
+    <div class="toolbar">
+
+      <input
+        type="search"
+        [(ngModel)]="busca"
+        placeholder="Buscar por título, conteúdo ou tag..."
+      >
+
+      <span>
+        {{ dicasFiltradas.length }} dica(s)
+      </span>
+
+    </div>
+
+    <div
+      *ngIf="loading"
+      class="empty-state"
+    >
+      Carregando dicas...
+    </div>
+
+    <div
+      *ngIf="!loading && dicasFiltradas.length === 0"
+      class="empty-state"
+    >
+      Nenhuma dica educativa encontrada.
+    </div>
+
+    <div
+      *ngIf="!loading && dicasFiltradas.length > 0"
+      class="table-wrapper"
+    >
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Tag</th>
+            <th>Ordem</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let dica of dicasFiltradas">
+
+            <td>
+              <strong>{{ dica.title }}</strong>
+              <small>{{ dica.body }}</small>
+            </td>
+
+            <td>
+              {{ dica.topicTag || '—' }}
+            </td>
+
+            <td>
+              {{ dica.sortOrder }}
+            </td>
+
+            <td>
+              <span
+                class="status"
+                [class.active]="dica.isActive"
+                [class.inactive]="!dica.isActive"
+              >
+                {{ dica.isActive ? 'Ativa' : 'Inativa' }}
+              </span>
+            </td>
+
+            <td class="actions-cell">
+
+              <button
+                type="button"
+                class="table-button"
+                (click)="editar(dica)"
+              >
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="table-button danger"
+                (click)="excluir(dica)"
+              >
+                Excluir
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <a
+    routerLink="/home"
+    class="back-link"
+  >
+    ← Voltar ao Dashboard
+  </a>
+
+</div>

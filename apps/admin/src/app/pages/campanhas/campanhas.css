@@ -1,0 +1,338 @@
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 40px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111827;
+}
+
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 20px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  color: #2563eb;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.page-header h1,
+.form-header h2 {
+  margin: 6px 0;
+}
+
+.page-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.primary-button {
+  border: 0;
+  border-radius: 8px;
+
+  background: #2563eb;
+  color: white;
+
+  padding: 11px 16px;
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button,
+.refresh-button {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  background: white;
+  color: #374151;
+
+  padding: 10px 15px;
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.message {
+  max-width: 1200px;
+  margin: 0 auto 16px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.message.success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+.message.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.form-card,
+.content-card {
+  max-width: 1200px;
+
+  margin: 0 auto 24px;
+
+  background: white;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.form-card {
+  padding: 24px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+}
+
+.close-button {
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.field input,
+.field textarea,
+.field select,
+.toolbar input {
+  width: 100%;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  padding: 10px 12px;
+
+  font: inherit;
+
+  background: white;
+
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.toolbar input:focus {
+  border-color: #2563eb;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field small {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+.content-card {
+  overflow: hidden;
+}
+
+.toolbar {
+  padding: 18px 20px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.toolbar input {
+  max-width: 420px;
+}
+
+.toolbar span {
+  margin-left: auto;
+
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 15px 18px;
+
+  border-bottom: 1px solid #f3f4f6;
+
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-size: 12px;
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+td {
+  font-size: 13px;
+}
+
+td strong,
+td small {
+  display: block;
+}
+
+td small {
+  margin-top: 5px;
+
+  color: #6b7280;
+
+  max-width: 400px;
+}
+
+.status {
+  display: inline-block;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status.pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status.processing {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.status.completed {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status.failed {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.empty-state {
+  padding: 40px;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+.back-link {
+  display: block;
+
+  max-width: 1200px;
+
+  margin: 10px auto 0;
+
+  color: #2563eb;
+
+  text-decoration: none;
+
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 20px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-full {
+    grid-column: auto;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar span {
+    margin-left: 0;
+  }
+}
