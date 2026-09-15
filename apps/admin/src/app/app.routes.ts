@@ -5,6 +5,8 @@ import { HomeComponent } from './pages/home/home';
 import { AdminComponent } from './pages/admin/admin';
 import { ConteudosComponent } from './pages/conteudos/conteudos';
 import { LoginComponent } from './pages/login/login';
+import { DicasComponent } from './pages/dicas/dicas';
+import { CampanhasComponent } from './pages/campanhas/campanhas';
 
 export const routes: Routes = [
   {
@@ -25,6 +27,16 @@ export const routes: Routes = [
   {
     path: 'admin/conteudos',
     component: ConteudosComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'admin/dicas',
+    component: DicasComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'admin/campanhas',
+    component: CampanhasComponent,
     canActivate: [authGuard],
   },
   {

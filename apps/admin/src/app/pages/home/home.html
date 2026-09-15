@@ -13,22 +13,49 @@
 
     <nav class="menu">
 
-      <a routerLink="/home" class="menu-item active">
-        <span>🏠</span>
-        Dashboard
-      </a>
+    <a
+      routerLink="/home"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="menu-item"
+    >
+      Dashboard
+    </a>
 
-      <a routerLink="/admin/conteudos" class="menu-item">
-        <span>📚</span>
-        Conteúdos
-      </a>
+    <a
+      routerLink="/admin/conteudos"
+      routerLinkActive="active"
+      class="menu-item"
+    >
+      Conteúdos
+    </a>
 
-      <a routerLink="/admin" class="menu-item">
-        <span>⚙️</span>
-        Administração
-      </a>
+    <a
+      routerLink="/admin/dicas"
+      routerLinkActive="active"
+      class="menu-item"
+    >
+      Dicas Educativas
+    </a>
 
-    </nav>
+    <a
+      routerLink="/admin/campanhas"
+      routerLinkActive="active"
+      class="menu-item"
+    >
+      Campanhas
+    </a>
+
+    <a
+      routerLink="/admin"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="menu-item"
+    >
+      Administração
+    </a>
+
+  </nav>
 
     <div class="sidebar-footer">
       <span>ConectaGeração</span>
@@ -48,16 +75,24 @@
       </div>
 
       <div class="user">
-        <div class="avatar">{{ operador.charAt(0).toUpperCase() }}</div>
 
-        <div>
+        <div class="avatar">
+          {{ operador.charAt(0).toUpperCase() }}
+        </div>
+
+        <div class="user-info">
           <strong>{{ operador }}</strong>
           <small>Operador do backoffice</small>
         </div>
 
-        <button type="button" class="logout-button" (click)="logout()">
+        <button
+          type="button"
+          class="logout-button"
+          (click)="logout()"
+        >
           Sair
         </button>
+
       </div>
 
     </header>
@@ -66,7 +101,9 @@
     <section class="welcome">
 
       <div>
-        <span class="welcome-label">VISÃO GERAL</span>
+        <span class="welcome-label">
+          VISÃO GERAL
+        </span>
 
         <h2>
           Bem-vindo ao ConectaGeração 👋
@@ -78,38 +115,186 @@
         </p>
       </div>
 
+      <div class="welcome-badge">
+        Administração
+      </div>
+
     </section>
 
 
-    <section class="cards">
+    <section class="dashboard-section">
 
-      <div class="card">
+      <div class="section-title dashboard-title">
 
-        <div class="card-icon">
-          📚
+        <div>
+          <span>RESUMO</span>
+          <h2>Visão geral da plataforma</h2>
         </div>
 
-        <div class="card-info">
-          <span>Tópicos (base)</span>
-          <strong>
-            {{ carregandoConteudos ? '…' : conteudos }}
-          </strong>
-          <small>Via admin-api / knowledge-topics</small>
-        </div>
+        <button
+          type="button"
+          class="refresh-button"
+          (click)="carregarDashboard()"
+          [disabled]="carregando"
+        >
+          {{ carregando ? 'Atualizando...' : '↻ Atualizar' }}
+        </button>
 
       </div>
 
-      <div class="card">
-        <div class="card-icon">
-          {{ apiOk ? '✓' : '!' }}
+
+      <div
+        *ngIf="erro"
+        class="dashboard-warning"
+      >
+        <strong>Atenção:</strong>
+        {{ erro }}
+      </div>
+
+
+      <div class="cards">
+
+        <div class="card">
+
+          <div class="card-icon">
+            📚
+          </div>
+
+          <div class="card-info">
+            <span>Conteúdos</span>
+
+            <strong>
+              {{ carregando ? '…' : conteudos }}
+            </strong>
+
+            <small>
+              Tópicos cadastrados na plataforma
+            </small>
+          </div>
+
         </div>
-        <div class="card-info">
-          <span>Status da API</span>
-          <strong>{{ apiOk ? 'Conectado' : (carregandoConteudos ? '…' : 'Indisponível') }}</strong>
-          <small>
-            {{ apiOk ? 'Spring Boot em localhost:8081' : (erroConteudos || 'Aguardando admin-api') }}
-          </small>
+
+
+        <div class="card">
+
+          <div class="card-icon">
+            💡
+          </div>
+
+          <div class="card-info">
+            <span>Dicas educativas</span>
+
+            <strong>
+              {{ carregando ? '…' : dicas }}
+            </strong>
+
+            <small>
+              Orientações disponíveis aos usuários
+            </small>
+          </div>
+
         </div>
+
+
+        <div class="card">
+
+          <div class="card-icon">
+            📢
+          </div>
+
+          <div class="card-info">
+            <span>Campanhas</span>
+
+            <strong>
+              {{ carregando ? '…' : campanhas }}
+            </strong>
+
+            <small>
+              Campanhas registradas no sistema
+            </small>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+  <div class="card-icon">
+    👥
+  </div>
+
+  <div class="card-info">
+    <span>Usuários cadastrados</span>
+
+    <strong>
+      {{ usuarios }}
+    </strong>
+
+    <small>
+      Usuários registrados na plataforma
+    </small>
+  </div>
+
+</div>
+
+
+<div class="card">
+
+  <div class="card-icon">
+    🤖
+  </div>
+
+  <div class="card-info">
+    <span>Assistência IA</span>
+
+    <strong>
+      {{ perguntasIa }}
+    </strong>
+
+    <small>
+      Perguntas realizadas pelos usuários
+    </small>
+  </div>
+
+</div>
+
+
+        <div class="card">
+
+          <div
+            class="card-icon"
+            [class.status-online]="apiOk"
+            [class.status-offline]="!apiOk && !carregando"
+          >
+            {{ carregando ? '…' : (apiOk ? '✓' : '!') }}
+          </div>
+
+          <div class="card-info">
+            <span>Status da API</span>
+
+            <strong
+              class="api-status"
+              [class.online]="apiOk"
+              [class.offline]="!apiOk && !carregando"
+            >
+              {{
+                carregando
+                  ? 'Verificando'
+                  : (apiOk ? 'Conectado' : 'Indisponível')
+              }}
+            </strong>
+
+            <small>
+              {{
+                apiOk
+                  ? 'Admin API disponível'
+                  : (erro || 'Verificando conexão...')
+              }}
+            </small>
+          </div>
+
+        </div>
+        
+
       </div>
 
     </section>
@@ -127,7 +312,10 @@
 
       <div class="actions">
 
-        <a routerLink="/admin/conteudos" class="action">
+        <a
+          routerLink="/admin/conteudos"
+          class="action"
+        >
 
           <div class="action-icon">
             📚
@@ -135,15 +323,24 @@
 
           <div>
             <strong>Gerenciar conteúdos</strong>
-            <p>Adicionar, editar e remover conteúdos</p>
+
+            <p>
+              Adicionar, editar e remover conteúdos
+              educativos.
+            </p>
           </div>
 
-          <span class="arrow">→</span>
+          <span class="arrow">
+            →
+          </span>
 
         </a>
 
 
-        <a routerLink="/admin" class="action">
+        <a
+          routerLink="/admin"
+          class="action"
+        >
 
           <div class="action-icon">
             ⚙️
@@ -151,10 +348,16 @@
 
           <div>
             <strong>Área administrativa</strong>
-            <p>Acessar configurações do sistema</p>
+
+            <p>
+              Acessar recursos administrativos
+              da plataforma.
+            </p>
           </div>
 
-          <span class="arrow">→</span>
+          <span class="arrow">
+            →
+          </span>
 
         </a>
 

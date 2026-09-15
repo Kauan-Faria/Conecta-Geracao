@@ -1,0 +1,310 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">COMUNICAÇÃO</span>
+
+      <h1>Campanhas</h1>
+
+      <p>
+        Crie e acompanhe campanhas enviadas aos usuários da plataforma.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="abrirFormulario()"
+    >
+      + Nova campanha
+    </button>
+  </div>
+
+
+  <div
+    *ngIf="mensagem"
+    class="message success"
+  >
+    {{ mensagem }}
+  </div>
+
+  <div
+    *ngIf="erro"
+    class="message error"
+  >
+    {{ erro }}
+  </div>
+
+
+  <section
+    *ngIf="mostrandoFormulario"
+    class="form-card"
+  >
+
+    <div class="form-header">
+
+      <div>
+        <span class="eyebrow">
+          NOVA CAMPANHA
+        </span>
+
+        <h2>Criar campanha</h2>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="cancelar()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="field field-full">
+
+        <label for="titulo">
+          Título
+        </label>
+
+        <input
+          id="titulo"
+          type="text"
+          maxlength="120"
+          [(ngModel)]="titulo"
+          placeholder="Ex.: Segurança digital"
+        >
+
+      </div>
+
+
+      <div class="field field-full">
+
+        <label for="corpo">
+          Mensagem
+        </label>
+
+        <textarea
+          id="corpo"
+          rows="5"
+          [(ngModel)]="corpo"
+          placeholder="Digite a mensagem da campanha"
+        ></textarea>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="deepLink">
+          Deep link
+        </label>
+
+        <input
+          id="deepLink"
+          type="text"
+          maxlength="256"
+          [(ngModel)]="deepLink"
+          placeholder="/tutorial/seguranca"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="segmentType">
+          Público
+        </label>
+
+        <select
+          id="segmentType"
+          [(ngModel)]="segmentType"
+        >
+          <option value="all_active">
+            Todos os usuários ativos
+          </option>
+
+          <option value="uid_list">
+            Lista específica de usuários
+          </option>
+        </select>
+
+      </div>
+
+
+      <div
+        *ngIf="segmentType === 'uid_list'"
+        class="field field-full"
+      >
+
+        <label for="firebaseUids">
+          Firebase UIDs
+        </label>
+
+        <textarea
+          id="firebaseUids"
+          rows="5"
+          [(ngModel)]="firebaseUidsTexto"
+          placeholder="Informe um UID por linha ou separados por vírgula"
+        ></textarea>
+
+        <small>
+          Este campo é obrigatório quando o público for uma lista específica.
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="cancelar()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="salvando"
+        (click)="salvar()"
+      >
+        {{ salvando ? 'Criando...' : 'Criar campanha' }}
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <section class="content-card">
+
+    <div class="toolbar">
+
+      <input
+        type="search"
+        [(ngModel)]="busca"
+        placeholder="Buscar campanha..."
+      >
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="carregar()"
+        [disabled]="loading"
+      >
+        ↻ Atualizar
+      </button>
+
+      <span>
+        {{ campanhasFiltradas.length }} campanha(s)
+      </span>
+
+    </div>
+
+
+    <div
+      *ngIf="loading"
+      class="empty-state"
+    >
+      Carregando campanhas...
+    </div>
+
+
+    <div
+      *ngIf="!loading && campanhasFiltradas.length === 0"
+      class="empty-state"
+    >
+      Nenhuma campanha encontrada.
+    </div>
+
+
+    <div
+      *ngIf="!loading && campanhasFiltradas.length > 0"
+      class="table-wrapper"
+    >
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Campanha</th>
+            <th>Público</th>
+            <th>Status</th>
+            <th>Enviados</th>
+            <th>Ignorados</th>
+            <th>Solicitado por</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr
+            *ngFor="let campanha of campanhasFiltradas"
+          >
+
+            <td>
+              <strong>
+                {{ campanha.title }}
+              </strong>
+
+              <small>
+                {{ campanha.body }}
+              </small>
+            </td>
+
+            <td>
+              {{ traduzirSegmento(campanha.segmentType) }}
+            </td>
+
+            <td>
+              <span
+                class="status"
+                [class.pending]="campanha.status === 'pending'"
+                [class.processing]="campanha.status === 'processing'"
+                [class.completed]="campanha.status === 'completed'"
+                [class.failed]="campanha.status === 'failed'"
+              >
+                {{ traduzirStatus(campanha.status) }}
+              </span>
+            </td>
+
+            <td>
+              {{ campanha.sentCount ?? 0 }}
+            </td>
+
+            <td>
+              {{ campanha.skippedCount ?? 0 }}
+            </td>
+
+            <td>
+              {{ campanha.requestedBy || '—' }}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <a
+    routerLink="/home"
+    class="back-link"
+  >
+    ← Voltar ao Dashboard
+  </a>
+
+</div>
