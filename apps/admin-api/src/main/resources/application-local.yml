@@ -17,6 +17,8 @@ spring:
 
   h2:
     console:
+      # Console só neste perfil. Em outros perfis permanece desabilitado
+      # e o SecurityConfig não libera /h2-console.
       enabled: true
       path: /h2-console
 

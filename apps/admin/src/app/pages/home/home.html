@@ -218,44 +218,44 @@
 
         <div class="card">
 
-  <div class="card-icon">
-    👥
-  </div>
+          <div class="card-icon">
+            👥
+          </div>
 
-  <div class="card-info">
-    <span>Usuários cadastrados</span>
+          <div class="card-info">
+            <span>Usuários cadastrados</span>
 
-    <strong>
-      {{ usuarios }}
-    </strong>
+            <strong>
+              {{ formatMetric(usuarios) }}
+            </strong>
 
-    <small>
-      Usuários registrados na plataforma
-    </small>
-  </div>
+            <small>
+              {{ metricHint(usuarios, 'Usuários registrados na plataforma') }}
+            </small>
+          </div>
 
-</div>
+        </div>
 
 
-<div class="card">
+        <div class="card">
 
-  <div class="card-icon">
-    🤖
-  </div>
+          <div class="card-icon">
+            🤖
+          </div>
 
-  <div class="card-info">
-    <span>Assistência IA</span>
+          <div class="card-info">
+            <span>Assistência IA</span>
 
-    <strong>
-      {{ perguntasIa }}
-    </strong>
+            <strong>
+              {{ formatMetric(perguntasIa) }}
+            </strong>
 
-    <small>
-      Perguntas realizadas pelos usuários
-    </small>
-  </div>
+            <small>
+              {{ metricHint(perguntasIa, 'Perguntas realizadas pelos usuários') }}
+            </small>
+          </div>
 
-</div>
+        </div>
 
 
         <div class="card">

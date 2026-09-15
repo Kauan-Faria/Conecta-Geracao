@@ -24,6 +24,10 @@ spring:
   thymeleaf:
     cache: false
 
+  h2:
+    console:
+      enabled: false
+
 server:
   port: ${SERVER_PORT:8081}
 
