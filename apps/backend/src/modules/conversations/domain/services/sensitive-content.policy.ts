@@ -1,5 +1,7 @@
 const SENSITIVE_INPUT_PATTERNS = [
-  /\bsenha\b/i,
+  /\bminha\s+senha\b/i,
+  /\bsenha\s*[:=]\s*\S+/i,
+  /\bsenha\s+(é|e|eh)\s+\S+/i,
   /\bpassword\b/i,
   /\bpin\b/i,
   /\botp\b/i,

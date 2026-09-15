@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-06-10T12:00:00Z
-total_decisions: 11
+last_updated: 2026-09-15T01:20:00Z
+total_decisions: 18
 ---
 
 # Decision Index
@@ -17,6 +17,62 @@ Use this to find relevant prior decisions when working on related features.
 ---
 
 ## Decisions
+
+### ADR-018: Retrieve de steps só no modo RAG
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 032-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/032-rag-relevance-api/adr-018-skip-retrieve-unless-rag.md`
+- **Summary**: O pipeline 005 sempre chama o retriever antes do prompt. O generator infere o TopicMatch primeiro e só executa retrieve se o modo for rag.
+- **Read when**: Alterando GeminiAssistantReplyGenerator, KnowledgeRetriever, RagPromptBuilder, ou os modos clarify/general
+
+### ADR-017: Streak de esclarecimento no metadata da mensagem
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 032-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/032-rag-relevance-api/adr-017-clarification-streak-in-message-metadata.md`
+- **Summary**: FR-3 limita a 2 esclarecimentos seguidos. A streak deriva de metadata.replyMode nas mensagens assistant, sem coluna SQL nova.
+- **Read when**: Implementando limite de clarify, persistência de mensagens, guest chat, ou avaliando migration em Conversation
+
+### ADR-016: Esclarecimento por template, sem LLM
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 032-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/032-rag-relevance-api/adr-016-clarify-via-template.md`
+- **Summary**: FR-3 exige perguntar de novo sem chutar tópico e sem RAG. O modo clarify usa templates curtos e não chama Gemini.
+- **Read when**: Montando perguntas de esclarecimento, calibrando tom do chat, ou avaliando se clarify deve voltar a usar LLM
+
+### ADR-015: topicSlug persistido é pista, não trava o retrieve
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 031-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/031-rag-relevance-api/adr-015-persisted-slug-is-hint-not-lock.md`
+- **Summary**: O retriever sempre infere a mensagem atual. Slug da conversa só reforça continuidade se não houver outro match `high`. Tie/low não caem de volta no tópico antigo.
+- **Read when**: Alterando KnowledgeRetriever, SendMessage, resolvedTopicSlug, ou o fluxo de troca de assunto no chat
+
+### ADR-014: Confiança high/tie/low/none e empate sem displayOrder
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 031-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/031-rag-relevance-api/adr-014-confidence-thresholds-no-displayorder-tiebreak.md`
+- **Summary**: TopicMatch usa limiares de score (piso 2, margem 2). Empate não escolhe o primeiro da lista. Keywords genéricas valem 0.5 e não fecham tópico sozinhas.
+- **Read when**: Calibrando TopicInferencePolicy, pesos de alias/keyword, ou debugando tópico errado no RAG
+
+### ADR-013: Aliases no aggregate KnowledgeTopic (Prisma seed)
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 031-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/031-rag-relevance-api/adr-013-topic-aliases-on-knowledge-topic.md`
+- **Summary**: Grafias alternativas ficam em `KnowledgeTopic.aliases` via seed Prisma, não em CMS nem em arquivo solto. Fallback temporário só se a migration bloquear.
+- **Read when**: Adicionando grafias ao corpus, alterando seed dos 6 tópicos, ou mapeando KnowledgeTopic no Prisma
+
+### ADR-012: Matching lexical + aliases + fuzzy, sem embeddings
+- **Status**: accepted
+- **Date**: 2026-09-15
+- **Bolt**: 031-rag-relevance-api (001-rag-relevance-api)
+- **Path**: `bolts/031-rag-relevance-api/adr-012-lexical-fuzzy-matching-no-embeddings.md`
+- **Summary**: Classificação de tópico é normalização + aliases + Levenshtein em tokens ≥ 4. Sem pgvector e sem LLM para inferir tópico. Embeddings só se o corpus falhar com usuários.
+- **Read when**: Mexendo em RAG, inferência de tópico, ou avaliando embeddings/vector search
 
 ### ADR-011: Google Maps Platform como provedor backend de maps
 - **Status**: accepted

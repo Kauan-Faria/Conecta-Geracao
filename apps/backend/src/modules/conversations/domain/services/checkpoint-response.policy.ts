@@ -21,6 +21,10 @@ export class CheckpointResponsePolicy {
     return 'unchanged';
   }
 
+  isCheckpoint(userMessage: string): boolean {
+    return this.evaluate(userMessage) !== 'unchanged';
+  }
+
   resolveNextStep(currentStep: number, decision: CheckpointDecision, maxSteps: number): number {
     if (maxSteps <= 0) {
       return 0;

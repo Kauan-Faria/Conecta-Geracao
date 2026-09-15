@@ -11,8 +11,8 @@ describe('SensitiveContentPolicy', () => {
     expect(policy.containsSensitiveInput('o OTP que recebi')).toBe(true);
   });
 
-  it('não bloqueia mensagem comum', () => {
-    expect(policy.containsSensitiveInput('como faço um pix?')).toBe(false);
+  it('não bloqueia pedido de ajuda com senha do Wi-Fi', () => {
+    expect(policy.containsSensitiveInput('como passo a senha do wi-fi')).toBe(false);
   });
 
   it('mascara números longos em logs', () => {

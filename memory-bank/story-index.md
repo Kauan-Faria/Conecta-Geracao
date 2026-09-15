@@ -2,9 +2,9 @@
 
 ## Overview
 
-- **Total stories**: 67
-- **Generated**: 60
-- **Last updated**: 2026-08-06T22:45:00Z
+- **Total stories**: 74
+- **Generated**: 64
+- **Last updated**: 2026-09-15T01:01:25Z
 
 ---
 
@@ -257,12 +257,39 @@
 
 ---
 
+### 007-rag-relevance
+
+#### Unit: 001-rag-relevance-api
+
+### 001-normalize-and-fuzzy-match.md ✅ COMPLETED
+**Title**: Normalização e fuzzy match | **Priority**: Must | **Bolt**: 031-rag-relevance-api
+
+### 002-topic-alias-corpus.md ✅ COMPLETED
+**Title**: Corpus de aliases e peso de keywords | **Priority**: Must | **Bolt**: 031-rag-relevance-api
+
+### 003-never-inject-wrong-topic.md ✅ COMPLETED
+**Title**: Não injetar nem grudar tópico errado | **Priority**: Must | **Bolt**: 031-rag-relevance-api
+
+### 004-low-confidence-clarification.md ✅ GENERATED
+**Title**: Perguntar de novo na dúvida | **Priority**: Must | **Bolt**: 032-rag-relevance-api
+
+### 005-out-of-catalog-general-knowledge.md ✅ GENERATED
+**Title**: Orientação geral fora do catálogo | **Priority**: Must | **Bolt**: 032-rag-relevance-api
+
+### 006-immediate-topic-switch.md ✅ GENERATED
+**Title**: Troca imediata de assunto | **Priority**: Must | **Bolt**: 032-rag-relevance-api
+
+### 007-relevance-regression-tests.md ✅ GENERATED
+**Title**: Suite de regressão de relevância | **Priority**: Must | **Bolt**: 032-rag-relevance-api
+
+---
+
 ## Stories by Status
 
 - **Planned**: 0
-- **Generated**: 60
+- **Generated**: 64
 - **In Progress**: 0
-- **Completed**: 0
+- **Completed**: 3
 
 ---
 
@@ -300,3 +327,5 @@
 | 028-chat-voice-assist-ui | 001-chat-voice-assist-ui | 2 |
 | 029-chat-voice-assist-ui | 001-chat-voice-assist-ui | 1 |
 | 030-chat-voice-assist-ui | 001-chat-voice-assist-ui | 2 |
+| 031-rag-relevance-api | 001-rag-relevance-api | 3 |
+| 032-rag-relevance-api | 001-rag-relevance-api | 4 |

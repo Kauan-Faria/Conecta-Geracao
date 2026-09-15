@@ -35,6 +35,7 @@ export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository 
       if (topic.slug.includes(normalized)) return true;
       if (topic.title.toLowerCase().includes(normalized)) return true;
       if (topic.summary.toLowerCase().includes(normalized)) return true;
+      if (topic.aliases.some((alias) => alias.toLowerCase().includes(normalized))) return true;
       return topic.keywords.some((keyword) => keyword.toLowerCase().includes(normalized));
     });
   }
@@ -54,6 +55,7 @@ export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository 
           title: topic.title,
           summary: topic.summary,
           keywords: topic.keywords,
+          aliases: topic.aliases,
           displayOrder: topic.displayOrder,
           isActive: topic.isActive,
         },
@@ -61,6 +63,7 @@ export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository 
           title: topic.title,
           summary: topic.summary,
           keywords: topic.keywords,
+          aliases: topic.aliases,
           displayOrder: topic.displayOrder,
           isActive: topic.isActive,
         },
@@ -86,6 +89,7 @@ export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository 
     title: string;
     summary: string;
     keywords: string[];
+    aliases?: string[];
     displayOrder: number;
     isActive: boolean;
     steps: Array<{
@@ -103,6 +107,7 @@ export class PrismaKnowledgeTopicRepository implements KnowledgeTopicRepository 
       title: row.title,
       summary: row.summary,
       keywords: row.keywords,
+      aliases: row.aliases ?? [],
       displayOrder: row.displayOrder,
       isActive: row.isActive,
       steps: row.steps.map((s) => ({

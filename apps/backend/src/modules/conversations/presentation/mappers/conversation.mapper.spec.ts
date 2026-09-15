@@ -38,4 +38,17 @@ describe('toMessageDto', () => {
     const dto = toMessageDto(message);
     expect(dto.metadata).toBeUndefined();
   });
+
+  it('inclui metadata.replyMode quando presente', () => {
+    const message = Message.create({
+      id: 'msg-2',
+      conversationId: 'conv-1',
+      role: MessageRole.assistant(),
+      content: MessageContent.create('O que você está tentando fazer agora?'),
+      metadata: { replyMode: 'clarify' },
+    });
+
+    const dto = toMessageDto(message);
+    expect(dto.metadata).toEqual({ replyMode: 'clarify' });
+  });
 });

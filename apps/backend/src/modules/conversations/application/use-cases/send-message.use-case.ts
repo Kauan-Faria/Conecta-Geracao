@@ -60,6 +60,7 @@ export class SendMessageUseCase {
       const messageHistory = history.slice(-10).map((m) => ({
         role: m.role.value as 'user' | 'assistant',
         content: m.content.value,
+        replyMode: MessageMetadata.replyModeOf(m.metadata),
       }));
 
       const assistantReply = await this.replyGenerator.generateReply({
@@ -70,9 +71,10 @@ export class SendMessageUseCase {
         messageHistory,
       });
 
-      const assistantMetadata = assistantReply.mapAction
-        ? MessageMetadata.fromMapAction(assistantReply.mapAction)
-        : null;
+      const assistantMetadata = MessageMetadata.compose({
+        replyMode: assistantReply.replyMode,
+        mapAction: assistantReply.mapAction,
+      });
 
       const result = await this.unitOfWork.sendMessage({
         conversationId,
@@ -80,7 +82,10 @@ export class SendMessageUseCase {
         userContent: userContent.value,
         assistantContent: assistantReply.content.value,
         nextCurrentStep: assistantReply.nextCurrentStep,
-        topicSlug: assistantReply.resolvedTopicSlug ?? owned.topicSlug,
+        topicSlug:
+          assistantReply.resolvedTopicSlug !== undefined
+            ? assistantReply.resolvedTopicSlug
+            : owned.topicSlug,
         assistantMetadata,
       });
 

@@ -23,6 +23,11 @@ export class GuestMessageTurnDto {
   @MinLength(1)
   @MaxLength(4000)
   content!: string;
+
+  @ApiPropertyOptional({ enum: ['rag', 'clarify', 'general'] })
+  @IsOptional()
+  @IsIn(['rag', 'clarify', 'general'])
+  replyMode?: 'rag' | 'clarify' | 'general';
 }
 
 export class ReplyGuestMessageDto {

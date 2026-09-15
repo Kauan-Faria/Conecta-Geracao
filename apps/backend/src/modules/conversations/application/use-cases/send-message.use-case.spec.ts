@@ -72,6 +72,44 @@ describe('SendMessageUseCase', () => {
     });
   });
 
+  it('persiste topicSlug null quando o generator limpa o tópico', async () => {
+    const withTopic = Conversation.create({
+      id: 'conv-1',
+      firebaseUid: 'user-a',
+      topicSlug: 'codigo-govbr',
+      currentStep: 2,
+      status: ConversationStatus.inProgress(),
+    });
+    const unitOfWork = {
+      sendMessage: jest.fn().mockResolvedValue({ assistantMessage }),
+    };
+    const useCase = new SendMessageUseCase(
+      { findByIdForUser: jest.fn().mockResolvedValue(withTopic) } as never,
+      unitOfWork as never,
+      {
+        generateReply: jest.fn().mockResolvedValue({
+          content: MessageContent.create('Sobre o Instagram...'),
+          nextCurrentStep: 0,
+          resolvedTopicSlug: null,
+          replyMode: 'general',
+        }),
+      } as never,
+      { listByConversationId: jest.fn().mockResolvedValue([]) } as never,
+      { assertOwner: (c: Conversation | null) => c! } as never,
+      { onAssistantReplyReady: jest.fn() } as never,
+    );
+
+    await useCase.execute('user-a', 'conv-1', 'como usar o Instagram');
+
+    expect(unitOfWork.sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        topicSlug: null,
+        nextCurrentStep: 0,
+        assistantMetadata: { replyMode: 'general' },
+      }),
+    );
+  });
+
   it('retorna erro quando conversa está encerrada', async () => {
     const closed = Conversation.create({
       id: 'conv-1',

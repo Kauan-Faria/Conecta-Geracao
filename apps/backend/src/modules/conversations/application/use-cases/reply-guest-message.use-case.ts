@@ -5,7 +5,7 @@ import {
   AssistantReplyGenerator,
   AssistantMessageTurn,
 } from '../ports/assistant-reply.generator';
-import { MessageMetadata } from '../../domain/value-objects/message-metadata.vo';
+import { MessageMetadata, MessageMetadataJson } from '../../domain/value-objects/message-metadata.vo';
 
 export interface GuestAssistantReply {
   id: string;
@@ -13,7 +13,7 @@ export interface GuestAssistantReply {
   content: string;
   currentStep: number;
   topicSlug: string | null;
-  metadata: ReturnType<typeof MessageMetadata.fromMapAction> | null;
+  metadata: MessageMetadataJson | null;
   createdAt: string;
 }
 
@@ -38,16 +38,17 @@ export class ReplyGuestMessageUseCase {
       messageHistory: input.messageHistory,
     });
 
-    const metadata = assistantReply.mapAction
-      ? MessageMetadata.fromMapAction(assistantReply.mapAction)
-      : null;
+    const metadata = MessageMetadata.compose({
+      replyMode: assistantReply.replyMode,
+      mapAction: assistantReply.mapAction,
+    });
 
     return {
       id: randomUUID(),
       role: 'assistant',
       content: assistantReply.content.value,
       currentStep: assistantReply.nextCurrentStep,
-      topicSlug: assistantReply.resolvedTopicSlug ?? input.topicSlug ?? null,
+      topicSlug: assistantReply.resolvedTopicSlug,
       metadata,
       createdAt: new Date().toISOString(),
     };

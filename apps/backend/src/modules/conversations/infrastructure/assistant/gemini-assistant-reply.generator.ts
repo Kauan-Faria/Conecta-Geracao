@@ -6,6 +6,7 @@ import {
 } from '../../application/ports/assistant-reply.generator';
 import {
   KNOWLEDGE_RETRIEVER,
+  KnowledgeContext,
   KnowledgeRetriever,
 } from '../../application/ports/knowledge-retriever';
 import { LLM_PROVIDER, LlmProvider } from '../../application/ports/llm-provider';
@@ -23,6 +24,12 @@ import {
   buildLocationReplyPrompt,
   LOCATION_INTENT_SYSTEM_APPENDIX,
 } from './location-intent.prompt';
+import { ClarificationQuestionPolicy } from '../../domain/services/clarification-question.policy';
+import { ClarificationStreakCounter } from '../../domain/services/clarification-streak.counter';
+import { GeneralOrientationPolicy } from '../../domain/services/general-orientation.policy';
+import { MessageSubstanceClassifier } from '../../domain/services/message-substance.classifier';
+import { ReplyModeResolver } from '../../domain/services/reply-mode.resolver';
+import { TopicMatch } from '../../domain/value-objects/topic-match.vo';
 
 const CATEGORY_LABELS: Record<string, string> = {
   pharmacy: 'uma farmácia',
@@ -42,6 +49,11 @@ export class GeminiAssistantReplyGenerator implements AssistantReplyGenerator {
   private readonly categoryDisambiguator = new CategoryDisambiguator();
   private readonly radiusPolicy = new RadiusSuggestionPolicy();
   private readonly mapActionBuilder = new MapActionBuilder();
+  private readonly substance = new MessageSubstanceClassifier();
+  private readonly streakCounter = new ClarificationStreakCounter();
+  private readonly resolver = new ReplyModeResolver();
+  private readonly clarifyQuestions = new ClarificationQuestionPolicy();
+  private readonly generalOrientation = new GeneralOrientationPolicy();
 
   constructor(
     @Inject(KNOWLEDGE_RETRIEVER)
@@ -55,7 +67,7 @@ export class GeminiAssistantReplyGenerator implements AssistantReplyGenerator {
       return {
         content: MessageContent.create(this.guardrails.refusalMessage()),
         nextCurrentStep: input.currentStep,
-        resolvedTopicSlug: input.topicSlug,
+        resolvedTopicSlug: input.topicSlug ?? null,
       };
     }
 
@@ -80,7 +92,7 @@ export class GeminiAssistantReplyGenerator implements AssistantReplyGenerator {
       return {
         content: MessageContent.create(categoryResolution.question),
         nextCurrentStep: input.currentStep,
-        resolvedTopicSlug: input.topicSlug,
+        resolvedTopicSlug: input.topicSlug ?? null,
       };
     }
 
@@ -119,7 +131,7 @@ export class GeminiAssistantReplyGenerator implements AssistantReplyGenerator {
     return {
       content: MessageContent.create(rawReply),
       nextCurrentStep: input.currentStep,
-      resolvedTopicSlug: input.topicSlug,
+      resolvedTopicSlug: input.topicSlug ?? null,
       mapAction,
     };
   }
@@ -127,23 +139,118 @@ export class GeminiAssistantReplyGenerator implements AssistantReplyGenerator {
   private async generateKnowledgeReply(
     input: AssistantReplyInput,
   ): Promise<AssistantReplyResult> {
-    const knowledge = await this.knowledge.retrieve({
-      topicSlug: input.topicSlug,
-      userMessage: input.userMessage,
+    const persisted = input.topicSlug?.trim() || null;
+    const checkpointDecision = this.checkpoints.evaluate(input.userMessage);
+    const isCheckpoint = this.checkpoints.isCheckpoint(input.userMessage);
+    const streak = this.streakCounter.count(input.messageHistory);
+
+    let match: TopicMatch;
+    let catalog: { slug: string; title: string }[] = [];
+    try {
+      const inferred = await this.knowledge.inferMatch(input.userMessage);
+      match = inferred.match;
+      catalog = inferred.catalog;
+    } catch {
+      return this.failClosed(input, persisted);
+    }
+
+    const substance = this.substance.classify({
+      message: input.userMessage,
+      match,
+      isCheckpoint,
+      streakCount: streak.count,
     });
 
-    const stepCount = knowledge.steps.length;
-    const checkpointDecision = this.checkpoints.evaluate(input.userMessage);
-    const nextCurrentStep = this.checkpoints.resolveNextStep(
+    let plan;
+    try {
+      plan = this.resolver.resolve({
+        match,
+        persisted,
+        substance,
+        streak,
+        isCheckpoint,
+        checkpointDecision,
+      });
+    } catch {
+      return this.failClosed(input, persisted);
+    }
+
+    const resolvedTopicSlug = plan.resolvedTopicSlug(persisted);
+
+    if (plan.mode === 'clarify') {
+      const question = this.clarifyQuestions.compose(match, catalog);
+      return {
+        content: MessageContent.create(question.text),
+        nextCurrentStep: plan.nextCurrentStep(
+          input.currentStep,
+          checkpointDecision,
+          0,
+          this.checkpoints,
+        ),
+        resolvedTopicSlug,
+        replyMode: 'clarify',
+      };
+    }
+
+    if (plan.mode === 'general') {
+      const brief = this.generalOrientation.brief();
+      let rawReply: string;
+      try {
+        rawReply = await this.llm.generate({
+          systemPrompt: this.promptBuilder.buildGeneralSystemPrompt(brief.systemAppendix),
+          userPrompt: this.promptBuilder.buildGeneralUserPrompt({
+            userMessage: input.userMessage,
+            messageHistory: input.messageHistory,
+          }),
+        });
+      } catch {
+        rawReply =
+          'Estou com dificuldade técnica no momento. Tente novamente em instantes ou escolha um dos tópicos disponíveis no menu.';
+      }
+      if (this.guardrails.containsUnsafeOutput(rawReply)) {
+        rawReply = this.guardrails.refusalMessage();
+      }
+      return {
+        content: MessageContent.create(rawReply),
+        nextCurrentStep: 0,
+        resolvedTopicSlug,
+        replyMode: 'general',
+      };
+    }
+
+    const knowledge = await this.knowledge.retrieve({
+      topicSlug: match.slug ?? persisted,
+      userMessage: input.userMessage,
+    }).catch(() => null);
+
+    if (!knowledge) {
+      return this.failClosed(input, persisted);
+    }
+    const promptStep = plan.switchOccurred ? 0 : input.currentStep;
+    const nextCurrentStep = plan.nextCurrentStep(
       input.currentStep,
       checkpointDecision,
-      stepCount,
+      knowledge.steps.length,
+      this.checkpoints,
     );
 
+    return this.completeRagReply(input, knowledge, promptStep, checkpointDecision, {
+      nextCurrentStep,
+      resolvedTopicSlug,
+    });
+  }
+
+  private async completeRagReply(
+    input: AssistantReplyInput,
+    knowledge: KnowledgeContext,
+    promptStep: number,
+    checkpointDecision: ReturnType<CheckpointResponsePolicy['evaluate']>,
+    result: { nextCurrentStep: number; resolvedTopicSlug: string | null },
+  ): Promise<AssistantReplyResult> {
     const systemPrompt = this.promptBuilder.buildSystemPrompt();
     const userPrompt = this.promptBuilder.buildUserPrompt({
       knowledge,
-      currentStep: input.currentStep,
+      currentStep: promptStep,
       checkpointDecision,
       userMessage: input.userMessage,
       messageHistory: input.messageHistory,
@@ -161,18 +268,25 @@ export class GeminiAssistantReplyGenerator implements AssistantReplyGenerator {
       rawReply = this.guardrails.refusalMessage();
     }
 
-    if (!knowledge.topicSlug && knowledge.availableTopics.length > 0) {
-      const list = knowledge.availableTopics.map((t) => `• ${t.title}`).join('\n');
-      rawReply = `${rawReply}\n\nPosso ajudar com estes assuntos:\n${list}`;
-    }
-
-    const resolvedTopicSlug =
-      input.topicSlug ?? (knowledge.inferredFromMessage ? knowledge.topicSlug : null);
-
     return {
       content: MessageContent.create(rawReply),
-      nextCurrentStep,
-      resolvedTopicSlug,
+      nextCurrentStep: result.nextCurrentStep,
+      resolvedTopicSlug: result.resolvedTopicSlug,
+      replyMode: 'rag',
+    };
+  }
+
+  private failClosed(
+    input: AssistantReplyInput,
+    persisted: string | null,
+  ): AssistantReplyResult {
+    return {
+      content: MessageContent.create(
+        'Estou com dificuldade técnica no momento. Tente novamente em instantes ou escolha um dos tópicos disponíveis no menu.',
+      ),
+      nextCurrentStep: input.currentStep,
+      resolvedTopicSlug: persisted,
+      replyMode: 'general',
     };
   }
 }

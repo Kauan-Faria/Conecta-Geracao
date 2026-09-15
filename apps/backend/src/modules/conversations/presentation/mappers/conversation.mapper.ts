@@ -1,6 +1,5 @@
 import { Conversation } from '../../domain/entities/conversation.entity';
 import { Message } from '../../domain/entities/conversation.entity';
-import { MessageMetadataJson } from '../../domain/value-objects/message-metadata.vo';
 
 export interface MapActionDto {
   type: 'map_search';
@@ -11,6 +10,7 @@ export interface MapActionDto {
 
 export interface MessageMetadataDto {
   map_action?: MapActionDto;
+  replyMode?: 'rag' | 'clarify' | 'general';
 }
 
 export interface ConversationSummaryDto {
@@ -53,8 +53,11 @@ export function toMessageDto(message: Message): MessageDto {
     createdAt: message.createdAt.toISOString(),
   };
 
-  if (message.metadata?.map_action) {
-    dto.metadata = { map_action: message.metadata.map_action };
+  if (message.metadata?.map_action || message.metadata?.replyMode) {
+    dto.metadata = {
+      ...(message.metadata.map_action ? { map_action: message.metadata.map_action } : {}),
+      ...(message.metadata.replyMode ? { replyMode: message.metadata.replyMode } : {}),
+    };
   }
 
   return dto;

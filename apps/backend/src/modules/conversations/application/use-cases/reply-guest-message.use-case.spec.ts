@@ -31,4 +31,25 @@ describe('ReplyGuestMessageUseCase', () => {
     expect(result.content).toBe('Vou te ajudar a encontrar uma farmácia.');
     expect(result.currentStep).toBe(0);
   });
+
+  it('propaga slug e replyMode iguais ao generator (paridade)', async () => {
+    const replyGenerator = {
+      generateReply: jest.fn().mockResolvedValue({
+        content: MessageContent.create('Você quer ajuda com Wi-Fi ou com Gov.br?'),
+        nextCurrentStep: 2,
+        resolvedTopicSlug: 'codigo-govbr',
+        replyMode: 'clarify',
+      }),
+    };
+    const useCase = new ReplyGuestMessageUseCase(replyGenerator as never);
+    const result = await useCase.execute({
+      content: 'código QR',
+      topicSlug: 'codigo-govbr',
+      currentStep: 2,
+      messageHistory: [],
+    });
+    expect(result.topicSlug).toBe('codigo-govbr');
+    expect(result.currentStep).toBe(2);
+    expect(result.metadata).toEqual({ replyMode: 'clarify' });
+  });
 });

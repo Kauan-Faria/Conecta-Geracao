@@ -21,7 +21,29 @@ export class RagPromptBuilder {
       '- Ao ensinar um passo, inclua a pergunta de checkpoint quando existir no contexto.',
       '- Se o usuário disser que não conseguiu, repita ou simplifique o MESMO passo sem avançar.',
       '- Se o usuário confirmar (sim), avance para o próximo passo do contexto.',
-      '- Se o tópico não estiver claro, sugira um dos tópicos listados em "Tópicos disponíveis".',
+    ].join('\n');
+  }
+
+  buildGeneralSystemPrompt(appendix: string): string {
+    return [
+      'Você é o assistente do app Conecta Geração, que ajuda pessoas com pouca familiaridade digital.',
+      appendix,
+    ].join('\n\n');
+  }
+
+  buildGeneralUserPrompt(input: {
+    userMessage: string;
+    messageHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+  }): string {
+    return [
+      '## Orientação geral (sem passos oficiais da base)',
+      'Não inclua tutoriais curados de Wi-Fi, Gov.br, PIX, boleto, WhatsApp ou golpe.',
+      '',
+      '### Histórico recente',
+      ...input.messageHistory.slice(-6).map((m) => `${m.role}: ${m.content}`),
+      '',
+      '### Mensagem atual do usuário',
+      input.userMessage,
     ].join('\n');
   }
 

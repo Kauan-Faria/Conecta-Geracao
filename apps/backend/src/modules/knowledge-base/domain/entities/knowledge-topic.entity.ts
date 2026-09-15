@@ -6,6 +6,7 @@ export interface KnowledgeTopicProps {
   title: string;
   summary: string;
   keywords: string[];
+  aliases?: string[];
   displayOrder: number;
   isActive?: boolean;
   steps: KnowledgeStepProps[];
@@ -17,6 +18,7 @@ export class KnowledgeTopic {
   readonly title: string;
   readonly summary: string;
   readonly keywords: string[];
+  readonly aliases: string[];
   readonly displayOrder: number;
   readonly isActive: boolean;
   readonly steps: KnowledgeStep[];
@@ -27,6 +29,7 @@ export class KnowledgeTopic {
     this.title = props.title;
     this.summary = props.summary;
     this.keywords = props.keywords;
+    this.aliases = props.aliases ?? [];
     this.displayOrder = props.displayOrder;
     this.isActive = props.isActive ?? true;
     this.steps = props.steps.map((s) => KnowledgeStep.create(s));

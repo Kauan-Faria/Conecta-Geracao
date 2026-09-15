@@ -5,7 +5,8 @@ export const MVP_TOPICS_DATA: KnowledgeTopicProps[] = [
     slug: 'fazer-pix',
     title: 'Como fazer um PIX',
     summary: 'Envie dinheiro pelo app do seu banco com segurança.',
-    keywords: ['pix', 'transferencia', 'banco', 'pagamento'],
+    keywords: ['pix', 'transferencia', 'banco'],
+    aliases: ['pix', 'pics', 'pixx', 'pikis', 'fazer um pix'],
     displayOrder: 1,
     steps: [
       {
@@ -36,7 +37,16 @@ export const MVP_TOPICS_DATA: KnowledgeTopicProps[] = [
     slug: 'codigo-govbr',
     title: 'Código Gov.br (tutorial)',
     summary: 'Entenda o que é o código Gov.br e quando ele é pedido em sites públicos.',
-    keywords: ['gov.br', 'codigo', 'governo', 'cadastro'],
+    keywords: ['gov.br', 'governo', 'codigo'],
+    aliases: [
+      'gov.br',
+      'govbr',
+      'gov br',
+      'goovi',
+      'governo',
+      'codigo do gov',
+      'gov brasi',
+    ],
     displayOrder: 2,
     steps: [
       {
@@ -70,6 +80,7 @@ export const MVP_TOPICS_DATA: KnowledgeTopicProps[] = [
     title: 'WhatsApp: contato e localização',
     summary: 'Compartilhe um contato ou sua localização em uma conversa.',
     keywords: ['whatsapp', 'contato', 'localizacao', 'compartilhar'],
+    aliases: ['whatsapp', 'whatsap', 'watsap', 'uatsap', 'zap', 'whats', 'watzap'],
     displayOrder: 3,
     steps: [
       {
@@ -100,7 +111,17 @@ export const MVP_TOPICS_DATA: KnowledgeTopicProps[] = [
     slug: 'wifi-qr-code',
     title: 'Senha do Wi-Fi via QR Code',
     summary: 'Compartilhe a rede Wi-Fi usando um QR Code no celular ou roteador.',
-    keywords: ['wifi', 'qr', 'rede', 'internet'],
+    keywords: ['wifi', 'qr'],
+    aliases: [
+      'wifi',
+      'wi-fi',
+      'uifi',
+      'wify',
+      'wiffi',
+      'senha do wifi',
+      'qr do wifi',
+      'rede wifi',
+    ],
     displayOrder: 4,
     steps: [
       {
@@ -131,7 +152,8 @@ export const MVP_TOPICS_DATA: KnowledgeTopicProps[] = [
     slug: 'segunda-via-boleto',
     title: '2ª via de boleto',
     summary: 'Emita a segunda via pelo app ou site oficial da empresa.',
-    keywords: ['boleto', 'segunda via', 'conta', 'pagamento'],
+    keywords: ['boleto', 'segunda via'],
+    aliases: ['boleto', 'boletu', 'boletoo', 'segunda via', '2 via', 'conta atrasada'],
     displayOrder: 5,
     steps: [
       {
@@ -163,6 +185,7 @@ export const MVP_TOPICS_DATA: KnowledgeTopicProps[] = [
     title: 'Reconhecer possível golpe',
     summary: 'Aprenda sinais de golpe e como se proteger.',
     keywords: ['golpe', 'fraude', 'seguranca', 'link'],
+    aliases: ['golpe', 'golpi', 'fraude', 'mensagem estranha', 'link suspeito'],
     displayOrder: 6,
     steps: [
       {
