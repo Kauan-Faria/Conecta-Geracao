@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-09-15T01:20:00Z
-total_decisions: 18
+last_updated: 2026-09-26T14:14:00Z
+total_decisions: 27
 ---
 
 # Decision Index
@@ -17,6 +17,78 @@ Use this to find relevant prior decisions when working on related features.
 ---
 
 ## Decisions
+
+### ADR-027: Erro PL/SQL mapeado na borda HTTP
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 034-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/034-oracle-consumption-api/adr-027-mapeamento-erro-oracle-http.md`
+- **Summary**: O cliente do admin precisa distinguir usuário inexistente, período inválido e Oracle fora do ar. A borda HTTP traduz -20001, -20002 e -20003 e recusa o pedido inválido antes do JDBC.
+- **Read when**: Mapeando ORA-20001, ORA-20002 ou falha de conexão do consumo para HTTP, ou alterando a mensagem de Oracle indisponível
+
+### ADR-026: Relatório com cursor e SYS_REFCURSOR
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 034-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/034-oracle-consumption-api/adr-026-relatorio-cursor-refcursor.md`
+- **Summary**: A story pede cursor e loop, e o JDBC precisa ler o resumo. A procedure percorre os usuários, preenche a temporária de sessão e só então abre o SYS_REFCURSOR.
+- **Read when**: Alterando PR_RELATORIO_CONSUMO, a tabela RELATORIO_CONSUMO_TMP, ou a leitura do ref cursor no Java
+
+### ADR-025: Pool Oracle fora do bean DataSource
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 034-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/034-oracle-consumption-api/adr-025-datasource-oracle-fora-do-jpa.md`
+- **Summary**: Um segundo bean DataSource faria o JPA e o JdbcTemplate do Postgres recuarem. O pool Oracle vive em OracleConsumoAccess e só nasce na primeira chamada de consumo.
+- **Read when**: Configurando o datasource Oracle do admin-api, o JdbcTemplate do dashboard, ou a subida da API com o Oracle desligado
+
+### ADR-024: Contrato das functions de consumo
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 033-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/033-oracle-consumption-api/adr-024-contrato-functions-consumo.md`
+- **Summary**: Consultas SQL, o teste e o JDBC do bolt 034 precisam de uma frase e de um identificador estáveis. A function recebe o ID numérico, devolve a frase combinada e trata 10.000 tokens como consumo alto.
+- **Read when**: Chamando FN_INDICADOR_TOKENS ou FN_CONSUMO_FORMATADO, montando o seed de demonstração, ou criando a tabela de alerta
+
+### ADR-023: Scripts Oracle idempotentes no admin-api
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 033-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/033-oracle-consumption-api/adr-023-scripts-oracle-idempotentes.md`
+- **Summary**: O DDL precisa rodar de novo na máquina local sem duplicar a série e sem depender do Prisma. Os scripts ficam no admin-api, em Oracle 12c ou mais recente, com checagem no dicionário e seed por MERGE.
+- **Read when**: Adicionando DDL ou seed Oracle, escolhendo ferramenta de migration do admin-api, ou reaplicando os scripts locais
+
+### ADR-022: Credenciais Oracle somente por ambiente
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 033-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/033-oracle-consumption-api/adr-022-credenciais-oracle-por-ambiente.md`
+- **Summary**: A instância local varia de máquina para máquina e a senha não pode entrar no Git. URL, usuário e senha ficam em variável de ambiente; o SQL não contém connect string.
+- **Read when**: Configurando a conexão Oracle, revisando segredos do admin-api, ou preparando o datasource do bolt 034
+
+### ADR-021: Exceções de domínio com RAISE_APPLICATION_ERROR
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 033-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/033-oracle-consumption-api/adr-021-excecoes-plsql-application-error.md`
+- **Summary**: Usuário inexistente não pode parecer consumo zero. A function sinaliza -20001 ou -20002 e só devolve 0 quando o usuário existe e não há leituras no período.
+- **Read when**: Tratando usuário inexistente ou período inválido no PL/SQL, no teste SQL, ou no caller JDBC
+
+### ADR-020: Regras de consumo calculadas em PL/SQL
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 033-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/033-oracle-consumption-api/adr-020-regras-de-consumo-em-plsql.md`
+- **Summary**: O padrão do projeto coloca regra de negócio na aplicação, mas o enunciado pede o indicador vindo do banco. FN_INDICADOR_TOKENS e FN_CONSUMO_FORMATADO calculam a soma e o texto; o Java futuro só chama.
+- **Read when**: Implementando o indicador de tokens, o texto formatado, ou movendo essa conta para Java ou Spring
+
+### ADR-019: Oracle local isolado do Postgres
+- **Status**: accepted
+- **Date**: 2026-09-26
+- **Bolt**: 033-oracle-consumption-api (001-oracle-consumption-api)
+- **Path**: `bolts/033-oracle-consumption-api/adr-019-oracle-isolado-do-postgres.md`
+- **Summary**: O padrão do projeto persiste no Supabase via Prisma, e esta intent precisa de Oracle sem mover o app. A série simulada de consumo fica só no Oracle local; Postgres, Prisma e usuários reais permanecem intactos.
+- **Read when**: Trabalhando na persistência Oracle do admin, no segundo datasource, ou em qualquer mudança que leve consumo da IA para o Prisma ou o Postgres
 
 ### ADR-018: Retrieve de steps só no modo RAG
 - **Status**: accepted

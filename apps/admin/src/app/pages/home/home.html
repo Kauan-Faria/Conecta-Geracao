@@ -47,6 +47,14 @@
     </a>
 
     <a
+      routerLink="/admin/consumo"
+      routerLinkActive="active"
+      class="menu-item"
+    >
+      Consumo
+    </a>
+
+    <a
       routerLink="/admin"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
@@ -327,6 +335,31 @@
             <p>
               Adicionar, editar e remover conteúdos
               educativos.
+            </p>
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a
+          routerLink="/admin/consumo"
+          class="action"
+        >
+
+          <div class="action-icon">
+            📊
+          </div>
+
+          <div>
+            <strong>Consumo de tokens</strong>
+
+            <p>
+              Ver o indicador, os alertas e o relatório
+              do período de demonstração.
             </p>
           </div>
 

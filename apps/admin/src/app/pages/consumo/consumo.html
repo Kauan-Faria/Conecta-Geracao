@@ -1,0 +1,124 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <a routerLink="/home" class="back-link">← Dashboard</a>
+      <h1>Consumo de tokens</h1>
+      <p>
+        Período de demonstração:
+        {{ periodoInicio }} até {{ periodoFim }}.
+        Limite de consumo alto: 10.000 tokens.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="disparar()"
+      [disabled]="disparando || carregando || !dados"
+    >
+      {{ disparando ? 'Disparando…' : 'Disparar alerta' }}
+    </button>
+  </div>
+
+  <div *ngIf="mensagem" class="feedback">
+    {{ mensagem }}
+  </div>
+
+  <div *ngIf="erro" class="error-banner">
+    <p>{{ erro }}</p>
+    <div class="error-actions">
+      <button type="button" class="secondary-button" (click)="carregar(true)">
+        Carregar de novo
+      </button>
+    </div>
+    <form *ngIf="mostrarCampoId" class="id-form" (ngSubmit)="tentarComId()">
+      <label for="id-manual">Id do usuário de consumo</label>
+      <input
+        id="id-manual"
+        name="idManual"
+        type="number"
+        min="1"
+        step="1"
+        [(ngModel)]="idManual"
+      />
+      <button type="submit" class="secondary-button">
+        Consultar este id
+      </button>
+    </form>
+  </div>
+
+  <div *ngIf="erroDisparo" class="error-banner">
+    {{ erroDisparo }}
+  </div>
+
+  <p *ngIf="carregando" class="loading">Carregando consumo…</p>
+
+  <ng-container *ngIf="dados && !carregando">
+
+    <section class="blocks">
+
+      <article class="block">
+        <h2>Indicador</h2>
+        <p class="token-total">{{ dados.tokenTotal }}</p>
+        <p class="hint">Total de tokens do usuário {{ dados.userId }} no período.</p>
+      </article>
+
+      <article class="block">
+        <h2>Texto formatado</h2>
+        <p class="formatted">{{ dados.formattedText }}</p>
+      </article>
+
+      <article class="block">
+        <h2>Alertas</h2>
+        <p *ngIf="dados.alerts.length === 0" class="hint">
+          Nenhum alerta neste período.
+        </p>
+        <ul *ngIf="dados.alerts.length > 0" class="alert-list">
+          <li *ngFor="let alerta of dados.alerts">
+            <strong>{{ alerta.message }}</strong>
+            <span>{{ alerta.tokenTotal }} tokens</span>
+          </li>
+        </ul>
+      </article>
+
+      <article class="block block-wide">
+        <h2>Relatório por usuário</h2>
+        <p *ngIf="dados.report.length === 0" class="hint">
+          Nenhum usuário no relatório.
+        </p>
+        <table *ngIf="dados.report.length > 0">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Tokens</th>
+              <th>Alerta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let linha of dados.report"
+              [class.selected]="linha.userId === userId"
+            >
+              <td>
+                <button
+                  type="button"
+                  class="user-button"
+                  (click)="selecionarUsuario(linha)"
+                  [attr.aria-pressed]="linha.userId === userId"
+                >
+                  {{ linha.name }}
+                </button>
+              </td>
+              <td>{{ linha.tokenTotal }}</td>
+              <td>{{ linha.hasAlert ? 'Sim' : 'Não' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+    </section>
+
+  </ng-container>
+
+</div>

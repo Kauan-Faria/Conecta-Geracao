@@ -24,6 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // rotas publicas que nao devem passar pelo filtro (login, swagger, health)
     private final RequestMatcher publicRoutes = request -> {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
         String path = request.getRequestURI();
         return path.startsWith("/api/auth/login")
                 || path.startsWith("/swagger-ui")
@@ -49,14 +52,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+        if (header == null || !header.startsWith("Bearer ") || !jwtService.isValid(header.substring(7))) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"code\":\"UNAUTHORIZED\",\"message\":\"Autenticação necessária.\"}");
             return;
         }
 
         String token = header.substring(7);
 
-        if (jwtService.isValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String username = jwtService.extractUsername(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 

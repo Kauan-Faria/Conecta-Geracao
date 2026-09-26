@@ -2,9 +2,9 @@
 
 ## Overview
 
-- **Total stories**: 74
-- **Generated**: 64
-- **Last updated**: 2026-09-15T01:01:25Z
+- **Total stories**: 84
+- **Generated**: 74
+- **Last updated**: 2026-09-26T12:43:00Z
 
 ---
 
@@ -284,10 +284,48 @@
 
 ---
 
+### 008-admin-oracle-persistence
+
+#### Unit: 001-oracle-consumption-api
+
+### 001-oracle-schema-and-seed.md ✅ GENERATED
+**Title**: Tabelas e série simulada de tokens | **Priority**: Must | **Bolt**: 033-oracle-consumption-api
+
+### 002-token-indicator-function.md ✅ GENERATED
+**Title**: Function de indicador de tokens | **Priority**: Must | **Bolt**: 033-oracle-consumption-api
+
+### 003-formatted-consumption-function.md ✅ GENERATED
+**Title**: Function de consumo formatado | **Priority**: Must | **Bolt**: 033-oracle-consumption-api
+
+### 004-high-consumption-alert-procedure.md ✅ GENERATED
+**Title**: Procedure de alerta por consumo alto | **Priority**: Must | **Bolt**: 034-oracle-consumption-api
+
+### 005-per-user-consumption-report.md ✅ GENERATED
+**Title**: Procedure de relatório por usuário | **Priority**: Must | **Bolt**: 034-oracle-consumption-api
+
+### 006-java-jdbc-procedure-call.md ✅ GENERATED
+**Title**: API Java chama a procedure via JDBC | **Priority**: Must | **Bolt**: 034-oracle-consumption-api
+
+### 007-oracle-model-documentation.md ✅ GENERATED
+**Title**: DER e documentação do PL/SQL | **Priority**: Must | **Bolt**: 034-oracle-consumption-api
+
+#### Unit: 002-admin-consumption-ui
+
+### 001-consumption-screen.md ✅ GENERATED
+**Title**: Tela de consumo do operador | **Priority**: Must | **Bolt**: 035-admin-consumption-ui
+
+### 002-trigger-alert-routine.md ✅ GENERATED
+**Title**: Disparo da rotina de alerta | **Priority**: Must | **Bolt**: 035-admin-consumption-ui
+
+### 003-consumption-error-state.md ✅ GENERATED
+**Title**: Erro da consulta sem quebrar o painel | **Priority**: Must | **Bolt**: 035-admin-consumption-ui
+
+---
+
 ## Stories by Status
 
 - **Planned**: 0
-- **Generated**: 64
+- **Generated**: 74
 - **In Progress**: 0
 - **Completed**: 3
 
@@ -329,3 +367,6 @@
 | 030-chat-voice-assist-ui | 001-chat-voice-assist-ui | 2 |
 | 031-rag-relevance-api | 001-rag-relevance-api | 3 |
 | 032-rag-relevance-api | 001-rag-relevance-api | 4 |
+| 033-oracle-consumption-api | 001-oracle-consumption-api | 3 |
+| 034-oracle-consumption-api | 001-oracle-consumption-api | 4 |
+| 035-admin-consumption-ui | 002-admin-consumption-ui | 3 |

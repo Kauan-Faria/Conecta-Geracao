@@ -1,5 +1,7 @@
 flow: aidlc
-version: 0.1.66
-installed_at: '2026-05-27T21:50:35.106Z'
+version: 0.1.74
+installed_at: '2026-09-26T15:02:49.211Z'
 tools:
+  - claude
   - cursor
+  - codex

@@ -8,10 +8,10 @@ Monorepo com:
 |-----|--------|
 | **`apps/mobile`** | App Flutter — usuário final |
 | **`apps/backend`** | API NestJS — chat, RAG, mapas, push do app |
-| **`apps/admin-api`** | API Spring Boot — backoffice (CRUD de conteúdo) |
+| **`apps/admin-api`** | API Spring Boot — backoffice (CRUD de conteúdo e consumo da IA) |
 | **`apps/admin`** | Painel Angular — consome o `admin-api` |
 
-O NestJS e o Flutter **não foram substituídos**. O backoffice (Java + Angular) cobre a gestão administrativa que o MVP deixou de fora, no **mesmo PostgreSQL**.
+O NestJS e o Flutter continuam sendo o produto. O backoffice (Java + Angular) cobre a gestão administrativa no **mesmo PostgreSQL** (Supabase, compartilhado). A série simulada de tokens da IA fica num **Oracle instalado na máquina de cada pessoa**: quem for rodar o consumo cria a instância e o schema localmente. Esse banco não é um serviço compartilhado do time.
 
 ---
 
@@ -23,7 +23,8 @@ O NestJS e o Flutter **não foram substituídos**. O backoffice (Java + Angular)
 | **API do app** | NestJS 10, TypeScript, Prisma, class-validator |
 | **API admin** | Spring Boot 3.3, Java 17, JPA, Security, Validation |
 | **Painel admin** | Angular 22, HttpClient, Router, Forms (`ngModel`) |
-| **Banco de dados** | PostgreSQL (Supabase) — compartilhado |
+| **Banco do produto** | PostgreSQL (Supabase) — app, NestJS e backoffice |
+| **Banco do consumo** | Oracle na máquina de cada pessoa — série simulada de tokens, só o `admin-api` |
 | **Auth (app)** | Firebase Auth (Google, telefone/SMS, e-mail/senha, convidado) |
 | **Auth (admin)** | JWT próprio do `admin-api` (operadores) |
 | **IA** | Google Gemini (assistente conversacional + RAG) |
@@ -37,10 +38,12 @@ O NestJS e o Flutter **não foram substituídos**. O backoffice (Java + Angular)
 ```text
 Flutter  ──REST/Firebase JWT──►  NestJS (:3000)  ──Prisma──►  PostgreSQL
 Angular  ──REST/JWT admin────►  Spring (:8081)  ──JPA─────►  PostgreSQL
-                                      ▲
-                              mesmas tabelas de
-                         knowledge / tips / campaigns
+                                      │
+                                      └──JDBC (pool próprio)──►  Oracle na máquina
+                                           de quem está rodando
 ```
+
+Conteúdos, dicas e campanhas usam as mesmas tabelas do NestJS, no Supabase compartilhado. O consumo fica no Oracle que cada pessoa instala e cria na própria máquina. O Flutter não chama esse Oracle.
 
 ### Bibliotecas principais
 
@@ -68,6 +71,7 @@ Angular  ──REST/JWT admin────►  Spring (:8081)  ──JPA───
 - `springdoc-openapi` — Swagger UI
 - `jjwt` — JWT de operador
 - PostgreSQL JDBC — mesmo banco do NestJS (`ddl-auto: validate`)
+- Oracle JDBC (Hikari) — pool separado, só `/api/consumption`
 
 **Admin web** (`apps/admin`)
 
@@ -189,7 +193,12 @@ export ADMIN_JWT_SECRET="troque-por-uma-chave-longa-aleatoria"
 export ADMIN_SEED_USERNAME="admin"
 export ADMIN_SEED_PASSWORD="defina-uma-senha-forte"
 export ADMIN_CORS_ORIGIN="http://localhost:4200"
+export ORACLE_URL="jdbc:oracle:thin:@//localhost:1521/<service>"
+export ORACLE_USERNAME="usuario_do_schema"
+export ORACLE_PASSWORD="senha"
 ```
+
+O Oracle da tela de consumo é instalado por cada pessoa na própria máquina (listener local, em geral porta 1521). Não há instância compartilhada: cada um cria o schema e aplica os scripts nele. Sem essas variáveis o `admin-api` sobe e `/api/consumption` responde 503. Scripts e modelo: `apps/admin-api/src/main/resources/db/oracle/` (`MODELO.md`).
 
 Instale o painel Angular (projeto independente do workspace pnpm da raiz):
 
@@ -269,7 +278,7 @@ pnpm start
 - UI: http://localhost:4200
 - Login: credenciais seed (`ADMIN_SEED_USERNAME` / `ADMIN_SEED_PASSWORD`)
 
-Rotas principais: `/login`, `/home`, `/admin`, `/admin/conteudos`.
+Rotas principais: `/login`, `/home`, `/admin`, `/admin/conteudos`, `/admin/dicas`, `/admin/campanhas`, `/admin/consumo`.
 
 ### Docker (API NestJS — opcional)
 
@@ -313,11 +322,12 @@ pnpm test
 ## Arquitetura (resumo)
 
 - **Produto (MVP):** Flutter + NestJS — orientação digital, acessibilidade, IA, mapas, push
-- **Backoffice (disciplina / operação):** Angular + Spring Boot — CRUD de tópicos, dicas e campanhas
-- **Banco único:** Prisma migrations definem o schema; o Spring usa `ddl-auto: validate`
+- **Backoffice:** Angular + Spring Boot — CRUD de tópicos, dicas e campanhas no Postgres; consumo simulado de tokens no Oracle
+- **Postgres do produto:** Prisma migrations definem o schema; o Spring usa `ddl-auto: validate`
+- **Oracle do consumo:** cada pessoa instala na própria máquina e aplica os scripts SQL do `admin-api`; pool JDBC fora do JPA; limite de consumo alto = 10.000 tokens no período
 - **Auth separada:** Firebase no app do usuário; JWT de operador no painel
 - **Mobile ↔ NestJS:** REST JSON; OpenAPI/Swagger; `X-Request-Id`
-- **Angular ↔ admin-api:** REST JSON; interceptor `Authorization: Bearer <jwt>`
+- **Angular ↔ admin-api:** REST JSON; interceptor `Authorization: Bearer <jwt>`; o browser não fala com o Oracle
 - **Estado mobile:** Riverpod por feature
 
 Detalhes completos em `memory-bank/standards/`.
@@ -333,7 +343,7 @@ Detalhes completos em `memory-bank/standards/`.
 | **Knowledge Base** | Tópicos curados (PIX, Gov.br, etc.); leitura no NestJS, escrita no admin-api |
 | **Maps** | Busca de lugares, geocoding, rotas (proxy Google Maps na API) |
 | **Notifications** | FCM, preferências, dicas e campanhas |
-| **Backoffice** | Painel Angular + Spring Boot (operadores, JWT, Swagger) |
+| **Backoffice** | Painel Angular + Spring Boot (operadores, JWT, Swagger, consumo no Oracle) |
 
 ---
 

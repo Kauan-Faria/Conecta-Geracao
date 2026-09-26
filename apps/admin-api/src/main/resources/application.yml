@@ -50,3 +50,11 @@ springdoc:
 logging:
   level:
     org.hibernate.SQL: ${SQL_LOG_LEVEL:info}
+
+# Segundo banco, só da rota de consumo. Não substitui spring.datasource.
+# Sem ORACLE_URL e ORACLE_USERNAME a API sobe e a rota responde erro.
+oracle:
+  datasource:
+    url: ${ORACLE_URL:}
+    username: ${ORACLE_USERNAME:}
+    password: ${ORACLE_PASSWORD:}

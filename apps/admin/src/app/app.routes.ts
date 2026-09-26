@@ -7,6 +7,7 @@ import { ConteudosComponent } from './pages/conteudos/conteudos';
 import { LoginComponent } from './pages/login/login';
 import { DicasComponent } from './pages/dicas/dicas';
 import { CampanhasComponent } from './pages/campanhas/campanhas';
+import { ConsumoComponent } from './pages/consumo/consumo';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,11 @@ export const routes: Routes = [
   {
     path: 'admin/campanhas',
     component: CampanhasComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'admin/consumo',
+    component: ConsumoComponent,
     canActivate: [authGuard],
   },
   {
