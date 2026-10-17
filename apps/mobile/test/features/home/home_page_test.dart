@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/fake_auth_repository.dart';
 import '../../helpers/fake_chat_repository.dart';
+import '../../helpers/voice_test_overrides.dart';
 
 class _OnlineConnectivityService extends ConnectivityService {
   _OnlineConnectivityService() : super(Connectivity());
@@ -57,6 +58,7 @@ void main() {
               _OnlineConnectivityService(),
             ),
             sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+            ...voiceTestOverrides(),
           ],
           child: const ConectaGeracaoApp(),
         ),

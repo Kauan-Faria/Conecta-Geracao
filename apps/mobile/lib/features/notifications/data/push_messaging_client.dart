@@ -23,14 +23,19 @@ abstract class PushMessagingClient {
 }
 
 class FirebasePushMessagingClient implements PushMessagingClient {
-  FirebasePushMessagingClient({FirebaseMessaging? messaging})
-    : _messaging = messaging ?? FirebaseMessaging.instance;
+  FirebasePushMessagingClient([this._messaging]);
 
-  final FirebaseMessaging _messaging;
+  FirebaseMessaging? _messaging;
+
+  // Firebase is initialized by main() before the real application starts.
+  // Keeping this lookup lazy also allows widgets and controllers to be tested
+  // without requiring the native Firebase plugin to be bootstrapped.
+  FirebaseMessaging get _instance =>
+      _messaging ??= FirebaseMessaging.instance;
 
   @override
   Future<PushNotificationSettings> getNotificationSettings() async {
-    final settings = await _messaging.getNotificationSettings();
+    final settings = await _instance.getNotificationSettings();
     return PushNotificationSettings(
       isAuthorized: _isAuthorized(settings.authorizationStatus),
     );
@@ -38,20 +43,20 @@ class FirebasePushMessagingClient implements PushMessagingClient {
 
   @override
   Future<PushNotificationSettings> requestPermission() async {
-    final settings = await _messaging.requestPermission();
+    final settings = await _instance.requestPermission();
     return PushNotificationSettings(
       isAuthorized: _isAuthorized(settings.authorizationStatus),
     );
   }
 
   @override
-  Future<String?> getToken() => _messaging.getToken();
+  Future<String?> getToken() => _instance.getToken();
 
   @override
-  Stream<String> get onTokenRefresh => _messaging.onTokenRefresh;
+  Stream<String> get onTokenRefresh => _instance.onTokenRefresh;
 
   @override
-  Future<RemoteMessage?> getInitialMessage() => _messaging.getInitialMessage();
+  Future<RemoteMessage?> getInitialMessage() => _instance.getInitialMessage();
 
   @override
   void listenToOpenedApp(void Function(RemoteMessage message) handler) {

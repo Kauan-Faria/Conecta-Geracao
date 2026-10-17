@@ -21,6 +21,7 @@ import 'fake_auth_repository.dart';
 import 'fake_chat_repository.dart';
 import 'fake_notifications_remote_port.dart';
 import 'fake_push_messaging_client.dart';
+import 'voice_test_overrides.dart';
 
 class OnlineConnectivityService extends ConnectivityService {
   OnlineConnectivityService() : super(Connectivity());
@@ -81,6 +82,7 @@ Future<ProviderContainer> pumpShellApp(
           FakeNotificationsRemotePort(),
         ),
         notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
+        ...voiceTestOverrides(),
       ],
       child: const ConectaGeracaoApp(),
     ),

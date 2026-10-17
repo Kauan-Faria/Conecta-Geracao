@@ -24,6 +24,8 @@ import { ApiResponseInterceptor } from './shared/http/api-response.interceptor';
 
 import { HttpExceptionFilter } from './shared/http/http-exception.filter';
 
+import { HealthController } from './health.controller';
+
 
 
 @Module({
@@ -85,6 +87,8 @@ import { HttpExceptionFilter } from './shared/http/http-exception.filter';
     },
 
   ],
+
+  controllers: [HealthController],
 
 })
 

@@ -46,10 +46,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   String? _lastFailedContent;
   String? _loadedConversationId;
   String? _handledLaunchKey;
+  // `ref` não pode ser usado em dispose(); guardamos o notifier aqui para
+  // parar o TTS ao sair da tela.
+  late final TtsPlaybackController _ttsPlayback;
 
   @override
   void initState() {
     super.initState();
+    _ttsPlayback = ref.read(ttsPlaybackControllerProvider.notifier);
     _maybeHandleLaunchParams();
   }
 
@@ -108,7 +112,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void dispose() {
     // Para e libera o engine TTS ao sair da tela (sem await em dispose).
-    ref.read(ttsPlaybackControllerProvider.notifier).disposePlayback();
+    // Recurso auxiliar: nunca deve impedir o dispose da página.
+    try {
+      _ttsPlayback.disposePlayback();
+    } catch (_) {}
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -128,8 +135,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Future<void> _sendMessage([String? overrideContent]) async {
-    await ref.read(voiceInputControllerProvider.notifier).stopIfListening();
-    await ref.read(ttsPlaybackControllerProvider.notifier).stopIfSpeaking();
+    // Recursos de voz são auxiliares e podem não estar disponíveis em testes,
+    // web ou dispositivos sem o plugin nativo. Eles não devem bloquear o envio.
+    try {
+      await ref.read(voiceInputControllerProvider.notifier).stopIfListening();
+    } catch (_) {}
+    try {
+      await ref.read(ttsPlaybackControllerProvider.notifier).stopIfSpeaking();
+    } catch (_) {}
 
     final content = (overrideContent ?? _textController.text).trim();
     if (content.isEmpty) {
@@ -172,7 +185,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (message == null || message == previous?.feedbackMessage) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
       ref.read(ttsPlaybackControllerProvider.notifier).clearFeedback();
     });
 

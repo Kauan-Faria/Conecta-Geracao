@@ -5,6 +5,7 @@ import 'package:conecta_geracao/features/auth/presentation/auth_controller.dart'
 import 'package:conecta_geracao/features/chat/data/chat_repository.dart';
 import 'package:conecta_geracao/features/chat/data/conversation_cache_repository.dart';
 import 'package:conecta_geracao/features/chat/presentation/chat_controller.dart';
+import 'package:conecta_geracao/features/chat/presentation/widgets/checkpoint_quick_replies.dart';
 import 'package:conecta_geracao/features/notifications/presentation/notifications_providers.dart';
 import 'package:conecta_geracao/features/notifications/presentation/notifications_bootstrap.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -17,6 +18,8 @@ import '../../helpers/fake_auth_repository.dart';
 import '../../helpers/fake_chat_repository.dart';
 import '../../helpers/fake_notifications_remote_port.dart';
 import '../../helpers/fake_push_messaging_client.dart';
+import '../../helpers/fake_text_to_speech_service.dart';
+import '../../helpers/voice_test_overrides.dart';
 
 class _OnlineConnectivityService extends ConnectivityService {
   _OnlineConnectivityService() : super(Connectivity());
@@ -30,10 +33,12 @@ void main() {
 
   group('ChatPage', () {
     late FakeChatRepository fakeChat;
+    late FakeTextToSpeechService fakeTts;
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
       fakeChat = FakeChatRepository();
+      fakeTts = FakeTextToSpeechService();
     });
 
     Future<void> pumpChat(WidgetTester tester) async {
@@ -62,7 +67,10 @@ void main() {
             notificationsApiProvider.overrideWithValue(
               FakeNotificationsRemotePort(),
             ),
-            notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
+            notificationsBootstrapProvider.overrideWith(
+              (ref) => Future.value(),
+            ),
+            ...voiceTestOverrides(tts: fakeTts),
           ],
           child: const ConectaGeracaoApp(),
         ),
@@ -126,9 +134,20 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.send);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Sim'));
-      await tester.pumpAndSettle();
+      final quickReplies = tester.widget<CheckpointQuickReplies>(
+        find.byType(CheckpointQuickReplies),
+      );
+      // A primeira resposta do assistente dispara o auto-TTS; ao responder,
+      // o ChatPage interrompe a leitura antes de enviar (stopIfSpeaking).
+      expect(fakeTts.speakCount, 1);
+      final stopsBeforeReply = fakeTts.stopCount;
 
+      await quickReplies.onSim();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(fakeTts.stopCount, greaterThan(stopsBeforeReply));
+      expect(fakeChat.sendCalls, 2);
       expect(fakeChat.lastSentContent, 'Sim');
     });
 
@@ -163,7 +182,10 @@ void main() {
             notificationsApiProvider.overrideWithValue(
               FakeNotificationsRemotePort(),
             ),
-            notificationsBootstrapProvider.overrideWith((ref) => Future.value()),
+            notificationsBootstrapProvider.overrideWith(
+              (ref) => Future.value(),
+            ),
+            ...voiceTestOverrides(tts: fakeTts),
           ],
           child: const ConectaGeracaoApp(),
         ),

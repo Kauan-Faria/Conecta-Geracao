@@ -1,4 +1,5 @@
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 
 const _apiBaseUrlFromEnv = String.fromEnvironment(
   'API_BASE_URL',
@@ -10,7 +11,11 @@ const _apiBaseUrlFromEnv = String.fromEnvironment(
 /// - Android emulador: `10.0.2.2` mapeia para o localhost da máquina host.
 /// - iOS simulador / desktop: `localhost` funciona direto.
 String defaultApiBaseUrlForPlatform() {
-  if (Platform.isAndroid) {
+  // No build web o nginx encaminha /api/v1 para o backend no mesmo domínio.
+  if (kIsWeb) {
+    return '';
+  }
+  if (defaultTargetPlatform == TargetPlatform.android) {
     return 'http://10.0.2.2:3000';
   }
   return 'http://localhost:3000';

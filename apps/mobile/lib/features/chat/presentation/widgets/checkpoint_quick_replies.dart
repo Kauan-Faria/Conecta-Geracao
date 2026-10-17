@@ -10,8 +10,8 @@ class CheckpointQuickReplies extends StatelessWidget {
     super.key,
   });
 
-  final VoidCallback onSim;
-  final VoidCallback onNao;
+  final Future<void> Function() onSim;
+  final Future<void> Function() onNao;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class _QuickReplyButton extends StatelessWidget {
   final Color backgroundColor;
   final Color foregroundColor;
   final Color borderColor;
-  final VoidCallback onPressed;
+  final Future<void> Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class _QuickReplyButton extends StatelessWidget {
       child: SizedBox(
         height: AppSpacing.minTouchTarget,
         child: OutlinedButton(
-          onPressed: onPressed,
+          onPressed: () async => onPressed(),
           style: OutlinedButton.styleFrom(
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,

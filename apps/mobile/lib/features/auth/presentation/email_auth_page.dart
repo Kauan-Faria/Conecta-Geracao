@@ -114,7 +114,7 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Vamos fazer seu cadastro',
+            isSignUp ? 'Vamos fazer seu cadastro' : 'Entrar com email e senha',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -122,7 +122,9 @@ class _EmailAuthPageState extends ConsumerState<EmailAuthPage> {
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
-            'Faça seu cadastro com email e senha, ou entre com sua conta google',
+            isSignUp
+                ? 'Faça seu cadastro com email e senha, ou entre com sua conta google'
+                : 'Entre com seu email e senha para continuar',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

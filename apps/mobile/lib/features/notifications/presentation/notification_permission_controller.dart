@@ -56,9 +56,15 @@ class NotificationPermissionController
     }
     _firstAssistantReplyHandled = true;
 
-    final settings = await _pushClient.getNotificationSettings();
-    if (settings.isAuthorized) {
-      await _repository.syncTokenIfPermitted();
+    try {
+      final settings = await _pushClient.getNotificationSettings();
+      if (settings.isAuthorized) {
+        await _repository.syncTokenIfPermitted();
+        return;
+      }
+    } catch (_) {
+      // Push notifications are optional. A missing/unavailable Firebase
+      // plugin must never interrupt the chat response flow.
       return;
     }
 

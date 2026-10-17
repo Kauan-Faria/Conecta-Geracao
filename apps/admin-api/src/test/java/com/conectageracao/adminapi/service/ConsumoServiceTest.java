@@ -126,7 +126,16 @@ class ConsumoServiceTest {
                 .thenReturn(new BigDecimal("3500"));
         when(jdbc.queryForObject(contains("FN_CONSUMO_FORMATADO"), eq(String.class), any(), any(), any()))
                 .thenReturn("Ana Clara consumiu 3500 tokens no período. Consumo normal.");
-        when(jdbc.query(anyString(), anyMapper(), any(), any(), any())).thenReturn(List.of());
+        when(jdbc.queryForObject(contains("FN_CONSULTAR_TOTAL_DINAMICO"), eq(BigDecimal.class), any(), any()))
+                .thenAnswer(invocation -> {
+                    String origin = invocation.getArgument(2);
+                    if ("LEITURA".equals(origin)) {
+                        return new BigDecimal("12500");
+                    }
+                    return BigDecimal.ZERO;
+                });
+        when(jdbc.query(contains("FROM alerta_consumo"), anyMapper(), any(), any(), any())).thenReturn(List.of());
+        when(jdbc.query(contains("FROM log_alerta_consumo"), anyMapper(), any())).thenReturn(List.of());
         when(connection.prepareCall(anyString())).thenReturn(call);
         when(call.getObject(3)).thenReturn(cursor);
         when(cursor.next()).thenReturn(true, false);
@@ -146,8 +155,36 @@ class ConsumoServiceTest {
         assertTrue(response.alerts().isEmpty());
         assertEquals(1, response.report().size());
         assertFalse(response.report().get(0).hasAlert());
+        assertEquals(12500L, response.dynamicTotals().readingTotal());
+        assertEquals(0L, response.dynamicTotals().alertCount());
+        assertEquals(0L, response.dynamicTotals().logCount());
+        assertTrue(response.auditLogs().isEmpty());
         verify(connection).prepareCall("{ call PR_RELATORIO_CONSUMO(?, ?, ?) }");
         verify(call).registerOutParameter(3, OracleTypes.CURSOR);
+        verify(jdbc).queryForObject(contains("FN_CONSULTAR_TOTAL_DINAMICO"), eq(BigDecimal.class), eq("LEITURA"), eq(1L));
+        verify(jdbc).queryForObject(contains("FN_CONSULTAR_TOTAL_DINAMICO"), eq(BigDecimal.class), eq("ALERTA"), eq(1L));
+        verify(jdbc).queryForObject(contains("FN_CONSULTAR_TOTAL_DINAMICO"), eq(BigDecimal.class), eq("LOG"), eq(1L));
+    }
+
+    @Test
+    void origemDinamicaRecusadaVira400() throws Exception {
+        when(oracle.require()).thenReturn(jdbc);
+        when(jdbc.queryForObject(contains("FN_INDICADOR_TOKENS"), eq(BigDecimal.class), any(), any(), any()))
+                .thenReturn(new BigDecimal("3500"));
+        when(jdbc.queryForObject(contains("FN_CONSUMO_FORMATADO"), eq(String.class), any(), any(), any()))
+                .thenReturn("Ana Clara consumiu 3500 tokens no período. Consumo normal.");
+        when(jdbc.query(contains("FROM alerta_consumo"), anyMapper(), any(), any(), any())).thenReturn(List.of());
+        when(connection.prepareCall(anyString())).thenReturn(call);
+        when(call.getObject(3)).thenReturn(cursor);
+        when(cursor.next()).thenReturn(false);
+        when(jdbc.execute(anyCallback())).thenAnswer(invocation -> {
+            ConnectionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInConnection(connection);
+        });
+        when(jdbc.queryForObject(contains("FN_CONSULTAR_TOTAL_DINAMICO"), eq(BigDecimal.class), any(), any()))
+                .thenThrow(sql(20004));
+
+        assertThrows(ValidationException.class, () -> service.consult(1L, INICIO, FIM));
     }
 
     @Test

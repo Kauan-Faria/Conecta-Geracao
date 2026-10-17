@@ -11,6 +11,8 @@ Monorepo com:
 | **`apps/admin-api`** | API Spring Boot — backoffice (CRUD de conteúdo e consumo da IA) |
 | **`apps/admin`** | Painel Angular — consome o `admin-api` |
 
+O build, os testes, as imagens, o deploy progressivo e os relatórios estão documentados em [deployment/README.md](deployment/README.md).
+
 O NestJS e o Flutter continuam sendo o produto. O backoffice (Java + Angular) cobre a gestão administrativa no **mesmo PostgreSQL** (Supabase, compartilhado). A série simulada de tokens da IA fica num **Oracle instalado na máquina de cada pessoa**: quem for rodar o consumo cria a instância e o schema localmente. Esse banco não é um serviço compartilhado do time.
 
 ---

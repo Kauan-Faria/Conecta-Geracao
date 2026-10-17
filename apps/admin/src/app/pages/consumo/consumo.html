@@ -82,6 +82,42 @@
         </ul>
       </article>
 
+      <article class="block">
+        <h2>Consulta dinâmica</h2>
+        <ul class="totals-list">
+          <li>Leituras (série inteira): <strong>{{ dados.dynamicTotals.readingTotal }}</strong></li>
+          <li>Alertas: <strong>{{ dados.dynamicTotals.alertCount }}</strong></li>
+          <li>Logs: <strong>{{ dados.dynamicTotals.logCount }}</strong></li>
+        </ul>
+        <p class="hint">
+          Totais de PKG_CONSUMO_IA.FN_CONSULTAR_TOTAL_DINAMICO.
+          As leituras somam a série inteira, não só o período.
+        </p>
+      </article>
+
+      <article class="block block-wide">
+        <h2>Log de auditoria</h2>
+        <p *ngIf="dados.auditLogs.length === 0" class="hint">
+          Nenhum log de alerta para este usuário.
+        </p>
+        <table *ngIf="dados.auditLogs.length > 0">
+          <thead>
+            <tr>
+              <th>Operação</th>
+              <th>Mensagem</th>
+              <th>Tokens</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of dados.auditLogs">
+              <td>{{ log.operation }}</td>
+              <td>{{ log.message }}</td>
+              <td>{{ log.tokenTotal }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
       <article class="block block-wide">
         <h2>Relatório por usuário</h2>
         <p *ngIf="dados.report.length === 0" class="hint">

@@ -31,6 +31,8 @@ function consulta(parcial: Partial<Consumption> & Pick<Consumption, 'userId'>): 
     formattedText: '',
     alerts: [],
     report: relatorio,
+    dynamicTotals: { readingTotal: 0, alertCount: 0, logCount: 0 },
+    auditLogs: [],
     ...parcial,
   };
 }
@@ -97,12 +99,13 @@ describe('ConsumoComponent', () => {
     fixture.detectChanges();
   }
 
-  it('mostra os quatro blocos depois de focar Bruno Alves', () => {
+  it('mostra os blocos depois de focar Bruno Alves', () => {
     abrirNoBruno(consulta({
       userId: 2,
       tokenTotal: 10000,
       formattedText: 'Bruno Alves consumiu 10000 tokens no período. Consumo alto.',
       alerts: [],
+      dynamicTotals: { readingTotal: 15000, alertCount: 0, logCount: 0 },
     }));
 
     const texto = fixture.nativeElement.textContent as string;
@@ -111,10 +114,48 @@ describe('ConsumoComponent', () => {
     expect(texto).toContain('Bruno Alves consumiu 10000 tokens no período. Consumo alto.');
     expect(texto).toContain('Alertas');
     expect(texto).toContain('Nenhum alerta neste período.');
+    expect(texto).toContain('Consulta dinâmica');
+    expect(texto).toContain('15000');
+    expect(texto).toContain('Log de auditoria');
+    expect(texto).toContain('Nenhum log de alerta para este usuário.');
     expect(texto).toContain('Relatório por usuário');
     expect(texto).toContain('Ana Clara');
     expect(texto).toContain('Clara Sem Leituras');
     expect(fixture.componentInstance.userId).toBe(2);
+  });
+
+  it('mostra o log da trigger depois do disparo', () => {
+    const comAlerta = consulta({
+      userId: 2,
+      tokenTotal: 10000,
+      formattedText: 'Bruno Alves consumiu 10000 tokens no período. Consumo alto.',
+      alerts: [alertaBruno()],
+      dynamicTotals: { readingTotal: 15000, alertCount: 1, logCount: 1 },
+      auditLogs: [{
+        id: 1,
+        alertId: 10,
+        operation: 'INSERT',
+        userId: 2,
+        tokenTotal: 10000,
+        message: 'Bruno Alves consumiu 10000 tokens no período. Consumo alto.',
+        registeredAt: '2026-09-26T12:00:00',
+      }],
+      report: relatorio.map((linha) =>
+        linha.userId === 2 ? { ...linha, hasAlert: true } : linha,
+      ),
+    });
+    abrirNoBruno();
+
+    (fixture.nativeElement.querySelector('.primary-button') as HTMLButtonElement).click();
+    httpMock.expectOne((req) => req.method === 'POST').flush({ alertId: 10, recorded: true });
+    pedido(2).flush(comAlerta);
+    fixture.detectChanges();
+
+    const texto = fixture.nativeElement.textContent as string;
+    expect(texto).toContain('INSERT');
+    expect(texto).toContain('Bruno Alves consumiu 10000 tokens no período. Consumo alto.');
+    expect(texto).toContain('Leituras (série inteira)');
+    expect(fixture.nativeElement.querySelectorAll('.alert-list li').length).toBe(1);
   });
 
   it('mostra a lista vazia sem esconder o indicador', () => {

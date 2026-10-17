@@ -157,6 +157,17 @@
   margin-bottom: 8px;
 }
 
+.totals-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #111827;
+  font-size: 14px;
+}
+
+.totals-list li {
+  margin-bottom: 6px;
+}
+
 .alert-list span {
   display: block;
   color: #6b7280;

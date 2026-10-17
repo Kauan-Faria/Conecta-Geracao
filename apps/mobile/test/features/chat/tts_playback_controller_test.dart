@@ -224,6 +224,21 @@ void main() {
       expect(fakeTts.speakCount, 0);
     });
 
+    test('auto-TTS silently skips unsupported platforms', () async {
+      container = await createContainer(platformSupported: false);
+      final notifier = container.read(ttsPlaybackControllerProvider.notifier);
+
+      await notifier.onNewAssistantMessage(
+        messageId: 'a1',
+        content: 'Resposta do assistente',
+      );
+
+      final state = container.read(ttsPlaybackControllerProvider);
+      expect(state.status, TtsPlaybackStatus.idle);
+      expect(state.feedbackMessage, isNull);
+      expect(fakeTts.speakCount, 0);
+    });
+
     test('completion handler returns to idle', () async {
       container = await createContainer();
       final notifier = container.read(ttsPlaybackControllerProvider.notifier);

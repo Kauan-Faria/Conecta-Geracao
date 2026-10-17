@@ -1,0 +1,126 @@
+name: conecta-geracao
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-conecta_geracao}
+      POSTGRES_USER: ${POSTGRES_USER:-conecta}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD obrigatoria}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  oracle:
+    image: gvenzl/oracle-free:23-slim-faststart
+    restart: unless-stopped
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD:?ORACLE_SYS_PASSWORD obrigatoria}
+      APP_USER: ${ORACLE_USERNAME:-conecta}
+      APP_USER_PASSWORD: ${ORACLE_PASSWORD:?ORACLE_PASSWORD obrigatoria}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ../apps/admin-api/src/main/resources/db/oracle:/opt/conecta/oracle:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 60s
+
+  backend:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX obrigatorio}/conecta-geracao-backend:${IMAGE_TAG:?IMAGE_TAG obrigatoria}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-conecta}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-conecta_geracao}
+      DIRECT_URL: postgresql://${POSTGRES_USER:-conecta}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-conecta_geracao}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GOOGLEMAPS_API_KEY: ${GOOGLEMAPS_API_KEY:-}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-conecta-geracao}
+      FCM_ENABLED: ${FCM_ENABLED:-false}
+      NOTIFICATIONS_INTERNAL_SERVICE_KEY: ${NOTIFICATIONS_INTERNAL_SERVICE_KEY:-}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  admin-api:
+    image: ${IMAGE_PREFIX}/conecta-geracao-admin-api:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8081
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-conecta_geracao}
+      DB_USERNAME: ${POSTGRES_USER:-conecta}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?ADMIN_JWT_SECRET obrigatorio}
+      ADMIN_SEED_USERNAME: ${ADMIN_SEED_USERNAME:-admin}
+      ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD:?ADMIN_SEED_PASSWORD obrigatoria}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:4200}
+      ORACLE_URL: jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+      ORACLE_USERNAME: ${ORACLE_USERNAME:-conecta}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+    ports:
+      - "${ADMIN_API_PORT:-8081}:8081"
+    depends_on:
+      backend:
+        condition: service_healthy
+      oracle:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  mobile:
+    image: ${IMAGE_PREFIX}/conecta-geracao-mobile:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${MOBILE_WEB_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  admin:
+    image: ${IMAGE_PREFIX}/conecta-geracao-admin:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_WEB_PORT:-4200}:80"
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  oracle-data:

@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/fake_auth_repository.dart';
 import '../../helpers/fake_notifications_remote_port.dart';
 import '../../helpers/fake_push_messaging_client.dart';
+import '../../helpers/voice_test_overrides.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,7 @@ void main() {
             notificationsBootstrapProvider.overrideWith(
               (ref) => Future.value(),
             ),
+            ...voiceTestOverrides(),
           ],
           child: const ConectaGeracaoApp(),
         ),

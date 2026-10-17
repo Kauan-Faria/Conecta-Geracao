@@ -1,0 +1,389 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: Ambiente final da execução (staging sempre acontece primeiro)
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: conecta-geracao-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PNPM_VERSION: "11.4.0"
+  JAVA_VERSION: "17"
+
+jobs:
+  metadata:
+    name: Metadados da entrega
+    runs-on: ubuntu-latest
+    outputs:
+      image_prefix: ${{ steps.release.outputs.image_prefix }}
+      image_tag: ${{ steps.release.outputs.image_tag }}
+    steps:
+      - id: release
+        name: Calcular nomes imutáveis
+        shell: bash
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "image_prefix=ghcr.io/$owner" >> "$GITHUB_OUTPUT"
+          echo "image_tag=sha-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+  backend:
+    name: NestJS · build e testes
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci_shadow
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile --filter @conecta-geracao/api...
+      - name: Gerar cliente Prisma
+        run: pnpm --filter @conecta-geracao/api prisma:generate
+      - name: Testar com cobertura
+        working-directory: apps/backend
+        run: pnpm exec jest --ci --runInBand --coverage
+      - name: Compilar
+        working-directory: apps/backend
+        run: pnpm exec nest build
+      - name: Publicar relatório NestJS
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-backend-${{ github.run_attempt }}
+          path: apps/backend/coverage
+          if-no-files-found: warn
+          retention-days: 14
+
+  mobile:
+    name: Flutter · análise, testes e APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Instalar dependências
+        working-directory: apps/mobile
+        run: flutter pub get
+      - name: Analisar código
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Testar com cobertura
+        working-directory: apps/mobile
+        run: flutter test --coverage
+      - name: Gerar APK
+        working-directory: apps/mobile
+        run: flutter build apk --release --dart-define=API_BASE_URL=${{ vars.MOBILE_API_BASE_URL }}
+      - name: Publicar APK e cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-flutter-${{ github.run_attempt }}
+          path: |
+            apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+            apps/mobile/coverage/lcov.info
+          if-no-files-found: warn
+          retention-days: 14
+
+  admin_api:
+    name: Spring Boot · build e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+          cache-dependency-path: apps/admin-api/pom.xml
+      - name: Testar e empacotar
+        working-directory: apps/admin-api
+        run: mvn -B -ntp verify
+      - name: Publicar relatórios Maven
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-admin-api-${{ github.run_attempt }}
+          path: apps/admin-api/target/surefire-reports
+          if-no-files-found: warn
+          retention-days: 14
+
+  admin:
+    name: Angular · build e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22.22.3"
+          cache: pnpm
+          cache-dependency-path: apps/admin/pnpm-lock.yaml
+      - name: Instalar dependências
+        working-directory: apps/admin
+        run: pnpm install --frozen-lockfile
+      - name: Testar com cobertura
+        working-directory: apps/admin
+        run: pnpm exec ng test --watch=false --coverage
+      - name: Compilar para produção
+        working-directory: apps/admin
+        run: pnpm build --configuration production
+      - name: Publicar relatório Angular
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-admin-web-${{ github.run_attempt }}
+          path: apps/admin/coverage
+          if-no-files-found: warn
+          retention-days: 14
+
+  oracle:
+    name: Oracle · integração PL/SQL
+    runs-on: ubuntu-latest
+    services:
+      oracle:
+        image: gvenzl/oracle-free:23-slim-faststart
+        env:
+          ORACLE_PASSWORD: OracleCi123
+          APP_USER: conecta_ci
+          APP_USER_PASSWORD: ConectaCi123
+        ports:
+          - 1521:1521
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 40
+          --health-start-period 60s
+    steps:
+      - uses: actions/checkout@v6
+      - name: Copiar scripts para o Oracle
+        env:
+          ORACLE_CONTAINER: ${{ job.services.oracle.id }}
+        run: |
+          docker exec "$ORACLE_CONTAINER" mkdir -p /tmp/conecta-oracle
+          docker cp apps/admin-api/src/main/resources/db/oracle/. "$ORACLE_CONTAINER:/tmp/conecta-oracle"
+      - name: Aplicar schema, functions, procedures e testes
+        shell: bash
+        env:
+          ORACLE_CONTAINER: ${{ job.services.oracle.id }}
+        run: |
+          set -o pipefail
+          mkdir -p reports
+          scripts=(
+            001_ddl_consumo.sql
+            002_seed_consumo.sql
+            003_fn_indicador_tokens.sql
+            004_fn_consumo_formatado.sql
+            005_test_consumo.sql
+            006_pr_registrar_alerta_consumo.sql
+            007_pr_relatorio_consumo.sql
+            008_test_procedures.sql
+            009_pkg_consumo_ia.sql
+            010_test_pkg_consumo.sql
+          )
+          for script in "${scripts[@]}"; do
+            echo "===== $script =====" | tee -a reports/oracle.log
+            docker exec "$ORACLE_CONTAINER" bash -lc \
+              "sqlplus -s conecta_ci/ConectaCi123@//localhost:1521/FREEPDB1 @/tmp/conecta-oracle/$script" \
+              2>&1 | tee -a reports/oracle.log
+          done
+      - name: Publicar log Oracle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-oracle-${{ github.run_attempt }}
+          path: reports/oracle.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  images:
+    name: Imagem · ${{ matrix.component }}
+    if: github.event_name != 'pull_request'
+    needs: [metadata, backend, mobile, admin_api, admin, oracle]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: backend
+            context: .
+            dockerfile: apps/backend/Dockerfile
+          - component: mobile
+            context: apps/mobile
+            dockerfile: apps/mobile/Dockerfile
+          - component: admin-api
+            context: apps/admin-api
+            dockerfile: apps/admin-api/Dockerfile
+          - component: admin
+            context: apps/admin
+            dockerfile: apps/admin/Dockerfile
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-buildx-action@v3
+      - name: Login no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build e push
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ needs.metadata.outputs.image_prefix }}/conecta-geracao-${{ matrix.component }}:${{ needs.metadata.outputs.image_tag }}
+          cache-from: type=gha,scope=${{ matrix.component }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+
+  deploy_staging:
+    name: Deploy · staging
+    if: github.event_name != 'pull_request'
+    needs: [metadata, images]
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.APP_URL }}
+    env:
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/conecta-geracao' }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preparar pacote e SSH
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+          DEPLOY_ENV_FILE: ${{ secrets.DEPLOY_ENV_FILE }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          tar -czf "$RUNNER_TEMP/deployment.tgz" \
+            deployment/docker-compose.yml \
+            deployment/deploy.sh \
+            apps/admin-api/src/main/resources/db/oracle
+          printf '%s\n' "$DEPLOY_ENV_FILE" | tr -d '\r' > "$RUNNER_TEMP/deploy.env"
+          printf '\nIMAGE_PREFIX=%s\nIMAGE_TAG=%s\n' \
+            '${{ needs.metadata.outputs.image_prefix }}' \
+            '${{ needs.metadata.outputs.image_tag }}' >> "$RUNNER_TEMP/deploy.env"
+          chmod 600 "$RUNNER_TEMP/deploy.env"
+      - name: Enviar e executar deploy
+        shell: bash
+        run: |
+          target='${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}'
+          ssh -p "$SSH_PORT" "$target" "mkdir -p '$DEPLOY_PATH'"
+          scp -P "$SSH_PORT" "$RUNNER_TEMP/deployment.tgz" "$target:$DEPLOY_PATH/deployment.tgz"
+          scp -P "$SSH_PORT" "$RUNNER_TEMP/deploy.env" "$target:$DEPLOY_PATH/.env.upload"
+          ssh -p "$SSH_PORT" "$target" \
+            "cd '$DEPLOY_PATH' && tar -xzf deployment.tgz && mv .env.upload deployment/.env && chmod 600 deployment/.env && chmod +x deployment/deploy.sh && deployment/deploy.sh"
+      - name: Coletar logs do deploy
+        if: always()
+        shell: bash
+        run: |
+          target='${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}'
+          ssh -p "$SSH_PORT" "$target" \
+            "cd '$DEPLOY_PATH' && docker compose --env-file deployment/.env -f deployment/docker-compose.yml ps && docker compose --env-file deployment/.env -f deployment/docker-compose.yml logs --no-color --tail=500" \
+            > staging-deployment.log 2>&1 || true
+      - name: Publicar logs de staging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-staging-${{ github.run_attempt }}
+          path: staging-deployment.log
+          retention-days: 30
+
+  deploy_production:
+    name: Deploy · produção
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_target == 'production'
+    needs: [metadata, images, deploy_staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    env:
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/conecta-geracao' }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preparar pacote e SSH
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+          DEPLOY_ENV_FILE: ${{ secrets.DEPLOY_ENV_FILE }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          tar -czf "$RUNNER_TEMP/deployment.tgz" \
+            deployment/docker-compose.yml \
+            deployment/deploy.sh \
+            apps/admin-api/src/main/resources/db/oracle
+          printf '%s\n' "$DEPLOY_ENV_FILE" | tr -d '\r' > "$RUNNER_TEMP/deploy.env"
+          printf '\nIMAGE_PREFIX=%s\nIMAGE_TAG=%s\n' \
+            '${{ needs.metadata.outputs.image_prefix }}' \
+            '${{ needs.metadata.outputs.image_tag }}' >> "$RUNNER_TEMP/deploy.env"
+          chmod 600 "$RUNNER_TEMP/deploy.env"
+      - name: Enviar e executar deploy
+        shell: bash
+        run: |
+          target='${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}'
+          ssh -p "$SSH_PORT" "$target" "mkdir -p '$DEPLOY_PATH'"
+          scp -P "$SSH_PORT" "$RUNNER_TEMP/deployment.tgz" "$target:$DEPLOY_PATH/deployment.tgz"
+          scp -P "$SSH_PORT" "$RUNNER_TEMP/deploy.env" "$target:$DEPLOY_PATH/.env.upload"
+          ssh -p "$SSH_PORT" "$target" \
+            "cd '$DEPLOY_PATH' && tar -xzf deployment.tgz && mv .env.upload deployment/.env && chmod 600 deployment/.env && chmod +x deployment/deploy.sh && deployment/deploy.sh"
+      - name: Coletar logs do deploy
+        if: always()
+        shell: bash
+        run: |
+          target='${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}'
+          ssh -p "$SSH_PORT" "$target" \
+            "cd '$DEPLOY_PATH' && docker compose --env-file deployment/.env -f deployment/docker-compose.yml ps && docker compose --env-file deployment/.env -f deployment/docker-compose.yml logs --no-color --tail=500" \
+            > production-deployment.log 2>&1 || true
+      - name: Publicar logs de produção
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-production-${{ github.run_attempt }}
+          path: production-deployment.log
+          retention-days: 30

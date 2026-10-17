@@ -32,7 +32,7 @@ public class ConsumptionController {
     }
 
     @GetMapping
-    @Operation(summary = "Indicador, texto, alertas e relatório de consumo no Oracle")
+    @Operation(summary = "Indicador, texto, alertas, relatório, totais dinâmicos e log de auditoria no Oracle")
     public ConsumptionResponse consult(
             @RequestParam @Positive Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime periodStart,

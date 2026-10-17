@@ -115,6 +115,12 @@ class TtsPlaybackController extends Notifier<TtsPlaybackState> {
     required String content,
     bool isFinal = true,
   }) async {
+    // Auto-TTS is optional. Unsupported platforms must not surface an error
+    // snackbar for every assistant reply (and must not leave widget tests
+    // waiting on a platform-only playback state transition).
+    if (!state.isPlatformSupported) {
+      return;
+    }
     await ensurePrefsLoaded();
     if (!state.autoTtsEnabled) {
       return;
@@ -247,6 +253,15 @@ class TtsPlaybackController extends Notifier<TtsPlaybackState> {
   /// Seguro chamar mais de uma vez; um novo [speak] re-inicializa.
   Future<void> disposePlayback() async {
     _speakGeneration++;
+    if (!state.isPlatformSupported) {
+      _initialized = false;
+      state = state.copyWith(
+        status: TtsPlaybackStatus.idle,
+        clearSpeakingMessageId: true,
+        clearFeedback: true,
+      );
+      return;
+    }
     try {
       await _tts.stop();
     } catch (_) {

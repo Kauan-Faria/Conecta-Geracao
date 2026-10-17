@@ -10,5 +10,7 @@ public record ConsumptionResponse(
         Long tokenTotal,
         String formattedText,
         List<ConsumptionAlertResponse> alerts,
-        List<ConsumptionReportLineResponse> report
+        List<ConsumptionReportLineResponse> report,
+        ConsumptionDynamicTotalsResponse dynamicTotals,
+        List<ConsumptionAuditLogResponse> auditLogs
 ) {}

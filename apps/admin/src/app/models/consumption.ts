@@ -25,6 +25,22 @@ export interface ConsumptionReportLine {
   hasAlert: boolean;
 }
 
+export interface ConsumptionDynamicTotals {
+  readingTotal: number;
+  alertCount: number;
+  logCount: number;
+}
+
+export interface ConsumptionAuditLog {
+  id: number;
+  alertId: number | null;
+  operation: string;
+  userId: number | null;
+  tokenTotal: number | null;
+  message: string;
+  registeredAt: string;
+}
+
 export interface Consumption {
   userId: number;
   periodStart: string;
@@ -33,6 +49,8 @@ export interface Consumption {
   formattedText: string;
   alerts: ConsumptionAlert[];
   report: ConsumptionReportLine[];
+  dynamicTotals: ConsumptionDynamicTotals;
+  auditLogs: ConsumptionAuditLog[];
 }
 
 export interface RegisterAlertResponse {

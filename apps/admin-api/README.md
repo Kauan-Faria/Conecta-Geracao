@@ -47,9 +47,9 @@ pnpm api:prisma:migrate
 
 3. Na instância Oracle da sua máquina, aplique os scripts de `src/main/resources/db/oracle/` já conectado no schema que você criou (sem credencial no arquivo), nesta ordem:
 
-`001_ddl_consumo.sql`, `002_seed_consumo.sql`, `003_fn_indicador_tokens.sql`, `004_fn_consumo_formatado.sql`, `006_pr_registrar_alerta_consumo.sql`, `007_pr_relatorio_consumo.sql`.
+`001_ddl_consumo.sql`, `002_seed_consumo.sql`, `003_fn_indicador_tokens.sql`, `004_fn_consumo_formatado.sql`, `006_pr_registrar_alerta_consumo.sql`, `007_pr_relatorio_consumo.sql`, `009_pkg_consumo_ia.sql`.
 
-`005_test_consumo.sql` e `008_test_procedures.sql` são suítes repetíveis, não fazem parte da subida. O modelo, o DER e o limite de **10.000 tokens** estão em `MODELO.md`.
+`005_test_consumo.sql`, `008_test_procedures.sql` e `010_test_pkg_consumo.sql` são suítes repetíveis, não fazem parte da subida. O modelo, o DER e o limite de **10.000 tokens** estão em `MODELO.md`.
 
 4. Suba a API:
 
@@ -79,11 +79,11 @@ Authorization: Bearer <token>
 | Tópicos da base (RAG) | `/api/knowledge-topics` | CRUD completo, com passos aninhados |
 | Dicas educacionais | `/api/educational-tips` | CRUD completo |
 | Campanhas | `/api/campaigns` | Criar/listar (dispara em nome do operador logado) |
-| Consumo da IA | `GET /api/consumption` | Indicador, texto formatado, alertas e relatório no Oracle |
+| Consumo da IA | `GET /api/consumption` | Indicador, texto formatado, alertas, relatório, totais dinâmicos e log no Oracle |
 | Alerta de consumo | `POST /api/consumption/alerts` | Chama `PR_REGISTRAR_ALERTA_CONSUMO` via JDBC |
 
 Conteúdos, dicas e campanhas usam as **mesmas** tabelas do NestJS (`knowledge_topics`, `knowledge_steps`,
 `educational_tips`, `campaigns`). O consumo fica no Oracle da máquina de quem está rodando (`USUARIO_CONSUMO`, `LEITURA_CONSUMO`,
-`ALERTA_CONSUMO`), criado por essa pessoa ao aplicar os scripts. Não copia usuário real do Supabase.
+`ALERTA_CONSUMO`, `LOG_ALERTA_CONSUMO`), criado por essa pessoa ao aplicar os scripts. Não copia usuário real do Supabase.
 
 `/api/consumption` exige JWT. Sem token a API recusa e o Oracle não é chamado. Período invertido responde 400. Oracle fora do ar responde 503 (`ORACLE_UNAVAILABLE`) e o restante do painel continua no Postgres.

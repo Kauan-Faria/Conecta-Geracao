@@ -161,6 +161,12 @@ export class ConsumoComponent implements OnInit {
       ...dados,
       alerts: dados.alerts ?? [],
       report: dados.report ?? [],
+      dynamicTotals: dados.dynamicTotals ?? {
+        readingTotal: 0,
+        alertCount: 0,
+        logCount: 0,
+      },
+      auditLogs: dados.auditLogs ?? [],
     };
   }
 

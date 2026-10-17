@@ -1,6 +1,8 @@
 package com.conectageracao.adminapi.service;
 
 import com.conectageracao.adminapi.dto.ConsumptionAlertResponse;
+import com.conectageracao.adminapi.dto.ConsumptionAuditLogResponse;
+import com.conectageracao.adminapi.dto.ConsumptionDynamicTotalsResponse;
 import com.conectageracao.adminapi.dto.ConsumptionReportLineResponse;
 import com.conectageracao.adminapi.dto.ConsumptionResponse;
 import com.conectageracao.adminapi.dto.RegisterAlertRequest;
@@ -44,6 +46,14 @@ public class ConsumoService {
                AND fim = ?
              ORDER BY id
             """;
+    private static final String SQL_DINAMICO =
+            "SELECT PKG_CONSUMO_IA.FN_CONSULTAR_TOTAL_DINAMICO(?, ?) FROM DUAL";
+    private static final String SQL_LOGS = """
+            SELECT id, alerta_id, operacao, usuario_id, total_tokens, mensagem, registrado_em
+              FROM log_alerta_consumo
+             WHERE usuario_id = ?
+             ORDER BY id
+            """;
     private static final String CALL_ALERTA =
             "{ call PR_REGISTRAR_ALERTA_CONSUMO(?, ?, ?, ?, ?) }";
     private static final String CALL_RELATORIO =
@@ -66,7 +76,11 @@ public class ConsumoService {
             String text = jdbc.queryForObject(SQL_FORMATADO, String.class, userId, start, end);
             List<ConsumptionAlertResponse> alerts = jdbc.query(SQL_ALERTAS, (rs, rowNum) -> mapAlert(rs), userId, start, end);
             List<ConsumptionReportLineResponse> report = report(jdbc, start, end);
-            return new ConsumptionResponse(userId, periodStart, periodEnd, total, text, alerts, report);
+            ConsumptionDynamicTotalsResponse dynamicTotals = dynamicTotals(jdbc, userId);
+            List<ConsumptionAuditLogResponse> auditLogs = jdbc.query(
+                    SQL_LOGS, (rs, rowNum) -> mapLog(rs), userId);
+            return new ConsumptionResponse(
+                    userId, periodStart, periodEnd, total, text, alerts, report, dynamicTotals, auditLogs);
         } catch (DataAccessException ex) {
             throw translate(ex);
         }
@@ -128,6 +142,30 @@ public class ConsumoService {
         return rows == null ? List.of() : rows;
     }
 
+    private ConsumptionDynamicTotalsResponse dynamicTotals(JdbcTemplate jdbc, Long userId) {
+        Long readings = toLong(jdbc.queryForObject(SQL_DINAMICO, BigDecimal.class, "LEITURA", userId));
+        Long alerts = toLong(jdbc.queryForObject(SQL_DINAMICO, BigDecimal.class, "ALERTA", userId));
+        Long logs = toLong(jdbc.queryForObject(SQL_DINAMICO, BigDecimal.class, "LOG", userId));
+        return new ConsumptionDynamicTotalsResponse(readings, alerts, logs);
+    }
+
+    private ConsumptionAuditLogResponse mapLog(ResultSet rs) throws SQLException {
+        return new ConsumptionAuditLogResponse(
+                rs.getLong("ID"),
+                toNullableLong(rs, "ALERTA_ID"),
+                rs.getString("OPERACAO"),
+                toNullableLong(rs, "USUARIO_ID"),
+                toNullableLong(rs, "TOTAL_TOKENS"),
+                rs.getString("MENSAGEM"),
+                toLocal(rs.getTimestamp("REGISTRADO_EM"))
+        );
+    }
+
+    private static Long toNullableLong(ResultSet rs, String column) throws SQLException {
+        long value = rs.getLong(column);
+        return rs.wasNull() ? null : value;
+    }
+
     private ConsumptionAlertResponse mapAlert(ResultSet rs) throws SQLException {
         return new ConsumptionAlertResponse(
                 rs.getLong("ID"),
@@ -172,6 +210,9 @@ public class ConsumoService {
             }
             if (code == 20003) {
                 return new ValidationException("Limite de consumo inválido.");
+            }
+            if (code == 20004) {
+                return new ValidationException("Origem de consulta não permitida.");
             }
         }
         log.warn("Falha ao falar com o Oracle de consumo", ex);

@@ -156,7 +156,7 @@ class VoiceInputController extends Notifier<VoiceInputState> {
 
   /// Usado ao enviar mensagem enquanto ainda está ouvindo.
   Future<void> stopIfListening() async {
-    if (state.isListening || _speech.isListening) {
+    if (state.isListening) {
       await stopListening();
     }
   }
